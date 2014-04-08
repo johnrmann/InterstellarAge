@@ -110,7 +110,7 @@ def start_page():
 
 
 
-@app.route('/login', method='POST')
+@app.route('/login', methods=['POST'])
 def login():
     # Get the data provided by the user
     username = request.form["username"]
@@ -126,7 +126,7 @@ def login():
 
 
 
-@app.route('/register', method='POST')
+@app.route('/register', methods=['POST'])
 def register():
     """
     If ".../register" is accessed with a POST request, then we scan the request
@@ -179,7 +179,7 @@ def register():
 
 
 
-@app.route("/captcha", method="POST")
+@app.route("/captcha", methods=["POST"])
 def get_captcha():
     """
     Creates a new captcha, assigns it to the session, and returns an image
