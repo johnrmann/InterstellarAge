@@ -12,7 +12,7 @@ import hashlib
 import json
 
 # Import Flask
-from flask import Flask, request, render_template, redirect, url_for
+from flask import Flask, request, render_template, redirect, session, url_for
 
 # Setup the application
 app = Flask(__name__)
