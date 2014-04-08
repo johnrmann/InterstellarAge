@@ -1,0 +1,58 @@
+body {
+    background-image:url('../img/orion_hubble.jpg');
+    font-family: Helvetica;
+}
+
+h1 {
+    color: white;
+    text-shadow: 0px 0px 10px rgba(255,255,255,0.7);
+    font-family: monospace;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+.container {
+    background: rgba(0,0,0,0.6);
+    margin: auto;
+    border-radius: 10px;
+    padding: 30px 10px;
+    text-align: center;
+    width: 300px;
+}
+
+input {
+    padding: 5px; 
+    border: solid 1px #E5E5E5;
+    border-radius: 3px; 
+    margin: 3px; 
+    width: 200px; 
+    box-shadow: rgba(0,0,0,0.1) 0px 0px 8px; 
+    -moz-box-shadow: rgba(0,0,0,0.1) 0px 0px 8px; 
+    -webkit-box-shadow: rgba(0,0,0,0.1) 0px 0px 8px; 
+}
+
+.button {
+    background: #8A8A8A;
+    border: 1px solid #999;
+    border: none rgba(0, 0, 0, 0);
+    border-radius: 2px;
+    color: white;
+    font-size: 12px;
+    margin: 6px auto;
+    padding: 0.5em 1em;
+    width: 150px;
+    text-decoration: none;
+}
+
+.button:hover,
+.button:focus {
+    background-image: -webkit-gradient(linear, 0 0, 0 100%, from(transparent), color-stop(40%, rgba(0,0,0, 0.05)), to(rgba(0,0,0, 0.10)));
+    background-image: -webkit-linear-gradient(transparent, rgba(0,0,0, 0.05) 40%, rgba(0,0,0, 0.10));
+    background-image: -moz-linear-gradient(top, rgba(0,0,0, 0.05) 0%, rgba(0,0,0, 0.10));
+    background-image: -o-linear-gradient(transparent, rgba(0,0,0, 0.05) 40%, rgba(0,0,0, 0.10));
+    background-image: linear-gradient(transparent, rgba(0,0,0, 0.05) 40%, rgba(0,0,0, 0.10));
+}
+
+.button:active {
+    box-shadow: 0 0 0 1px rgba(0,0,0, 0.15) inset, 0 0 6px rgba(0,0,0, 0.20) inset;
+}
