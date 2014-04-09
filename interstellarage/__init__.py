@@ -12,7 +12,7 @@ import hashlib
 import json
 
 # Import Flask
-from flask import Flask, request, render_template, redirect, session, url_for
+from flask import Flask, request, render_template, redirect, session, url_for, send_file
 from flask.ext.sqlalchemy import SQLAlchemy
 
 # Setup the application
