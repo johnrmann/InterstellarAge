@@ -40,7 +40,7 @@ def assign_captcha():
     # Pick a random word from the list and pick a random integer
     import random
     random_word = random.choice(captcha_words)
-    random_int = ramdom.randint(0,1000)
+    random_int = random.randint(0,1000)
 
     # Create the captcha string and assign it to the session
     captcha = "{0} {1}".format(random_word, str(random_int))
