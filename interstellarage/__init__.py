@@ -18,7 +18,8 @@ from flask.ext.sqlalchemy import SQLAlchemy
 # Setup the application
 app = Flask(__name__)
 app.debug = True
-app.config["SECRET_KEY"] = "F1nalFr0ntier"
+app.config["SECRET_KEY"] = "space"
+app.config["SQLALCHEMY_DATABASE_URI"] = "mysql://InterstellarAge:starship@localhost/$default"
 
 # Setup the database
 db = SQLAlchemy(app)
@@ -125,8 +126,16 @@ def login():
     hasher.update(password)
     password_hashed = hasher.hexdigest()
 
-    # TODO
-    pass
+    # Get user with matching username
+    import user as user_lib
+    user = user_lib.find(username=username)
+    if user == None:
+        return "Login failed"
+    elif user.password_hashed != password_hashed:
+        return "Wrong password"
+    else:
+        session["user_id"] = user.unique
+        return "Login worked!"
 
 
 
@@ -174,8 +183,8 @@ def register():
         return registration_error("Captcha doesn't match. Try again.")
 
     try:
-        #user = user.User(username, password_hashed, email)
-        return "Not implemented yet"
+        user = user.User(username, password_hashed, email)
+        return "{0} {1}".format(str(user.unique), username)
     except AssertionError as exception:
         return exception.args[0]
 
