@@ -24,6 +24,9 @@ app.config["SQLALCHEMY_DATABASE_URI"] = "mysql://InterstellarAge:starship@localh
 # Setup the database
 db = SQLAlchemy(app)
 
+# Global variables
+ROOT_DIR = "/home/InterstellarAge/interstellarage"
+
 def assign_captcha():
     """
     Randomly creates a captcha (used to determine if a user is a human or
@@ -59,13 +62,16 @@ def captcha_image(captcha):
         an image.
     """
 
+    # Declare global variables
+    global ROOT_DIR
+
     # Import Image from the Python Image Library
     from PIL import Image, ImageDraw, ImageFont
 
     # Create the blank image
     im = Image.new("RGB", (100, 40), "white")
     draw = ImageDraw.Draw(im)
-    font = ImageFont.truetype("/static/ttf/font.ttf", 30, encoding="unic")
+    font = ImageFont.truetype(ROOT_DIR+"/static/ttf/font.ttf", 30, encoding="unic")
     draw.text((5,5), captcha, font=font, fill="black")
     del draw
 
