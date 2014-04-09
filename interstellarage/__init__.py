@@ -210,7 +210,7 @@ def get_captcha():
 
     from io import BytesIO
     image = captcha_image(assign_captcha())
-    return send_file(BytesIO(image))
+    return send_file(BytesIO(image), mimetype="image/php")
 
 
 
