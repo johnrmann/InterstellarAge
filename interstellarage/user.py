@@ -2,31 +2,42 @@
 InterstellarAge
 """
 
-# The User class will be a subclass of DatabaseRecord, enabling TODO
-from database import DatabaseRecord, DATABASE_NAME
+# Import SQLAlchemy
+from flask.ext.sqlalchemy import SQLAlchemy
+from flask.ext.sqlalchemy.orm import relationship
+
+# Import the database from the main file
+from interstellarage import db
+
+# Import the game class
+from game import Game
 
 # Define global variables
 USERNAME_MIN_LENGTH = 4
 USERNAME_MAX_LENGTH = 32
 
-class User(DatabaseRecord):
+class User(db.Model):
     """
     TODO
 
     Public Attributes:
+        unique (int):
         username (str): TODO
         password_hash (str): The hashed version of this `User`'s password.
         email (str): The `User`'s e-mail address.
-
-    Inherited Attributes:
-        unique (int): TODO
     """
 
-    username = ""
-    password_hash = ""
-    email = ""
+    __tablename__ = 'user'
 
-    current_games = []
+    unique = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True)
+    password_hash = db.Column(db.String(100))
+    email = db.Column(db.String(120), unique=True)
+
+    games_as_isca = relationship("Game")
+    games_as_galaxycorp = relationship("Game")
+    games_as_fsr = relationship("Game")
+    games_as_privateer = relationship("Game")
 
     def __init__(self, username, password_hash, email):
         """
@@ -43,7 +54,6 @@ class User(DatabaseRecord):
         # Validate username input -- check length and ensure that nobody else
         # has chosen this username.
         assert USERNAME_MIN_LENGTH <= len(username) <= USERNAME_MAX_LENGTH
-        # TODO nobody else has chosen this username.
 
         # Validate email input -- check length and ensure that it matches the
         # regular expression for an email address
@@ -55,7 +65,15 @@ class User(DatabaseRecord):
         self.email = email
 
         # Record this new user in the SQL database
-        super(User,self).__init__("users", DATABASE_NAME)
+        db.session.add(self)
+        db.session.commit()
+
+    def get_games(self):
+        """
+        Returns a list of all the `Game`s this `User` is part of.
+        """
+
+        return []
 
 
 
@@ -79,12 +97,12 @@ def find(unique=None, username=None, email=None):
 
     # Find with unique
     elif unique != None:
-        pass
+        return User.query.filter_by(unique=unique).first()
 
     # Find with username
     elif username != None:
-        pass
+        return User.query.filter_by(username=username).first()
 
     # Find with email
     elif email != None:
-        pass
+        return User.query.filter_by(email=email).first()

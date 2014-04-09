@@ -13,11 +13,15 @@ import json
 
 # Import Flask
 from flask import Flask, request, render_template, redirect, session, url_for
+from flask.ext.sqlalchemy import SQLAlchemy
 
 # Setup the application
 app = Flask(__name__)
 app.debug = True
 app.config["SECRET_KEY"] = "F1nalFr0ntier"
+
+# Setup the database
+db = SQLAlchemy(app)
 
 def assign_captcha():
     """
@@ -89,7 +93,7 @@ def current_user():
         user_id = session['user_id']
         # TODO get the user
         import user as user_lib
-        user = user_lib.find(unique=user_id)
+        user = user_lib.find(unique=int(user_id))
         return user
 
 
