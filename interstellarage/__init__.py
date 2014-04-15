@@ -86,9 +86,9 @@ def captcha_image(captcha):
 
     # Save the image data
     im_path = ROOT_DIR+"/temporary/captcha.png"
-    im.save(file(im_path, 'wb'), "PNG")
+    im_file = open(im_path, 'w+')
+    im.save(im_path, "PNG")
     del im
-    im_file = open(im_path)
 
     # Copy the image to a temporary file.
     from shutil import copyfileobj
