@@ -22,71 +22,71 @@ FACTION_CODE_PRIVATEER = 3
 NUMBER_OF_FACTIONS = 4
 
 class Game(db.Model):
-	"""
-	Attributes:
-		unique (int): This `Game`'s unique identifier.
-		started_when (datetime): The date and time the game was started.
+    """
+    Attributes:
+        unique (int): This `Game`'s unique identifier.
+        started_when (datetime): The date and time the game was started.
 
-		user_isca_id (int):
-		user_fsr_id (int):
-		user_galaxycorp_id (int):
-		user_privateer_id (int):
-	"""
+        user_isca_id (int):
+        user_fsr_id (int):
+        user_galaxycorp_id (int):
+        user_privateer_id (int):
+    """
 
-	__tablename__ = 'game'
+    __tablename__ = 'game'
 
-	unique = db.Column(db.Integer, primary_key=True)
-	started_when = db.Column(db.DateTime)
+    unique = db.Column(db.Integer, primary_key=True)
+    started_when = db.Column(db.DateTime)
 
-	user_isca_id = db.Column(db.Integer, db.ForeignKey('user.unique'))
-	user_fsr_id = db.Column(db.Integer, db.ForeignKey('user.unique'))
-	user_galaxycorp_id = db.Column(db.Integer, db.ForeignKey('user.unique'))
-	user_privateer_id = db.Column(db.Integer, db.ForeignKey('user.unique'))
+    user_isca_id = db.Column(db.Integer, db.ForeignKey('user.unique'))
+    user_fsr_id = db.Column(db.Integer, db.ForeignKey('user.unique'))
+    user_galaxycorp_id = db.Column(db.Integer, db.ForeignKey('user.unique'))
+    user_privateer_id = db.Column(db.Integer, db.ForeignKey('user.unique'))
 
-	user_isca =
-		db.relationship("User", backref=db.backref('games_as_isca'))
-	user_fsr =
-		db.relationship("User", backref=db.backref('games_as_fsr'))
-	user_galaxycorp =
-		db.relationship("User", backref=db.backref('games_as_galaxycorp'))
-	user_privateer =
-		db.relationship("User", backref=db.backref('games_as_privateer'))
+    user_isca =
+        db.relationship("User", backref=db.backref('games_as_isca'))
+    user_fsr =
+        db.relationship("User", backref=db.backref('games_as_fsr'))
+    user_galaxycorp =
+        db.relationship("User", backref=db.backref('games_as_galaxycorp'))
+    user_privateer =
+        db.relationship("User", backref=db.backref('games_as_privateer'))
 
-	def __init__ (self, isca=None, fsr=None, galaxycorp=None, privateer=None):
-		"""
-		Keyword Args:
-			isca (User):
-			fsr (User):
-			galaxycorp (User):
-			privateer (User):
-		"""
+    def __init__ (self, isca=None, fsr=None, galaxycorp=None, privateer=None):
+        """
+        Keyword Args:
+            isca (User):
+            fsr (User):
+            galaxycorp (User):
+            privateer (User):
+        """
 
-		if isca != None:
-			self.user_isca = isca
-			self.user_isca_id = isca.unique
-		elif fsr != None:
-			self.user_fsr = fsr
-			self.user_fsr_id = fsr.unique
-		elif galaxycorp != None:
-			self.user_galaxycorp = galaxycorp
-			self.user_galaxycorp_id = galaxycorp.unique
-		elif privateer != None:
-			self.user_privateer = privateer
-			self.user_privateer_id = privateer.unique
-		else:
-			# TODO error
-			pass
+        if isca != None:
+            self.user_isca = isca
+            self.user_isca_id = isca.unique
+        elif fsr != None:
+            self.user_fsr = fsr
+            self.user_fsr_id = fsr.unique
+        elif galaxycorp != None:
+            self.user_galaxycorp = galaxycorp
+            self.user_galaxycorp_id = galaxycorp.unique
+        elif privateer != None:
+            self.user_privateer = privateer
+            self.user_privateer_id = privateer.unique
+        else:
+            # TODO error
+            pass
 
-		self.started_when = datetime.now()
+        self.started_when = datetime.now()
 
-		# Save changes to the sql database
-		db.session.add(self)
-		db.session.commit()
+        # Save changes to the sql database
+        db.session.add(self)
+        db.session.commit()
 
-	def has_user(self, user):
-		cond1 = user == self.user_isca
-		cond2 = user == self.user_fsr
-		cond3 = user == self.user_galaxycorp
-		cond4 = user == self.user_privateer
+    def has_user(self, user):
+        cond1 = user == self.user_isca
+        cond2 = user == self.user_fsr
+        cond3 = user == self.user_galaxycorp
+        cond4 = user == self.user_privateer
 
-		return cond1 or cond2 or cond3 or cond4
+        return cond1 or cond2 or cond3 or cond4

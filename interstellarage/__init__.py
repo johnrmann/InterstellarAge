@@ -53,6 +53,7 @@ def assign_captcha():
 
     # Create the captcha string and assign it to the session
     captcha = "{0} {1}".format(random_word, str(random_int))
+    captcha = "testing" # remove this soon
     session['captcha'] = captcha
     return captcha
 
