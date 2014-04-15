@@ -196,12 +196,12 @@ def register():
         return registration_error("Password too long")
 
     # Check captcha
-    if not 'captcha' in session:
-        return "Data not submitted from form"
-    real_captcha = session['captcha']
-    if real_captcha != provided_captcha:
-        assign_captcha()
-        return registration_error("Captcha doesn't match. Try again.")
+    #if not 'captcha' in session:
+    #    return "Data not submitted from form"
+    #real_captcha = session['captcha']
+    #if real_captcha != provided_captcha:
+    #    assign_captcha()
+    #    return registration_error("Captcha doesn't match. Try again.")
 
     try:
         user = user.User(username, password_hashed, email)
@@ -223,7 +223,9 @@ def get_captcha():
         A `str` containing the raw binary data of a PNG image.
     """
 
-    image = captcha_image(assign_captcha())
+    captcha = assign_captcha()
+    print session['captcha']
+    image = captcha_image(captcha)
     resp = make_response(image)
     resp.headers['Content-Type'] = 'image/png'
     resp.headers['Content-Disposition'] = 'attachment; filename=captcha.png'
