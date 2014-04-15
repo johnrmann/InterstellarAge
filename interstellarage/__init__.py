@@ -132,7 +132,7 @@ def start_page():
         return render_template('login.html')
 
     # TODO
-    return 'Hello from Flask!'
+    return render_template('games.html', user=user)
 
 
 
@@ -204,7 +204,8 @@ def register():
     #    return registration_error("Captcha doesn't match. Try again.")
 
     try:
-        user = user.User(username, password_hashed, email)
+        import user as user_lib
+        user = user_lib.User(username, password_hashed, email)
         return "{0} {1}".format(str(user.unique), username)
     except AssertionError as exception:
         return exception.args[0]
