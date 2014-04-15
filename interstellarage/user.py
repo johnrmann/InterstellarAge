@@ -9,7 +9,7 @@ from flask.ext.sqlalchemy import SQLAlchemy
 from interstellarage import db
 
 # Import the game class
-from game import Game
+import game as game_lib
 
 # Define global variables
 USERNAME_MIN_LENGTH = 4

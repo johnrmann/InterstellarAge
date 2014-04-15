@@ -30,6 +30,10 @@ app.config["SQLALCHEMY_DATABASE_URI"] = "mysql://InterstellarAge:starship@localh
 # Setup the database
 db = SQLAlchemy(app)
 
+# Import our modules
+import user as user_lib
+import game as game_lib
+
 # Global variables
 ROOT_DIR = "/home/InterstellarAge/interstellarage"
 
@@ -113,8 +117,6 @@ def current_user():
         return None
     else:
         user_id = session['user_id']
-        # TODO get the user
-        import user as user_lib
         user = user_lib.find(unique=int(user_id))
         return user
 
@@ -148,7 +150,6 @@ def login():
     password_hashed = hasher.hexdigest()
 
     # Get user with matching username
-    import user as user_lib
     user = user_lib.find(username=username)
     if user == None:
         return "Login failed"
@@ -204,7 +205,6 @@ def register():
     #    return registration_error("Captcha doesn't match. Try again.")
 
     try:
-        import user as user_lib
         user = user_lib.User(username, password_hashed, email)
         return "{0} {1}".format(str(user.unique), username)
     except AssertionError as exception:
@@ -231,6 +231,12 @@ def get_captcha():
     resp.headers['Content-Type'] = 'image/png'
     resp.headers['Content-Disposition'] = 'attachment; filename=captcha.png'
     return resp
+
+
+
+@app.route("/game/<gameid>")
+def show_game(gameid):
+    return render_template('game.html')
 
 
 

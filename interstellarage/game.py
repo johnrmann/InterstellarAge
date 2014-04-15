@@ -12,7 +12,8 @@ from flask.ext.sqlalchemy import SQLAlchemy
 from interstellarage import db
 
 # Import the user class
-from user import User
+import user as user_lib
+import galaxy as galaxy_lib
 
 # Define global variables
 FACTION_CODE_ISCA = 0
@@ -37,6 +38,8 @@ class Game(db.Model):
 
     unique = db.Column(db.Integer, primary_key=True)
     started_when = db.Column(db.DateTime)
+    on_turn = db.Column(db.Integer)
+    started = db.Column(db.Boolean)
 
     user_isca_id = db.Column(db.Integer, db.ForeignKey('user.unique'))
     user_fsr_id = db.Column(db.Integer, db.ForeignKey('user.unique'))
@@ -74,16 +77,18 @@ class Game(db.Model):
             pass
 
         self.started_when = datetime.now()
+        self.on_turn = -1
+        self.started = False
 
         # Save changes to the sql database
         db.session.add(self)
         db.session.commit()
 
     def has_user(self, user):
-        cond1 = user == self.user_isca
-        cond2 = user == self.user_fsr
-        cond3 = user == self.user_galaxycorp
-        cond4 = user == self.user_privateer
+        cond1 = (user == self.user_isca)
+        cond2 = (user == self.user_fsr)
+        cond3 = (user == self.user_galaxycorp)
+        cond4 = (user == self.user_privateer)
 
         return cond1 or cond2 or cond3 or cond4
 

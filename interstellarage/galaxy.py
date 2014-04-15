@@ -42,6 +42,19 @@ class Galaxy(db.Model):
 
         return [system.as_dict() for system in self.systems]
 
+    def systems_near_system(self, near_system, distance):
+        """
+        Returns:
+        """
+
+        return_systems = []
+        for system in self.systems:
+            if system == near_system:
+                continue
+            elif system.grid_distance(near_system) <= distance:
+                return_systems.append(system)
+        return return_systems
+
     def get_json_filename(self):
         """
         Returns the location of this Galaxy's JSON file on the filesystem.
