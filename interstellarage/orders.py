@@ -3,10 +3,6 @@ import json
 
 # Import TODO
 from interstellarage import app
-from user import User
-from galaxy import Galaxy
-from system import System
-from planet import Planet
 
 # Define global variables
 ORDER_NOT_FINISHED = 0
