@@ -43,14 +43,10 @@ class Game(db.Model):
     user_galaxycorp_id = db.Column(db.Integer, db.ForeignKey('user.unique'))
     user_privateer_id = db.Column(db.Integer, db.ForeignKey('user.unique'))
 
-    user_isca =
-        db.relationship("User", backref=db.backref('games_as_isca'))
-    user_fsr =
-        db.relationship("User", backref=db.backref('games_as_fsr'))
-    user_galaxycorp =
-        db.relationship("User", backref=db.backref('games_as_galaxycorp'))
-    user_privateer =
-        db.relationship("User", backref=db.backref('games_as_privateer'))
+    user_isca = db.relationship("User", backref=db.backref('games_as_isca'))
+    user_fsr = db.relationship("User", backref=db.backref('games_as_fsr'))
+    user_galaxycorp = db.relationship("User", backref=db.backref('games_as_galaxycorp'))
+    user_privateer = db.relationship("User", backref=db.backref('games_as_privateer'))
 
     def __init__ (self, isca=None, fsr=None, galaxycorp=None, privateer=None):
         """
@@ -61,16 +57,16 @@ class Game(db.Model):
             privateer (User):
         """
 
-        if isca != None:
+        if isca is not None:
             self.user_isca = isca
             self.user_isca_id = isca.unique
-        elif fsr != None:
+        elif fsr is not None:
             self.user_fsr = fsr
             self.user_fsr_id = fsr.unique
-        elif galaxycorp != None:
+        elif galaxycorp is not None:
             self.user_galaxycorp = galaxycorp
             self.user_galaxycorp_id = galaxycorp.unique
-        elif privateer != None:
+        elif privateer is not None:
             self.user_privateer = privateer
             self.user_privateer_id = privateer.unique
         else:
@@ -90,3 +86,20 @@ class Game(db.Model):
         cond4 = user == self.user_privateer
 
         return cond1 or cond2 or cond3 or cond4
+
+    def open_slots(self):
+        slots = []
+        if self.user_isca is None:
+            slots.append("ISCA")
+        if self.user_fsr is None:
+            slots.append("FSR")
+        if self.user_galaxycorp is None:
+            slots.append("GalaxyCorp")
+        if self.user_privateer is None:
+            slots.append("Privateer")
+        return slots
+
+
+
+def create_game(user, faction):
+    pass
