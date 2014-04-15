@@ -12,7 +12,6 @@ from flask.ext.sqlalchemy import SQLAlchemy
 from interstellarage import db
 
 # Import the user class
-import user as user_lib
 import galaxy as galaxy_lib
 
 # Define global variables
