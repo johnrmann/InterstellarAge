@@ -2,11 +2,6 @@
 import json
 import random
 
-# Import InterstellarAge modules.
-from user import User
-from system import System
-from galaxy import Galaxy
-
 class Planet(object):
     """
     `Planet`s are objects contained in `System`s which `User`s fight to
@@ -226,7 +221,9 @@ class RockyPlanet(Planet):
 
 class HabitablePlanet(RockyPlanet):
     """
-    TODO
+    Objects of this class reperesent planets that are naturally suitable for
+    human life. So far, Earth is the only real-life example of this sort of
+    planet.
     """
 
     def _max_ground_colonies(self):

@@ -5,6 +5,9 @@ InterstellarAge
 # Import python modules
 import random
 
+# Import InterstellarAge modules.
+import planet as planet_lib
+
 # Define global variables.
 DISCOVER_DISTANCE = 4
 
@@ -15,18 +18,27 @@ class System(object):
         position ( (int, int) ): The Cartesian position of this `System` in the
             Galaxy Map. A `position` of `(0, 0, 0)` represents the center square
             in the grid.
+
+        star_color (str):
         star_brightness (float):
+
         planets (list of Planet): The `Planet`s in this `System`. Ordered such
             that the closest `Planet` to the star is at index 0.
+
         discovered_by (list of User): The `User`s that have discovered this
             `System`.
     """
 
     name = ""
     position = (0, 0, 0)
+
+    star_color = ""
     star_brightness = 0.0
+
     planets = []
+
     discovered_by = set()
+    planets_discovered_by = set()
 
     galaxy = None
 
@@ -87,15 +99,22 @@ class System(object):
 
     def discover(self, by_user):
         """
-        Marks this `System` and all other `System`s nearby as having been
-        discovered by the `User` "`by_user`".
+        When a fleet from a `User` (in this case, called `by_user`) arrives
+        at a `System` for the first time, the `Planet`s in that `System` are
+        marked as "discovered". This means that from that point forward,
+        `by_user` can plot hyperspace jumps directly to the planets of this
+        `System` instead of to the `System` in genreal.
+
+        This method also marks all `System`s within a certain range of this one
+        (but not their planets) as having been discovered, meaning they will be
+        visible on the Galaxy Map.
 
         Args:
             by_user (User): The `User` that made the recent discovery.
         """
 
         global DISCOVER_DISTANCE
-        self.discovered_by.add(by_user)
+        self.planets_discovered_by.add(by_user)
         for system in self.galaxy.systems_near_system(self, DISCOVER_DISTANCE):
             system.discovered_by.add(by_user)
 
@@ -135,6 +154,10 @@ class System(object):
         return max(1, int(self.grid_distance(other_system) / 4))
 
     def receive_fleet(self, incoming_fleet_size, from_user):
+        # Ensure data structure invariants
+        assert from_user not in self.planets_discovered_by
+        assert from_user in self.planets_discovered_by
+
         # Send the fleet to the nearset planet
         self.planets[-1].receive_fleet(incoming_fleet_size, from_user)
         self.discover()
@@ -168,5 +191,15 @@ class System(object):
 
 
 
-def system_from_json(json):
+def generate_system():
+    """
+    Returns:
+        A `System` generated at random.
+    """
+
+    pass
+
+
+
+def system_from_dict(system_dict):
     pass

@@ -22,6 +22,7 @@ class Galaxy(db.Model):
 
     __tablename__ = 'galaxy'
 
+    unique = db.Column(db.Integer, primary_key=True)
     for_game = None
     systems = []
 
