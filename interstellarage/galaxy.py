@@ -21,6 +21,7 @@ class Galaxy(db.Model):
     """
 
     __tablename__ = 'galaxy'
+    __table_args__ = {'extend_existing':True}
 
     unique = db.Column(db.Integer, primary_key=True)
     for_game = None

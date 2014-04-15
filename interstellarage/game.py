@@ -34,6 +34,7 @@ class Game(db.Model):
     """
 
     __tablename__ = 'game'
+    __table_args__ = {'extend_existing':True}
 
     unique = db.Column(db.Integer, primary_key=True)
     started_when = db.Column(db.DateTime)

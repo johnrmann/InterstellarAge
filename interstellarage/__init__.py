@@ -32,7 +32,6 @@ db = SQLAlchemy(app)
 
 # Import our modules
 import user as user_lib
-import game as game_lib
 
 # Global variables
 ROOT_DIR = "/home/InterstellarAge/interstellarage"
