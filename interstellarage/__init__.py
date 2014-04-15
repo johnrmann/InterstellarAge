@@ -11,6 +11,7 @@ Version 0.1 (7 April 2014)
 import hashlib
 import json
 import tempfile
+import os
 
 # Import Flask
 from flask import Flask
@@ -85,17 +86,16 @@ def captcha_image(captcha):
 
     # Save the image data
     im_path = ROOT_DIR+"/temporary/captcha.png"
-    im.save(im_path, "PNG")
+    im.save(file(im_path, 'wb'), "PNG")
     del im
     im_file = open(im_path)
 
     # Copy the image to a temporary file.
     from shutil import copyfileobj
-    from os import remove
     temp_im_file = tempfile.NamedTemporaryFile(mode='w+b',suffix='png')
     copyfileobj(im_file, temp_im_file)
     im_file.close()
-    remove(im_path)
+    os.remove(im_path)
 
     # Return the temporary image.
     return temp_im_file
