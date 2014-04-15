@@ -1,0 +1,104 @@
+[
+	{
+		"name" : "Solar System",
+		"x" : 0,
+		"y" : 0,
+		"star_brightness" : 1.00,
+		"planets" : [
+			{
+				"name" : "Mercury",
+				"type" : "RockyPlanet",
+				"moons" : [],
+				"space_colonies" : [],
+				"ground_colonies" : [],
+				"owner" : "ISCA",
+				"fleets" : [0, 0, 0]
+			},
+
+			{
+				"name" : "Venus",
+				"type" : "RockyPlanet",
+				"moons" : [],
+				"space_colonies" : [],
+				"ground_colonies" : [],
+				"owner" : "ISCA",
+				"fleets" : [0, 0, 0]
+			},
+
+			{
+				"name" : "Earth",
+				"type" : "System:HabitablePlanet",
+				"moons" : [
+					{
+						"name" : "Luna",
+						"type" : "RockyPlanet",
+						"moons" : [],
+						"space_colonies" : [],
+						"ground_colonies" : [],
+						"owner" : "ISCA",
+						"fleets" : [0, 0, 0]
+					}
+				],
+				"space_colonies" : [],
+				"ground_colonies" : [
+					{"name" : "Sydney"},
+					{"name" : "Tokyo"},
+					{"name" : "London"},
+					{"name" : "Paris"},
+					{"name" : "Cape Town"},
+					{"name" : "Buenos Aires"},
+					{"name" : "Chicago"},
+					{"name" : "Vancouver"}
+				],
+				"owner" : "ISCA",
+				"fleets" : [3, 3, 3]
+			},
+
+			{
+				"name" : "Mars",
+				"type" : "RockyPlanet",
+				"moons" : [],
+				"space_colonies" : [],
+				"ground_colonies" : [],
+				"owner" : "ISCA",
+				"fleets" : [0, 0, 0]
+			},
+
+			{
+				"name" : "Jupiter",
+				"type" : "GasPlanet",
+				"moons" : [],
+				"space_colonies" : [],
+				"owner" : "ISCA",
+				"fleets" : [0, 0, 0]
+			},
+
+			{
+				"name" : "Saturn",
+				"type" : "GasPlanet",
+				"moons" : [],
+				"space_colonies" : [],
+				"owner" : "ISCA",
+				"fleets" : [0, 0, 0]
+			},
+
+			{
+				"name" : "Uranus",
+				"type" : "GasPlanet",
+				"moons" : [],
+				"space_colonies" : [],
+				"owner" : "ISCA",
+				"fleets" : [0, 0, 0]
+			},
+
+			{
+				"name" : "Neptune",
+				"type" : "GasPlanet",
+				"moons" : [],
+				"space_colonies" : [],
+				"owner" : "ISCA",
+				"fleets" : [0, 0, 0]
+			}
+		]
+	}
+]

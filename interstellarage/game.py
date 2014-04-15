@@ -7,7 +7,6 @@ from datetime import datetime
 
 # Import SQLAlchemy
 from flask.ext.sqlalchemy import SQLAlchemy
-from flask.ext.sqlalchemy.orm import relationship
 
 # Import the database from the main file
 from interstellarage import db
@@ -36,26 +35,26 @@ class Game(db.Model):
 
 	__tablename__ = 'game'
 
-	unique = db.Column(Integer, primary_key=True)
+	unique = db.Column(db.Integer, primary_key=True)
 	started_when = db.Column(db.DateTime)
 
-	user_isca_id = db.Column(Integer, ForeignKey('user.unique'))
-	user_fsr_id = db.Column(Integer, ForeignKey('user.unique'))
-	user_galaxycorp_id = db.Column(Integer, ForeignKey('user.unique'))
-	user_privateer_id = db.Column(Integer, ForeignKey('user.unique'))
+	user_isca_id = db.Column(db.Integer, db.ForeignKey('user.unique'))
+	user_fsr_id = db.Column(db.Integer, db.ForeignKey('user.unique'))
+	user_galaxycorp_id = db.Column(db.Integer, db.ForeignKey('user.unique'))
+	user_privateer_id = db.Column(db.Integer, db.ForeignKey('user.unique'))
 
 	user_isca =
-		relationship("User", backref=db.backref('games_as_isca'))
+		db.relationship("User", backref=db.backref('games_as_isca'))
 	user_fsr =
-		relationship("User", backref=db.backref('games_as_fsr'))
+		db.relationship("User", backref=db.backref('games_as_fsr'))
 	user_galaxycorp =
-		relationship("User",backref=db.backref('games_as_galaxycorp'))
+		db.relationship("User", backref=db.backref('games_as_galaxycorp'))
 	user_privateer =
-		relationship("User", backref=db.backref('games_as_privateer'))
+		db.relationship("User", backref=db.backref('games_as_privateer'))
 
 	def __init__ (self, isca=None, fsr=None, galaxycorp=None, privateer=None):
 		"""
-		Args:
+		Keyword Args:
 			isca (User):
 			fsr (User):
 			galaxycorp (User):
@@ -83,3 +82,11 @@ class Game(db.Model):
 		# Save changes to the sql database
 		db.session.add(self)
 		db.session.commit()
+
+	def has_user(self, user):
+		cond1 = user == self.user_isca
+		cond2 = user == self.user_fsr
+		cond3 = user == self.user_galaxycorp
+		cond4 = user == self.user_privateer
+
+		return cond1 or cond2 or cond3 or cond4

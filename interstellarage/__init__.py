@@ -10,9 +10,14 @@ Version 0.1 (7 April 2014)
 # Import python libraries
 import hashlib
 import json
+import tempfile
 
 # Import Flask
-from flask import Flask, request, render_template, redirect, session, url_for, send_file
+from flask import Flask
+from flask import request, render_template, redirect, session, url_for
+from flask import make_response, send_file
+
+# SQL Alchemy
 from flask.ext.sqlalchemy import SQLAlchemy
 
 # Setup the application
@@ -71,20 +76,29 @@ def captcha_image(captcha):
     # Create the blank image
     im = Image.new("RGB", (100, 40), "white")
     draw = ImageDraw.Draw(im)
-    font = ImageFont.truetype(ROOT_DIR+"/static/ttf/font.ttf", 30, encoding="unic")
+
+    # Get the font and draw the provided text.
+    font_path = ROOT_DIR+"/static/ttf/font.ttf"
+    font = ImageFont.truetype(font_path, 30, encoding="unic")
     draw.text((5,5), captcha, font=font, fill="black")
     del draw
 
-    # Get image as PNG
-    import StringIO
-    output = StringIO.StringIO()
-    im.save(output, format="PNG")
+    # Save the image data
+    im_path = ROOT_DIR+"/temporary/captcha.png"
+    im.save(im_path, "PNG")
     del im
+    im_file = open(im_path)
 
-    # Return image data
-    to_return = output.getvalue()
-    output.close()
-    return to_return
+    # Copy the image to a temporary file.
+    from shutil import copyfileobj
+    from os import remove
+    temp_im_file = tempfile.NamedTemporaryFile(mode='w+b',suffix='png')
+    copyfileobj(im_file, temp_im_file)
+    im_file.close()
+    remove(im_path)
+
+    # Return the temporary image.
+    return temp_im_file
 
 
 
@@ -208,9 +222,11 @@ def get_captcha():
         A `str` containing the raw binary data of a PNG image.
     """
 
-    from io import BytesIO
     image = captcha_image(assign_captcha())
-    return send_file(BytesIO(image), mimetype="image/php")
+    resp = make_response(image)
+    resp.headers['Content-Type'] = 'image/png'
+    resp.headers['Content-Disposition'] = 'attachment; filename=captcha.png'
+    return resp
 
 
 
