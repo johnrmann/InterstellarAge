@@ -5,7 +5,7 @@ var renderer;
 var systems;
 
 function setup () {
-	var aspectRatio = (window.innerHeight / window.innerWidth);
+	var aspectRatio = (window.innerWidth / window.innerHeight);
 
 	scene = new THREE.Scene();
 	camera = new THREE.PerspectiveCamera(75, aspectRatio, 0.1, 1000);
@@ -14,7 +14,8 @@ function setup () {
 	renderer.setSize(window.innerWidth, window.innerHeight);
 	document.body.appendChild(renderer.domElement);
 
-	camera.position.z = 5;
+	camera.position.y = 50;
+	camera.rotation.x = (Math.PI / 2) * -1;
 }
 
 function createGalaxyMap (startSystems) {
@@ -30,7 +31,7 @@ function createGalaxyMap (startSystems) {
 		var y = system.z;
 		var z = system.y;
 
-		var sphere = new THREE.SphereGeometry(1, 7, 7);
+		var sphere = new THREE.SphereGeometry(1, 20, 20);
 		var mat = new THREE.MeshBasicMaterial( {color: 0xffff00 });
 		var mesh = new THREE.Mesh(sphere, mat);
 
@@ -50,6 +51,7 @@ var render = function () {
 
 createGalaxyMap([
 	{
+		name : "Solar System",
 		x : 0,
 		y : 0,
 		z : 0

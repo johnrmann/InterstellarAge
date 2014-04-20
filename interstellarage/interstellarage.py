@@ -204,6 +204,9 @@ def register():
     #    return registration_error("Captcha doesn't match. Try again.")
 
     try:
+        hasher = hashlib.sha1()
+        hasher.update(password)
+        password_hashed = hasher.hexdigest()
         user = user_lib.User(username, password_hashed, email)
         return "{0} {1}".format(str(user.unique), username)
     except AssertionError as exception:
