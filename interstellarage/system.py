@@ -55,6 +55,8 @@ class System(object):
         self.name = name
         if planets != None:
             self.planets = planets
+            for planet in self.planets:
+                planet.parent = self
             return
 
         # Randomly generate planets
@@ -63,8 +65,21 @@ class System(object):
         num_planets = random.randint(SYSTEM_MIN_PLANETS, SYSTEM_MAX_PLANETS)
         # TODO
 
-    def as_dict(self):
-        return {
+    def as_dict(self, hide_planets=False):
+        """
+        Keyword Args:
+            hide_planets (boolean): Set to `True` if an empty list is to be
+                returned in the "planets" field of the `dict`. A situation
+                where this is necessary is if the `User` has not discovered
+                the `Planet`s in this `System` yet.
+
+        Returns:
+            Important data about this `System` encased in a `dict`. This `dict`
+            can be used for saving game info to the server or sent back to the
+            `User`.
+        """
+
+        to_return = {
             "name" : self.name,
             "x" : self.position[0],
             "y" : self.position[1],
@@ -72,6 +87,10 @@ class System(object):
             "star_brightness" : self.star_brightness,
             "planets" : [planet.as_dict() for planet in self.planets]
         }
+
+        if hide_planets:
+            to_return['planets'] = []
+        return to_return
 
     def cartesian_distance(self, other_system):
         """
@@ -162,6 +181,13 @@ class System(object):
         self.planets[-1].receive_fleet(incoming_fleet_size, from_user)
         self.discover()
 
+    def owners(self):
+        """
+        Returns a set
+        """
+
+        pass
+
     def _generate_planet(self, n):
         """
         Args:
@@ -201,5 +227,25 @@ def generate_system():
 
 
 
-def system_from_dict(system_dict):
-    pass
+def system_from_dict(data, game):
+    # Get data from the dictionary.
+    name = data['name']
+    x = data['x']
+    y = data['y']
+    z = data['z']
+    star_brightness = data['star_brightness']
+    star_color = data['star_color']
+    planets = [planet_lib.planet_from_dict(p) for p in data['planets']]
+
+    # Setup the system.
+    system = System(
+        name,
+        planets=planets,
+        star_brightness=star_brightness
+    )
+    system.position = (x, y, z)
+    system.star_color = star_color
+    system.galaxy = game.galaxy
+
+    # We're done here.
+    return system

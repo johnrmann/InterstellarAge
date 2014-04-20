@@ -43,7 +43,7 @@ class Planet(object):
     _next_assign = 0
     _since_conquered = -1
 
-    def __init__(self, layer, name=None, moons=None):
+    def __init__(self, layer=None, name=None, moons=None):
         """
         Args:
             layer (int): If we think of solar systems like trees where
@@ -59,8 +59,15 @@ class Planet(object):
         pass
 
     def as_dict(self):
+        """
+        Returns:
+            Important data about this `Planet` encased in a `dict`. This `dict`
+            can be used for saving game info to the server or sent back to the
+            `User`.
+        """
+
         if self.owner is None:
-            owner_str = None
+            owner_str = ""
         else:
             owner_str = "ISCA" # TODO
 
@@ -251,3 +258,55 @@ class SpaceColony(Colony):
 
 class GroundColony(Colony):
     pass
+
+
+
+def planet_from_dict(data, game):
+    """
+    Creates a `Planet` using infomration from a `dict` called `data`.
+
+    Args:
+        data (dict):
+        game (Game):
+    """
+
+    planet = None
+
+    name = data['name']
+    moons = [planet_from_dict(moon) for moon in data['moons']]
+    space_colonies = [colony_from_dict(col) for col in data['space_colonies']]
+    ground_colonies = [colony_from_dict(col) for col in data['ground_colonies']]
+    fleets = data['fleets']
+
+    if data['type'] == 'GasPlanet':
+        planet = GasPlanet()
+    elif data['type'] == 'RockyPlanet':
+        planet = RockyPlanet()
+    elif data['type'] == 'HabitablePlanet':
+        planet = HabitablePlanet()
+
+    # Do final setup.
+    for moon in moons:
+        moon.parent = planet
+
+    # Assign the data to the planet.
+    planet.name = name
+    planet.moons = moons
+    planet.space_colonies = space_colonies
+    planet.ground_colonies = ground_colonies
+    planet.fleets = fleets
+
+    # Get the player's owner.
+    if data['owner'] == 'ISCA':
+        planet.owner = game.user_isca
+    elif data['owner'] == 'GalaxyCorp':
+        planet.owner = game.user_galaxycorp
+    elif data['owner'] == 'Privateer':
+        planet.owner = game.user_privateer
+    elif data['owner'] == 'FSR':
+        planet.owner = game.user_fsr
+    else:
+        planet.owner = None
+
+    # We're done here.
+    return planet
