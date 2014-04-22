@@ -5,36 +5,40 @@ InterstellarAge
 # Import python modules
 import random
 import json
+import pickle
 
-# Import the database
-from interstellarage import db
+# Import our modules
+import system as system_lib
 
 # Define global variables
 GALAXY_START_JSON = ""
 
-SYSTEM_MIN_PLANETS = 1
-SYSTEM_MAX_PLANETS = 10
-
-class Galaxy(db.Model):
+class Galaxy(object):
     """
     TODO
     """
 
-    __tablename__ = 'galaxy'
-    __table_args__ = {'extend_existing':True}
-
-    unique = db.Column(db.Integer, primary_key=True)
-    for_game = None
     systems = []
 
-    def __init__(self):
+    def __init__(self, game):
         """
-        TODO
+        Args:
+            game (Game):
         """
 
-        pass
+        # Declare global variables.
+        global GALAXY_START_JSON
 
-    def as_list(self):
+        # Open the JSON
+        json_f = open(GALAXY_START_JSON)
+        json_contents = json_f.read()
+        data = json.reads(json_contents)
+
+        # Append systems
+        for system in data:
+            self.systems.append()
+
+    def as_list(self, for_player=None):
         """
         Returns:
             The contents of this `Galaxy` formatted as a `list`. This `list`

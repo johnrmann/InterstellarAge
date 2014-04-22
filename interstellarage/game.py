@@ -13,24 +13,14 @@ from interstellarage import db
 
 # Import the user class
 import galaxy as galaxy_lib
-
-# Define global variables
-FACTION_CODE_ISCA = 0
-FACTION_CODE_GALAXYCORP = 1
-FACTION_CODE_FSR = 2
-FACTION_CODE_PRIVATEER = 3
-NUMBER_OF_FACTIONS = 4
+import orders as order_lib
 
 class Game(db.Model):
     """
     Attributes:
         unique (int): This `Game`'s unique identifier.
         started_when (datetime): The date and time the game was started.
-
-        user_isca_id (int):
-        user_fsr_id (int):
-        user_galaxycorp_id (int):
-        user_privateer_id (int):
+        on_turn (int): The current turn number.
     """
 
     __tablename__ = 'game'
@@ -41,40 +31,10 @@ class Game(db.Model):
     on_turn = db.Column(db.Integer)
     started = db.Column(db.Boolean)
 
-    user_isca_id = db.Column(db.Integer, db.ForeignKey('user.unique'))
-    user_fsr_id = db.Column(db.Integer, db.ForeignKey('user.unique'))
-    user_galaxycorp_id = db.Column(db.Integer, db.ForeignKey('user.unique'))
-    user_privateer_id = db.Column(db.Integer, db.ForeignKey('user.unique'))
-
-    user_isca = db.relationship("User", backref=db.backref('games_as_isca'))
-    user_fsr = db.relationship("User", backref=db.backref('games_as_fsr'))
-    user_galaxycorp = db.relationship("User", backref=db.backref('games_as_galaxycorp'))
-    user_privateer = db.relationship("User", backref=db.backref('games_as_privateer'))
-
-    def __init__ (self, isca=None, fsr=None, galaxycorp=None, privateer=None):
+    def __init__ (self):
         """
-        Keyword Args:
-            isca (User):
-            fsr (User):
-            galaxycorp (User):
-            privateer (User):
+        TODO
         """
-
-        if isca is not None:
-            self.user_isca = isca
-            self.user_isca_id = isca.unique
-        elif fsr is not None:
-            self.user_fsr = fsr
-            self.user_fsr_id = fsr.unique
-        elif galaxycorp is not None:
-            self.user_galaxycorp = galaxycorp
-            self.user_galaxycorp_id = galaxycorp.unique
-        elif privateer is not None:
-            self.user_privateer = privateer
-            self.user_privateer_id = privateer.unique
-        else:
-            # TODO error
-            pass
 
         self.started_when = datetime.now()
         self.on_turn = -1
@@ -84,27 +44,56 @@ class Game(db.Model):
         db.session.add(self)
         db.session.commit()
 
-    def has_user(self, user):
-        cond1 = (user == self.user_isca)
-        cond2 = (user == self.user_fsr)
-        cond3 = (user == self.user_galaxycorp)
-        cond4 = (user == self.user_privateer)
+    def execute_orders(self):
+        orders = [] # TODO
+        galaxy = None # TODO
+        phase = 1
+        orders_finished = False
+        not_done = order_lib.ORDER_NOT_FINISHED
+        finished = order_lib.ORDER_NEXT_TURN
 
-        return cond1 or cond2 or cond3 or cond4
+        while not orders_finished:
+            orders_finished = True
+            new_orders = []
 
-    def open_slots(self):
-        slots = []
-        if self.user_isca is None:
-            slots.append("ISCA")
-        if self.user_fsr is None:
-            slots.append("FSR")
-        if self.user_galaxycorp is None:
-            slots.append("GalaxyCorp")
-        if self.user_privateer is None:
-            slots.append("Privateer")
-        return slots
+            for order in orders:
+                result = order.execute(galaxy)
+                if result is not_done:
+                    orders_finished = False
+                elif result is finished:
+                    continue
+                new_orders.append(order)
+
+            # Remove completed orders
+            orders = new_orders
+
+        # Return the results
+        return [] # TODO
+
+    def start(self):
+        """
+        Starts the game.
+        """
+
+        # Preconditions
+        assert len(self.players) > 0
+
+        # Setup the galaxy for this game.
+
+    def player_for_faction(self, faction_shortname):
+        if faction_shortname == "":
+            return None
+        else:
+            for player in self.players:
+                if faction_shortname == player.faction_shortname():
+                    return player
+        return None
 
 
 
-def create_game(user, faction):
+def create_game(user, join_code, faction):
+    # Create the game object
+    # Create the player object
+    # Add the player object to the game
+    # Return the URL of the game
     pass

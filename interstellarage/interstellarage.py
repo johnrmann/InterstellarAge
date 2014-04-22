@@ -160,6 +160,19 @@ def login():
 
 
 
+@app.route('/logout')
+def logout():
+    """
+    If there is a `User` logged into the current session, then we remove
+    that `User`'s information from the session, effectively logging the `User`
+    out.
+    """
+
+    session.pop('user_id', None)
+    return "Logged out"
+
+
+
 @app.route('/register', methods=['POST'])
 def register():
     """

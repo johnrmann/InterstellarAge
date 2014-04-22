@@ -34,11 +34,6 @@ class User(db.Model):
     password_hash = db.Column(db.String(100))
     email = db.Column(db.String(120), unique=True)
 
-    games_as_isca = db.relationship("Game")
-    games_as_galaxycorp = db.relationship("Game")
-    games_as_fsr = db.relationship("Game")
-    games_as_privateer = db.relationship("Game")
-
     def __init__(self, username, password_hash, email):
         """
         Validates and assigns data.
@@ -73,7 +68,7 @@ class User(db.Model):
         Returns a list of all the `Game`s this `User` is part of.
         """
 
-        return []
+        return [player.game for player in self.playing]
 
 
 

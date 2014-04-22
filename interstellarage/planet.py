@@ -4,9 +4,9 @@ import random
 
 class Planet(object):
     """
-    `Planet`s are objects contained in `System`s which `User`s fight to
+    `Planet`s are objects contained in `System`s which `Player`s fight to
     control. `Planet`s do two major things: (1) build starships and (2)
-    generate money for `User`s at the beginning of every turn.
+    generate money for `Player`s at the beginning of every turn.
 
     Notes:
         - This should be considered an **abstract class**. It should **never
@@ -21,13 +21,13 @@ class Planet(object):
         space_colonies (list of SpaceColony):
         ground_colonies (list of GroundColony):
 
-        owner (User or None):
+        owner (Player or None):
         fleets (list of int):
 
     Private Attributes:
         _next_assign (int):
         _since_conquered (int): The number of turns since this `Planet` was
-            conquered by another `User`.
+            conquered by another `Player`.
     """
 
     name = ""
@@ -63,13 +63,13 @@ class Planet(object):
         Returns:
             Important data about this `Planet` encased in a `dict`. This `dict`
             can be used for saving game info to the server or sent back to the
-            `User`.
+            `Player`.
         """
 
         if self.owner is None:
             owner_str = ""
         else:
-            owner_str = "ISCA" # TODO
+            owner_str = self.owner.faction_shortname()
 
         parent_str = "" # TODO
 
@@ -90,8 +90,8 @@ class Planet(object):
             `Planet` produces every turn.
         """
 
-        ground_output = len(self.ground_colonies) * self._max_ground_colonies()
-        space_output = len(self.space_colonies) * self._max_space_colonies()
+        ground_output = len(self.ground_colonies) * self.max_ground_colonies()
+        space_output = len(self.space_colonies) * self.max_space_colonies()
 
         return ground_output + space_output
 
@@ -114,17 +114,17 @@ class Planet(object):
         self.fleets[fleet_number] = 0
         return fleet_size
 
-    def receive_fleet(self, incoming_fleet_size, from_user):
+    def receive_fleet(self, incoming_fleet_size, from_player):
         """
         Args:
             incoming_fleet_size (int): A positive `int` -- the number of ships
                 in the arriving navy.
-            from_user (User): The `User` who sent the `MoveOrder` or
+            from_player (Player): The `Player` who sent the `MoveOrder` or
                 `HyperspaceOrder` that sent the fleet to this `Planet`.
 
         Side-Effects:
-            - If the `User` takes control of the `Planet`, then the `System` it
-              is in is marked as being discovered by that `User`.
+            - If the `Player` takes control of the `Planet`, then the `System`
+              it is in is marked as being discovered by that `Player`.
 
         TODO:
             - Space stations (`space_colonies`) might be part of combat --
@@ -137,11 +137,11 @@ class Planet(object):
         if self.owner is None:
             self.fleets[0] = incoming_fleet_size
             self._next_assign = 1
-            self.owner = from_user
+            self.owner = from_player
             system.discover()
 
-        # User sends fleet to owned planet
-        elif from_user == self.owner:
+        # Player sends fleet to owned planet
+        elif from_player == self.owner:
             # Look for an empty fleet slot. If there is none, combine it with
             # an existing fleet.
             for a in xrange(0,3):
@@ -152,7 +152,7 @@ class Planet(object):
                 self.fleets[self._next_assign] += incoming_fleet_size
                 self._next_assign = (self._next_assign + 1) % 3
 
-        # User sends fleet to planet owned by other player -- engage in
+        # Player sends fleet to planet owned by other player -- engage in
         # combat.
         else:
             for a in xrange(0,3):
@@ -164,12 +164,12 @@ class Planet(object):
                     incoming_fleet_size -= self.fleets[a]
                     self.fleets[a] = 0
             else:
-                # If we reach this point, the invading user has won. Change
+                # If we reach this point, the invading player has won. Change
                 # ownership.
                 assert incoming_fleet_size > 0
                 self.fleets = [incoming_fleet_size, 0, 0]
                 self._next_assign = 1
-                self.owner = from_user
+                self.owner = from_player
                 system.discover()
 
     def strength(self):
@@ -187,10 +187,10 @@ class Planet(object):
         elif isinstance(self.parent, Planet):
             return self.parent.system()
 
-    def _max_ground_colonies(self):
+    def max_ground_colonies(self):
         return 0
 
-    def _max_space_colonies(self):
+    def max_space_colonies(self):
         return 4
 
     def _random_name(self):
@@ -203,10 +203,10 @@ class GasPlanet(Planet):
     TODO
     """
 
-    def _max_ground_colonies(self):
+    def max_ground_colonies(self):
         return 0
 
-    def _max_space_colonies(self):
+    def max_space_colonies(self):
         return 4
 
 
@@ -218,10 +218,10 @@ class RockyPlanet(Planet):
     Luna.
     """
 
-    def _max_ground_colonies(self):
+    def max_ground_colonies(self):
         return 4
 
-    def _max_space_colonies(self):
+    def max_space_colonies(self):
         return 4
 
 
@@ -233,10 +233,10 @@ class HabitablePlanet(RockyPlanet):
     planet.
     """
 
-    def _max_ground_colonies(self):
+    def max_ground_colonies(self):
         return 8
 
-    def _max_space_colonies(self):
+    def max_space_colonies(self):
         return 4
 
 
@@ -248,16 +248,6 @@ class Colony(object):
         return {
             "name" : self.name
         }
-
-
-
-class SpaceColony(Colony):
-    pass
-
-
-
-class GroundColony(Colony):
-    pass
 
 
 
@@ -273,7 +263,7 @@ def planet_from_dict(data, game):
     planet = None
 
     name = data['name']
-    moons = [planet_from_dict(moon) for moon in data['moons']]
+    moons = [planet_from_dict(moon, game) for moon in data['moons']]
     space_colonies = [colony_from_dict(col) for col in data['space_colonies']]
     ground_colonies = [colony_from_dict(col) for col in data['ground_colonies']]
     fleets = data['fleets']
@@ -284,6 +274,8 @@ def planet_from_dict(data, game):
         planet = RockyPlanet()
     elif data['type'] == 'HabitablePlanet':
         planet = HabitablePlanet()
+    else:
+        raise Exception("Unknown planet type {0}".format(data['type']))
 
     # Do final setup.
     for moon in moons:
@@ -297,16 +289,12 @@ def planet_from_dict(data, game):
     planet.fleets = fleets
 
     # Get the player's owner.
-    if data['owner'] == 'ISCA':
-        planet.owner = game.user_isca
-    elif data['owner'] == 'GalaxyCorp':
-        planet.owner = game.user_galaxycorp
-    elif data['owner'] == 'Privateer':
-        planet.owner = game.user_privateer
-    elif data['owner'] == 'FSR':
-        planet.owner = game.user_fsr
-    else:
-        planet.owner = None
+    planet.owner = game.player_for_faction(data['owner'])
 
     # We're done here.
     return planet
+
+
+
+def colony_from_dict(data):
+    return Colony(data['name'])
