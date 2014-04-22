@@ -14,21 +14,27 @@ class Planet(object):
           `GasPlanet`, `HabitablePlanet`, or `RockyPlanet`.
 
     Attributes:
-        name (str):
-        moons (list of Planet):
+        unique (int): Positive number uniquely identifying this `Planet`.
+
+        name (str): The name of this `Planet`.
+        moons (list of Planet): The `Planet`s that orbit this `Planet`.
         parent (Planet or System): The body which the `Planet` orbits.
 
         space_colonies (list of SpaceColony):
         ground_colonies (list of GroundColony):
 
-        owner (Player or None):
-        fleets (list of int):
+        owner (Player or None): The `Player` that last had a fleet above this
+            `Planet` (if there is such a `Player`).
+        fleets (list of int): The value `fleets[a]` is the number of starships
+            in fleet number `a`.
 
     Private Attributes:
         _next_assign (int):
         _since_conquered (int): The number of turns since this `Planet` was
             conquered by another `Player`.
     """
+
+    unique = 0
 
     name = ""
     moons = []
@@ -172,6 +178,15 @@ class Planet(object):
                 self.owner = from_player
                 system.discover()
 
+    def starship_build_cost(self, number):
+        """
+        Returns:
+            An `int` equal to the price (in interstellar dollars) of building
+            `number` starships above this `Planet`.
+        """
+
+        pass
+
     def strength(self):
         """
         Returns:
@@ -262,6 +277,7 @@ def planet_from_dict(data, game):
 
     planet = None
 
+    unique = data['unique']
     name = data['name']
     moons = [planet_from_dict(moon, game) for moon in data['moons']]
     space_colonies = [colony_from_dict(col) for col in data['space_colonies']]
@@ -282,6 +298,7 @@ def planet_from_dict(data, game):
         moon.parent = planet
 
     # Assign the data to the planet.
+    planet.unique = unique
     planet.name = name
     planet.moons = moons
     planet.space_colonies = space_colonies

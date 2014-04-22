@@ -25,7 +25,7 @@ from flask.ext.sqlalchemy import SQLAlchemy
 app = Flask(__name__)
 app.debug = True
 app.config["SECRET_KEY"] = "space"
-app.config["SQLALCHEMY_DATABASE_URI"] = "mysql://InterstellarAge:starship@localhost/$default"
+app.config["SQLALCHEMY_DATABASE_URI"] = "mysql://InterstellarAge:starship@mysql.server/InterstellarAge$default"
 
 # Setup the database
 db = SQLAlchemy(app)
