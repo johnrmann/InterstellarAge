@@ -9,34 +9,21 @@
 
 	<body>
         <h1>Interstellar Age</h1>
-		<div class="container">
+		<div class="container-login">
 			<div class="alert" id="error" style="display:none;"></div>
 
 			<input type="text" name="username" placeholder="username" id="username"></input>
 			<input type="password" name="password" placeholder="password" id="password"></input>
 
-			<span id="registration" style="display:none;">
-				<br/>
-				<input type="password" name="confirm_password" placeholder="Confirm Password" id="confirm_password"></input>
-				<br/>
-				<input type="text" name="email" placeholder="Your Email Address..." id="email"></input>
-				<br/>
-				<img src="" alt="Captcha" id="captcha_img" />
-				<input type="text" name="captcha" placeholder="Type what you see above." id="captcha"></input>
-				<div class="button green" id="register">Create Account</div>
-			</span>
-
 			<div class="button green" id="login">Login</div>
-			<div class="button red" id="noaccount">I don't have an account</div>
+            <a href="register">
+			    <div class="button red" id="noaccount">I don't have an account</div>
+            </a>
 		</div>
 	</body>
 
 	<script type="text/javascript">
 		$(document).ready(function () {
-			var updateCaptcha = function (rawImg) {
-				$("img#captcha_img").attr("src", rawImg);
-			};
-
 			var displayFailure = function (failure) {
 				$("div.error").show().html(failure);
 			};
@@ -56,63 +43,11 @@
 						'password' : password,
 					},
 					success: function(fromServer) {
-
+                        alert(fromServer);
 					},
 					error: function(jqXHR, textStatus, errorThrown) {
 						/* Inform the user why he/she failed. */
 						displayFailure(errorThrown);
-					}
-				});
-			});
-
-			/* When the user doesn't have an account. */
-			$('div.button#noaccount').click(function () {
-				$("#registration").show();
-				$("title").html("Interstellar Age - Create Account");
-				$("#login").hide();
-				$("#noaccount").hide();
-
-				/* Get the captcha image. */
-				$.ajax({
-					type:'POST',
-					url:'/captcha',
-					success: function (rawImg) {
-						updateCaptcha(rawImg);
-					}
-				})
-			});
-
-			/* When the user clicks the "Create Account" button. */
-			$('div.button#register').click(function () {
-				/* Get form data. */
-				var username = $("#username").val();
-				var password = $("#password").val();
-				var confirm_password = $("#confirm_password").val();
-				var email = $("#email").val();
-				var captcha = $("#captcha").val();
-
-				/* Send the registration request. */
-				$.ajax({
-					type:'POST',
-					url:'/register',
-					data:{
-						'username' : username,
-						'password' : password,
-						'confirm_password' : confirm_password,
-						'email' : email,
-						'captcha' : captcha
-					},
-					success: function(fromServer) {
-
-					},
-					error: function(jqXHR, textStatus, errorThrown) {
-						var errorObj = JSON.parse(errorThrown);
-
-						/* Show the user why he/she failed. */
-						displayFailure(errorObj.reason);
-
-						/* Update the captcha image. */
-						updateCaptcha(errorObj.captcha);
 					}
 				});
 			});

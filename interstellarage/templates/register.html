@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+	<head>
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/main.css') }}">
+		<title>Interstellar Age - Create Account</title>
+
+		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+	</head>
+
+	<body>
+        <h1>Create New Account</h1>
+		<div class="container-register">
+            <form method="POST" action="{{ url_for('register') }}">
+            {{ form.csrf_token }}
+            <table>
+                <tr>
+                    <td>Username</td>
+                    <td>{{ form.username }}</td>
+                </tr>
+                <tr>
+                    <td>Password (&gt;= 8 characters)</td>
+                    <td>{{ form.password }}</td>
+                </tr>
+                <tr>
+                    <td>Confirm Password</td>
+                    <td>{{ form.confirm_password }}</td>
+                </tr>
+                <tr>
+                    <td>Email</td>
+                    <td>{{ form.email }}</td>
+                </tr>
+            </table>
+            <br>
+            {% for error in form.recaptcha.errors %}
+                {{ error }}
+            {% endfor %}
+            {{ form.recaptcha }}
+            <br>
+            <input type="submit" value="Create Account">
+            </form>
+        </div>
+	</body>
+
+    <script type="text/javascript">
+		$(document).ready(function () {
+			/* When the user clicks the "Create Account" button. */
+			$('div.button#register').click(function () {
+                /* Show the user why he/she failed. */
+                //displayFailure(errorObj.reason);
+			});
+		});
+	</script>
+</html>

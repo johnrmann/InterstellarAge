@@ -11,13 +11,31 @@ h1 {
     text-transform: uppercase;
 }
 
-.container {
+.container-login, .container-register {
     background: rgba(0,0,0,0.6);
     margin: auto;
     border-radius: 10px;
     padding: 30px 10px;
     text-align: center;
+}
+
+.container-login {
     width: 300px;
+}
+
+.container-register {
+    color: white;
+    font-size: 14px;
+    width: 440px;
+}
+
+.container-register table {
+    margin: auto;
+    text-align: left;
+}
+
+.container-register table td {
+    padding: 0 5px;
 }
 
 input {
@@ -29,6 +47,10 @@ input {
     box-shadow: rgba(0,0,0,0.1) 0px 0px 8px; 
     -moz-box-shadow: rgba(0,0,0,0.1) 0px 0px 8px; 
     -webkit-box-shadow: rgba(0,0,0,0.1) 0px 0px 8px; 
+}
+
+.container-login a {
+    text-decoration: none;
 }
 
 .button {

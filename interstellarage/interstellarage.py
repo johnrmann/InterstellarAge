@@ -21,11 +21,18 @@ from flask import make_response, send_file
 # SQL Alchemy
 from flask.ext.sqlalchemy import SQLAlchemy
 
+# Flask-WTF
+from flask_wtf import Form, RecaptchaField
+from wtforms import StringField, PasswordField
+from wtforms.validators import DataRequired, Length, Email, EqualTo
+
 # Setup the application
 app = Flask(__name__)
 app.debug = True
 app.config["SECRET_KEY"] = "space"
 app.config["SQLALCHEMY_DATABASE_URI"] = "mysql://InterstellarAge:starship@localhost/$default"
+app.config["RECAPTCHA_PUBLIC_KEY"] = "6Lf6NvISAAAAAFVZK25ouv5_W1MkSTTbo1dxtN_F"
+app.config["RECAPTCHA_PRIVATE_KEY"] = "6Lf6NvISAAAAAKpc3nc_clcI300kwlF5zHxXUcMI"
 
 # Setup the database
 db = SQLAlchemy(app)
@@ -35,75 +42,6 @@ import user as user_lib
 
 # Global variables
 ROOT_DIR = "/home/InterstellarAge/interstellarage"
-
-def assign_captcha():
-    """
-    Randomly creates a captcha (used to determine if a user is a human or
-    a computer), assigns it to the session, and returns it as a string.
-
-    Returns:
-        The generated captcha as an `str`.
-    """
-
-    captcha_words = ["galaxy", "nebula", "earth", "mars", "saturn", "neptune",
-                     "jupiter", "venus", "sirius", "rigel", "vega", "mercury",
-                     "andromeda", "nova", "quasar", "spacetime", "star"]
-
-    # Pick a random word from the list and pick a random integer
-    import random
-    random_word = random.choice(captcha_words)
-    random_int = random.randint(0,1000)
-
-    # Create the captcha string and assign it to the session
-    captcha = "{0} {1}".format(random_word, str(random_int))
-    captcha = "testing" # remove this soon
-    session['captcha'] = captcha
-    return captcha
-
-
-
-def captcha_image(captcha):
-    """
-    Args:
-        captcha (str): The Captcha to display.
-
-    Returns:
-        An `str` containing binary PNG data. This image depicts `captcha` as
-        an image.
-    """
-
-    # Declare global variables
-    global ROOT_DIR
-
-    # Import Image from the Python Image Library
-    from PIL import Image, ImageDraw, ImageFont
-
-    # Create the blank image
-    im = Image.new("RGB", (100, 40), "white")
-    draw = ImageDraw.Draw(im)
-
-    # Get the font and draw the provided text.
-    font_path = ROOT_DIR+"/static/ttf/font.ttf"
-    font = ImageFont.truetype(font_path, 30, encoding="unic")
-    draw.text((5,5), captcha, font=font, fill="black")
-    del draw
-
-    # Save the image data
-    im_path = ROOT_DIR+"/temporary/captcha.png"
-    im_file = open(im_path, 'w+')
-    im.save(im_path, "PNG")
-    del im
-
-    # Copy the image to a temporary file.
-    from shutil import copyfileobj
-    temp_im_file = tempfile.NamedTemporaryFile(mode='w+b',suffix='png')
-    copyfileobj(im_file, temp_im_file)
-    im_file.close()
-    os.remove(im_path)
-
-    # Return the temporary image.
-    return temp_im_file
-
 
 
 def current_user():
@@ -151,7 +89,7 @@ def login():
     # Get user with matching username
     user = user_lib.find(username=username)
     if user == None:
-        return "Login failed"
+        return "No such user"
     elif user.password_hashed != password_hashed:
         return "Wrong password"
     else:
@@ -159,8 +97,16 @@ def login():
         return "Login worked!"
 
 
+class AccountForm(Form):
+    username = StringField('username', validators=[DataRequired(), Length(min=4, max=32)])
+    password = PasswordField('password', validators=[DataRequired(), Length(min=8, max=32),
+        EqualTo('confirm_password', message=u'Passwords must match')])
+    confirm_password = PasswordField('confirm_password')
+    email = StringField('email', validators=[Email(message=u'Invalid email address')])
+    recaptcha = RecaptchaField()
 
-@app.route('/register', methods=['POST'])
+
+@app.route('/register', methods=['GET', 'POST'])
 def register():
     """
     If ".../register" is accessed with a POST request, then we scan the request
@@ -179,82 +125,33 @@ def register():
         the registration was successful. If the registration wasn't successful,
         then a JSON object detailing the error with a new captcha is returned.
     """
+    if request.method == 'POST':
+        form = AccountForm()
+        if form.validate_on_submit():
+            username = form.username.data
+            password = form.password.data
+            email = form.email.data
+            
+            try:
+                hasher = hashlib.sha1()
+                hasher.update(password)
+                password_hashed = hasher.hexdigest()
+                user = user_lib.User(username, password_hashed, email)
+                return "{0} {1}".format(str(user.unique), username)
+            except AssertionError as exception:
+                return exception.args[0]
+            
+            return user.to_json()
+        else:
+            return "not validated"
 
-    # Get data from the form
-    username = request.form["username"]
-    password = request.form["password"]
-    confirm_password = request.form["confirm_password"]
-    email = request.form["email"]
-    provided_captcha = request.form["captcha"]
-
-    # Check password invariants
-    if password != confirm_password:
-        return registration_error("Passwords do not match")
-    elif len(password) < 8:
-        return registration_error("Password too short")
-    elif len(password) > 32:
-        return registration_error("Password too long")
-
-    # Check captcha
-    #if not 'captcha' in session:
-    #    return "Data not submitted from form"
-    #real_captcha = session['captcha']
-    #if real_captcha != provided_captcha:
-    #    assign_captcha()
-    #    return registration_error("Captcha doesn't match. Try again.")
-
-    try:
-        hasher = hashlib.sha1()
-        hasher.update(password)
-        password_hashed = hasher.hexdigest()
-        user = user_lib.User(username, password_hashed, email)
-        return "{0} {1}".format(str(user.unique), username)
-    except AssertionError as exception:
-        return exception.args[0]
-
-    return user.to_json()
-
-
-
-@app.route("/captcha", methods=["POST"])
-def get_captcha():
-    """
-    Creates a new captcha, assigns it to the session, and returns an image
-    showing it.
-
-    Returns:
-        A `str` containing the raw binary data of a PNG image.
-    """
-
-    captcha = assign_captcha()
-    print session['captcha']
-    image = captcha_image(captcha)
-    resp = make_response(image)
-    resp.headers['Content-Type'] = 'image/png'
-    resp.headers['Content-Disposition'] = 'attachment; filename=captcha.png'
-    return resp
+    else:
+        form = AccountForm()
+        return render_template("register.html", form=form)
+        
 
 
 
 @app.route("/game/<gameid>")
 def show_game(gameid):
     return render_template('game.html')
-
-
-
-def registration_error(reason):
-    """
-    Args:
-        reason (str): The reason why the registration wasn't successful.
-
-    Returns:
-        A 400 error with text containing a JSON object containing a reason for
-        the failure and a new captcha image.
-    """
-
-    new_captcha = assign_captcha()
-
-    return json.dumps({
-        "reason" : reason,
-        "captcha" : captcha_image(new_captcha)
-    }), 400
