@@ -62,7 +62,7 @@ def current_user():
 @app.route('/')
 def start_page():
     """
-    Shows the login/register page if there is no user logged in.
+    Shows the login page if there is no user logged in.
     """
 
     user = current_user()
@@ -117,7 +117,7 @@ class AccountForm(Form):
         EqualTo('confirm_password', message=u'Passwords must match')])
     confirm_password = PasswordField('confirm_password')
     email = StringField('email', validators=[Email(message=u'Invalid email address')])
-    recaptcha = RecaptchaField()
+    #recaptcha = RecaptchaField()
 
 
 
@@ -127,13 +127,6 @@ def register():
     If ".../register" is accessed with a POST request, then we scan the request
     for registration information. We validate that information. If the data
     is valid, then we register the user.
-
-    Request Fields (POST):
-        username (str): The user's desired username.
-        password (str): The user's desired password.
-        confirm_password (str): For checking password typos.
-        email (str): The user's email address.
-        captcha (str): To ensure that the user is not a robot.
 
     Returns:
         Returns a JSON object with the newly registered user's information if
