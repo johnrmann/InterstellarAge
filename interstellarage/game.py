@@ -27,6 +27,7 @@ class Game(db.Model):
     __table_args__ = {'extend_existing':True}
 
     unique = db.Column(db.Integer, primary_key=True)
+    creator_unique = db.Column(db.Integer)
     started_when = db.Column(db.DateTime)
     on_turn = db.Column(db.Integer)
     started = db.Column(db.Boolean)

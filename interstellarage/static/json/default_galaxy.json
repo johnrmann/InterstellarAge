@@ -35,7 +35,9 @@
 						"type" : "RockyPlanet",
 						"moons" : [],
 						"space_colonies" : [],
-						"ground_colonies" : [],
+						"ground_colonies" : [
+							{"name" : "Armstrong"}
+						],
 						"owner" : "ISCA",
 						"fleets" : [0, 0, 0]
 					}
@@ -69,7 +71,27 @@
 				"name" : "Jupiter",
 				"type" : "GasPlanet",
 				"moons" : [],
-				"space_colonies" : [],
+				"space_colonies" : [
+					{
+						"name" : "Europa",
+						"type" : "RockyPlanet",
+						"moons" : [],
+						"space_colonies" : [],
+						"ground_colonies" : [],
+						"owner" : "ISCA",
+						"fleets" : [0, 0, 0]
+					},
+
+					{
+						"name" : "Ganymede",
+						"type" : "RockyPlanet",
+						"moons" : [],
+						"space_colonies" : [],
+						"ground_colonies" : [],
+						"owner" : "ISCA",
+						"fleets" : [0, 0, 0]
+					}
+				],
 				"owner" : "ISCA",
 				"fleets" : [0, 0, 0]
 			},
@@ -78,7 +100,17 @@
 				"name" : "Saturn",
 				"type" : "GasPlanet",
 				"moons" : [],
-				"space_colonies" : [],
+				"space_colonies" : [
+					{
+						"name" : "Titan",
+						"type" : "RockyPlanet",
+						"moons" : [],
+						"space_colonies" : [],
+						"ground_colonies" : [],
+						"owner" : "ISCA",
+						"fleets" : [0, 0, 0]
+					}
+				],
 				"owner" : "ISCA",
 				"fleets" : [0, 0, 0]
 			},

@@ -162,4 +162,27 @@ def register():
 
 @app.route("/game/<gameid>")
 def show_game(gameid):
-    return render_template('game.html')
+    import game as game_lib
+    game = game_lib.find(unique=int(gameid))
+    user = current_user()
+
+    if game is None:
+        return "No game with that ID", 400
+    if user is None:
+        return "Not logged in", 400
+
+    joined = user in game
+    is_creator = (user.unique == game.creator_unique)
+    started = game.started
+
+    if started and not joined:
+        return "You can't play this game. Sorry. :(", 400
+    elif started and joined:
+        return render_template('game.html', game=game)
+    else:
+        return render_template(
+            'lobby.html',
+            game=game,
+            joined=joined,
+            is_creator=is_creator
+        )

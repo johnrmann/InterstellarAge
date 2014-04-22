@@ -30,11 +30,11 @@ class Player(db.Model):
     __tablename__ = 'player'
     __table_args__ = {'extend_existing':True}
 
-    user_id = db.Column(db.Integer, db.ForeignKey(user_lib.User.unique))
-    game_id = db.Column(db.Integer, db.ForeignKey(game_lib.Game.unique))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.unique'))
+    game_id = db.Column(db.Integer, db.ForeignKey('game.unique'))
 
-    user = db.relationship(user_lib.User, backref='playing')
-    game = db.relationship(game_lib.Game, backref='players')
+    user = db.relationship('User', backref='playing')
+    game = db.relationship('Game', backref='players')
 
     faction_code = db.Column(db.Integer)
     money = db.Column(db.Integer)
