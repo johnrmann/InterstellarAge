@@ -8,7 +8,8 @@ var galaxyMap = {
 	camera : null,
 	scene : null,
 	renderer : null,
-	onSystemClick : null
+	onSystemClick : null,
+	onKeyboard : null
 };
 
 var systemView = {
@@ -40,8 +41,10 @@ function galaxyMapSetup () {
 	galaxyMap.renderer.setSize(window.innerWidth, window.innerHeight);
 	document.body.appendChild(galaxyMap.renderer.domElement);
 
-	galaxyMap.camera.position.y = 50;
+	galaxyMap.camera.position.y = 60;
 	galaxyMap.camera.rotation.x = (Math.PI / 2) * -1;
+
+	galaxyMap.onSystemClick = createSystemView;
 
 	// The projector performs world/screen calculations.
 	projector = new THREE.Projector();
@@ -65,7 +68,7 @@ function createGalaxyMap (startSystems) {
 		var mesh = new THREE.Mesh(sphere, mat);
 
 		galaxyMap.scene.add(mesh);
-		mesh.position = new THREE.Vector3(x * 20, y * 20, z * 20);
+		mesh.position = new THREE.Vector3(x * 2, y * 2, z * 2);
 		mesh.userData = system;
 	}
 }
@@ -121,7 +124,7 @@ function updateGalaxyMap (newSystems) {
 
 var galaxyMapRender = function () {
 	requestAnimationFrame(galaxyMapRender);
-	renderer.render(galaxyMap.scene, galaxyMap.camera);
+	galaxyMap.renderer.render(galaxyMap.scene, galaxyMap.camera);
 };
 
 /**************************************************************************************************

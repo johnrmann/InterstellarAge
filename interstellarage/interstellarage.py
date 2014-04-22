@@ -30,7 +30,7 @@ from wtforms.validators import DataRequired, Length, Email, EqualTo
 app = Flask(__name__)
 app.debug = True
 app.config["SECRET_KEY"] = "space"
-app.config["SQLALCHEMY_DATABASE_URI"] = "mysql://InterstellarAge:starship@localhost/$default"
+app.config["SQLALCHEMY_DATABASE_URI"] = "mysql://InterstellarAge:starship@mysql.server/InterstellarAge$default"
 app.config["RECAPTCHA_PUBLIC_KEY"] = "6Lf6NvISAAAAAFVZK25ouv5_W1MkSTTbo1dxtN_F"
 app.config["RECAPTCHA_PRIVATE_KEY"] = "6Lf6NvISAAAAAKpc3nc_clcI300kwlF5zHxXUcMI"
 
@@ -97,6 +97,20 @@ def login():
         return "Login worked!"
 
 
+
+@app.route('/logout')
+def logout():
+    """
+    If there is a `User` logged into the current session, then we remove
+    that `User`'s information from the session, effectively logging the `User`
+    out.
+    """
+
+    session.pop('user_id', None)
+    return "Logged out"
+
+
+
 class AccountForm(Form):
     username = StringField('username', validators=[DataRequired(), Length(min=4, max=32)])
     password = PasswordField('password', validators=[DataRequired(), Length(min=8, max=32),
@@ -104,6 +118,7 @@ class AccountForm(Form):
     confirm_password = PasswordField('confirm_password')
     email = StringField('email', validators=[Email(message=u'Invalid email address')])
     recaptcha = RecaptchaField()
+
 
 
 @app.route('/register', methods=['GET', 'POST'])

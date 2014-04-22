@@ -10,6 +10,8 @@ import planet as planet_lib
 
 # Define global variables.
 DISCOVER_DISTANCE = 4
+SYSTEM_MIN_PLANETS = 1
+SYSTEM_MAX_PLANETS = 10
 
 class System(object):
     """
@@ -25,7 +27,7 @@ class System(object):
         planets (list of Planet): The `Planet`s in this `System`. Ordered such
             that the closest `Planet` to the star is at index 0.
 
-        discovered_by (list of User): The `User`s that have discovered this
+        discovered_by (list of Player): The `Player`s that have discovered this
             `System`.
     """
 
@@ -70,13 +72,13 @@ class System(object):
         Keyword Args:
             hide_planets (boolean): Set to `True` if an empty list is to be
                 returned in the "planets" field of the `dict`. A situation
-                where this is necessary is if the `User` has not discovered
+                where this is necessary is if the `Player` has not discovered
                 the `Planet`s in this `System` yet.
 
         Returns:
             Important data about this `System` encased in a `dict`. This `dict`
             can be used for saving game info to the server or sent back to the
-            `User`.
+            `Player`.
         """
 
         to_return = {
@@ -116,12 +118,12 @@ class System(object):
         import math
         return math.sqrt(x**2 + y**2 + z**2)
 
-    def discover(self, by_user):
+    def discover(self, by_player):
         """
-        When a fleet from a `User` (in this case, called `by_user`) arrives
+        When a fleet from a `Player` (in this case, called `by_player`) arrives
         at a `System` for the first time, the `Planet`s in that `System` are
         marked as "discovered". This means that from that point forward,
-        `by_user` can plot hyperspace jumps directly to the planets of this
+        `by_player` can plot hyperspace jumps directly to the planets of this
         `System` instead of to the `System` in genreal.
 
         This method also marks all `System`s within a certain range of this one
@@ -129,13 +131,13 @@ class System(object):
         visible on the Galaxy Map.
 
         Args:
-            by_user (User): The `User` that made the recent discovery.
+            by_player (Player): The `Player` that made the recent discovery.
         """
 
         global DISCOVER_DISTANCE
-        self.planets_discovered_by.add(by_user)
+        self.planets_discovered_by.add(by_player)
         for system in self.galaxy.systems_near_system(self, DISCOVER_DISTANCE):
-            system.discovered_by.add(by_user)
+            system.discovered_by.add(by_player)
 
     def grid_distance(self, other_system):
         """
@@ -172,13 +174,13 @@ class System(object):
 
         return max(1, int(self.grid_distance(other_system) / 4))
 
-    def receive_fleet(self, incoming_fleet_size, from_user):
+    def receive_fleet(self, incoming_fleet_size, from_player):
         # Ensure data structure invariants
-        assert from_user not in self.planets_discovered_by
-        assert from_user in self.planets_discovered_by
+        assert from_player not in self.planets_discovered_by
+        assert from_player in self.planets_discovered_by
 
         # Send the fleet to the nearset planet
-        self.planets[-1].receive_fleet(incoming_fleet_size, from_user)
+        self.planets[-1].receive_fleet(incoming_fleet_size, from_player)
         self.discover()
 
     def owners(self):
@@ -235,7 +237,7 @@ def system_from_dict(data, game):
     z = data['z']
     star_brightness = data['star_brightness']
     star_color = data['star_color']
-    planets = [planet_lib.planet_from_dict(p) for p in data['planets']]
+    planets = [planet_lib.planet_from_dict(p, game) for p in data['planets']]
 
     # Setup the system.
     system = System(
