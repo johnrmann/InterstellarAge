@@ -46,6 +46,8 @@ class Player(db.Model):
 
         self.user_id = user.unique
         self.game_id = game.unique
+        self.user = user
+        self.game = game
         self.faction_code = faction_code
 
         # Record this new player in the SQL database

@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+	<head>
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/main.css') }}">
+		<title>Interstellar Age - Login</title>
+
+		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+	</head>
+
+	<body>
+		{% if not joined %}
+		{% elif is_creator %}
+			You are going to play as {{ game.faction_shortname_for_user(user) }}.
+		{% elif joined %}
+			You have joined this game as {{ game.faction_shortname_for_user(user) }}.
+		{%- endif %}
+	</body>
+</html>

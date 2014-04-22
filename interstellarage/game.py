@@ -5,6 +5,9 @@ InterstellarAge
 # Import python modules
 from datetime import datetime
 
+# Import Flask
+from flask import request
+
 # Import SQLAlchemy
 from flask.ext.sqlalchemy import SQLAlchemy
 
@@ -31,8 +34,9 @@ class Game(db.Model):
     started_when = db.Column(db.DateTime)
     on_turn = db.Column(db.Integer)
     started = db.Column(db.Boolean)
+    join_code = db.Column(db.String)
 
-    def __init__ (self):
+    def __init__ (self, join_code):
         """
         TODO
         """
@@ -40,6 +44,7 @@ class Game(db.Model):
         self.started_when = datetime.now()
         self.on_turn = -1
         self.started = False
+        self.join_code = join_code
 
         # Save changes to the sql database
         db.session.add(self)
@@ -71,6 +76,12 @@ class Game(db.Model):
         # Return the results
         return [] # TODO
 
+    def faction_shortname_for_user(self, user):
+        for player in self.players:
+            if player.user == user:
+                return player.faction_shortname()
+        return ""
+
     def start(self):
         """
         Starts the game.
@@ -93,8 +104,24 @@ class Game(db.Model):
 
 
 def create_game(user, join_code, faction):
-    # Create the game object
-    # Create the player object
-    # Add the player object to the game
+    # Create the game object.
+    game = Game(join_code)
+
+    # Create the player object.
+    player = Player(user, game, faction)
+
     # Return the URL of the game
-    pass
+    return "/game/{0}".format(str(game.unique))
+
+
+
+@app.route('/game/create')
+def web_create_game():
+    import user as user_lib
+    user = user_lib.current_user()
+
+    if user is None:
+        return "Not logged in", 400
+
+    # TODO
+    return
