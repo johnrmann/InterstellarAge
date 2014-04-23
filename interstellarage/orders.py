@@ -38,7 +38,7 @@ class Order(object):
 class MoveOrder(Order):
     """
     Attributes:
-        orderer (User): The `User` that issued the orders.
+        orderer (Player): The `Player` that issued the orders.
         to_planet (Planet): The destination of the fleet.
         from_planet (Planet): The origin of the fleet.
         fleet_number (int): Signifies that we are moving fleet number n.
@@ -263,6 +263,8 @@ class BuildFleetOrder(Order):
         self.at_planet = at_planet
         self.in_fleet = in_fleet
         self.ships = ships
+
+
 
 def process_orders(user, game, move=[], hyperspace=[], build_ships=[],
                    upgrade_planet=[]):

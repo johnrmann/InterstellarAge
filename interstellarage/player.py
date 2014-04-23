@@ -30,6 +30,8 @@ class Player(db.Model):
     __tablename__ = 'player'
     __table_args__ = {'extend_existing':True}
 
+    unique = db.Column(db.Integer, primary_key=True)
+
     user_id = db.Column(db.Integer, db.ForeignKey('user.unique'))
     game_id = db.Column(db.Integer, db.ForeignKey('game.unique'))
 

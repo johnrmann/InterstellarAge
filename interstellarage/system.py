@@ -326,9 +326,8 @@ def system_from_dict(data, game):
     system = System(
         name,
         star_spectral_class=star_spectral_class
-        planets=planets
     )
-    system.star_spectral_class = star_spectral_class
+    system.planets = planets
     system.star_size = star_size
     system.position = (x, y, z)
     system.star_color = star_color

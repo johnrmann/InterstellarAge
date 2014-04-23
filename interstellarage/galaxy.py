@@ -15,6 +15,9 @@ import pickle
 # Import our modules
 import system as system_lib
 
+# This is so we can bind URLs
+from interstellarage import app
+
 # Define constants.
 
 # This is the path to the file of the default galaxy JSON. It contains the
@@ -148,7 +151,7 @@ class Galaxy(object):
 
         print "Generated {0} systems".format(str(generated))
 
-    def as_list(self, for_player=None):
+    def as_list(self, for_player=None, for_user=None):
         """
         Returns:
             The contents of this `Galaxy` formatted as a `list`. This `list`
@@ -156,7 +159,23 @@ class Galaxy(object):
             written to a JSON file.
         """
 
-        return [system.as_dict() for system in self.systems]
+        if for_user is not None:
+            for player in self.game.players:
+                if player.user == for_user:
+                    for_player = player
+                    break
+            else:
+                raise Exception("User doesn't have access")
+
+        to_return = [system.as_dict() for system in self.systems]
+        if for_player is not None:
+            new_to_return = []
+            for system in to_return:
+                if for_player not in system.discovered_by:
+                    continue
+                new_to_return.append(system)
+            return new_to_return
+        return to_return
 
     def system_at_position(self, x, y, z):
         """
@@ -282,3 +301,25 @@ def random_name(system=False):
 
     # We're done here.
     return name
+
+
+
+@app.route('/game/galaxy/entire', methods=['POST'])
+def web_entire_galaxy():
+    # Get the current user.
+    import user as user_lib
+    user = user_lib.current_user()
+    if user is None:
+        return "Not logged in", 400
+
+    # Get the desired game
+    import game as game_lib
+    game_unique = int(request.form['game'])
+    game = game_lib.find(unique=game_unique)
+    if game is None:
+        return "Invalid game", 400
+    elif user not in game:
+        return "You are not part of this game", 400
+
+    # Return the galaxy as JSON
+    return json.dumps(game.galaxy.as_list(for_user=user))

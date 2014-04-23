@@ -15,12 +15,16 @@ from flask.ext.sqlalchemy import SQLAlchemy
 from interstellarage import db
 
 # Import the user class
+import player as player_lib
 import galaxy as galaxy_lib
 import orders as order_lib
 
 # Define global variables.
 GAME_MIN_PLAYERS = 1
 GAME_MAX_PLAYERS = 4
+
+MIN_JOINCODE_LENGTH = 1
+MAX_JOINCODE_LENGTH = 25
 
 class Game(db.Model):
     """
@@ -91,10 +95,15 @@ class Game(db.Model):
         Starts the game.
         """
 
+        # Declare global variables.
+        global GAME_MIN_PLAYERS
+
         # Preconditions
-        assert len(self.players) > 0
+        assert len(self.players) >= GAME_MIN_PLAYERS
 
         # Setup the galaxy for this game.
+        game_galaxy = Galaxy(self, generate=True)
+        self.galaxy = game_galaxy
 
     def player_for_faction(self, faction_shortname):
         if faction_shortname == "":
@@ -138,14 +147,32 @@ def find(unique=None):
 
 @app.route('/game/create')
 def web_create_game():
+    # Declare global variables
+    global MIN_JOINCODE_LENGTH
+    global MAX_JOINCODE_LENGTH
+
     import user as user_lib
     user = user_lib.current_user()
 
     if user is None:
         return "Not logged in", 400
 
+    # Get the given join code
+    join_code = request.form['join_code']
+    assert len(join_code) in range(MIN_JOINCODE_LENGTH, MAX_JOINCODE_LENGTH)
+
+    # Ensure that the faction code looks good
+    faction_code = int(request.form['faction'])
     # TODO
-    return
+
+    # Create the game.
+    new_game = Game(join_code)
+    new_game.creator_unique = user.unique
+    db.session.commit()
+
+    # Create the Player for the User
+    new_player = Player(user, game, faction_code)
+    return "Game created"
 
 
 
@@ -161,7 +188,7 @@ def web_join_game(gameid):
         return "Game does not exist.", 400
 
     # Get the given join code
-    join_code = request.find['join_code']
+    join_code = request.form['join_code']
 
     # Is the game full?
     # Did we get the join_code right?
