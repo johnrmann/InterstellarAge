@@ -2,6 +2,14 @@
 import json
 import random
 
+# Define constants
+ROCKY_PLANET_MIN_SIZE = 0.10
+ROCKY_PLANET_MAX_SIZE = 5.00
+HABITABLE_PLANET_MIN_SIZE = 0.50
+HABITABLE_PLANET_MAX_SIZE = 2.50
+GAS_PLANET_MIN_SIZE = 7.00
+GAS_PLANET_MAX_SIZE = 20.00
+
 class Planet(object):
     """
     `Planet`s are objects contained in `System`s which `Player`s fight to
@@ -57,20 +65,29 @@ class Planet(object):
     _next_assign = 0
     _since_conquered = -1
 
-    def __init__(self, layer=None, name=None, moons=None):
-        """
-        Args:
-            layer (int): If we think of solar systems like trees where
-                planets are nodes and moons are children, then the `layer` of
-                a `Planet` is its depth in the tree. In the real world, Earth
-                would have a layer of 1 and Luna a layer of 2. If the Moon had
-                a moon, it would have a layer of 3.
-            name (str): The name of this planet. If `None` is supplied, a
-                random one will be created.
-            moons (list of Planets):
-        """
+    def __init__(self, name=None, orbit_distance=None, min_size=0.0,
+                 max_size=0.0):
+        # Preconditions.
+        assert min_size != 0.0
+        assert max_size != 0.0
+        assert min_size < max_size
 
-        pass
+        # Assign size.
+        self.size = random.randrange(min_size, max_size)
+
+        if name is not None:
+            self.name = name
+        else:
+            self.name = ""
+
+        # If we are given an orbit distance, then calculate an orbital period
+        if orbit_distance is not None:
+            self.orbit_distance = orbit_distance
+            self.orbit_period = orbit_distance * random.randrange(0.5, 1.5)
+        else:
+            self.orbit_distance = -1
+            self.orbit_period = -1
+
 
     def as_dict(self):
         """
@@ -208,7 +225,8 @@ class Planet(object):
             `number` starships above this `Planet`.
         """
 
-        pass
+        # TODO
+        return 100 * number
 
     def strength(self):
         """
@@ -224,21 +242,23 @@ class Planet(object):
         Returns:
             The `System` that contains this `Planet`.
         """
-        
+
         if isinstance(self.parent, System):
             return self.parent
         elif isinstance(self.parent, Planet):
             return self.parent.system()
 
     def max_ground_colonies(self):
+        """
+        Returns:
+            `int` -- the maximum number of colonies that can be on the ground
+            of this planet at any point.
+        """
+
         return 0
 
     def max_space_colonies(self):
         return 4
-
-    def _random_name(self):
-        self.name = "Delta Vega"
-
 
 
 class GasPlanet(Planet):
@@ -246,7 +266,25 @@ class GasPlanet(Planet):
     TODO
     """
 
+    def __init__(self, name=None, orbit_distance=None):
+        # Declare global variables.
+        global GAS_PLANET_MAX_SIZE
+        global GAS_PLANET_MIN_SIZE
+
+        super(GasPlanet, self).__init__(
+            name=name,
+            orbit_distance=orbit_distance,
+            min_size = GAS_PLANET_MIN_SIZE,
+            max_size = GAS_PLANET_MAX_SIZE
+        )
+
     def max_ground_colonies(self):
+        """
+        Returns:
+            `int` -- the maximum number of colonies that can be on the ground
+            of this planet at any point.
+        """
+
         return 0
 
     def max_space_colonies(self):
@@ -261,7 +299,36 @@ class RockyPlanet(Planet):
     Luna.
     """
 
+    # Declare global variables.
+    global ROCKY_PLANET_MAX_SIZE
+    global ROCKY_PLANET_MIN_SIZE
+
+    def __init__(self, name=None, orbit_distance=None,
+                 min_size=ROCKY_PLANET_MIN_SIZE,
+                 max_size=ROCKY_PLANET_MAX_SIZE):
+        """
+        Keyword Args:
+            name (str):
+            orbit_distance (float):
+            min_size (float): The minimum size that this planet can be. This
+                arg should be considered *private* -- it may only be passed
+                in by members of this module.
+            max_size (float):
+        """
+
+        super(RockyPlanet, self).__init__(
+            name=name,
+            orbit_distance=orbit_distance,
+            min_size=min_size,
+            max_size=max_size
+        )
+
     def max_ground_colonies(self):
+        """
+        Returns:
+            `int` -- the maximum number of colonies that can be on the ground
+            of this planet at any point.
+        """
         return 4
 
     def max_space_colonies(self):
@@ -276,7 +343,24 @@ class HabitablePlanet(RockyPlanet):
     planet.
     """
 
+    def __init__(self, name=None, orbit_distance=None):
+        # Declare global variables.
+        global HABITABLE_PLANET_MAX_SIZE
+        global HABITABLE_PLANET_MIN_SIZE
+
+        super(HabitablePlanet, self).__init__(
+            name=name,
+            orbit_distance=orbit_distance,
+            min_size = HABITABLE_PLANET_MIN_SIZE,
+            max_size = HABITABLE_PLANET_MAX_SIZE
+        )
+
     def max_ground_colonies(self):
+        """
+        Returns:
+            `int` -- the maximum number of colonies that can be on the ground
+            of this planet at any point.
+        """
         return 8
 
     def max_space_colonies(self):
@@ -312,6 +396,17 @@ def planet_from_dict(data, game):
     ground_colonies = [colony_from_dict(col) for col in data['ground_colonies']]
     fleets = data['fleets']
 
+    # Get astronomy data
+    orbit_distance = float(data['orbit_distance'])
+    orbit_period = float(data['orbit_period'])
+    size = float(data['size'])
+    texture = data['texture']
+    if 'rings' in data:
+        rings = data['rings']
+    else:
+        rings = ""
+
+    # Determine the type of planet to create.
     if data['type'] == 'GasPlanet':
         planet = GasPlanet()
     elif data['type'] == 'RockyPlanet':
@@ -332,6 +427,13 @@ def planet_from_dict(data, game):
     planet.space_colonies = space_colonies
     planet.ground_colonies = ground_colonies
     planet.fleets = fleets
+
+    # Assign astronomy data.
+    planet.orbit_distance = orbit_distance
+    planet.orbit_period = orbit_period
+    planet.size = size
+    planet.texture = texture
+    planet.rings = rings
 
     # Get the player's owner.
     planet.owner = game.player_for_faction(data['owner'])

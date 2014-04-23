@@ -13,6 +13,11 @@ DISCOVER_DISTANCE = 4
 SYSTEM_MIN_PLANETS = 1
 SYSTEM_MAX_PLANETS = 10
 
+SYSTEM_SCHEME_SYLLABLES = 1
+SYSTEM_SCHEME_STAR = 2
+
+SPECTRAL_CLASSES = ["O", "B", "A", "F", "G", "K", "M", "L", "T", "Y"]
+
 class System(object):
     """
     Attributes:
@@ -46,7 +51,6 @@ class System(object):
     name = ""
     position = (0, 0, 0)
 
-    star_color = ""
     star_spectral_class = ""
     star_size = 0.0
 
@@ -57,23 +61,21 @@ class System(object):
 
     galaxy = None
 
-    def __init__(self, name, planets=None):
+    def __init__(self, name, star_spectral_class=None, generate_planets=False):
         """
         Args:
             name (str): The name of this system.
-            star_brightness (float): 
-            planets (list of Planets): The `Planet`s that form this system. If
-                `None` is supplied instead of a list, then this system's
-                `Planet`s will be randomly generated.
+
+        Postconditions:
+            If a `star_spectral_class` was given, then a `star_size` will also
+            be calculated.
         """
 
         self.name = name
-        if planets != None:
-            self.planets = planets
-            for planet in self.planets:
-                planet.parent = self
-        else:
-            self.planets = []
+        
+        if star_spectral_class is not None:
+            self.star_spectral_class = star_spectral_class
+            # TODO set size
 
     def __contains__(self, other):
         """
@@ -83,13 +85,17 @@ class System(object):
 
         return other in self.planets
 
-    def as_dict(self, hide_planets=False):
+    def as_dict(self, hide_planets=False, include_discoveries=True):
         """
         Keyword Args:
             hide_planets (boolean): Set to `True` if an empty list is to be
                 returned in the "planets" field of the `dict`. A situation
                 where this is necessary is if the `Player` has not discovered
                 the `Planet`s in this `System` yet.
+
+            include_discoveries (boolean): Set to `True` if we are to include
+                information about the `Player`s that have discovered this
+                `System` with the return `dict`.
 
         Returns:
             Important data about this `System` encased in a `dict`. This `dict`
@@ -109,6 +115,13 @@ class System(object):
 
         if hide_planets:
             to_return['planets'] = []
+
+        if include_discoveries:
+            star = list(self.discovered_by)
+            planets = list(self.planets_discovered_by)
+            to_return['discovered_by'] = star
+            to_return['planets_discovered_by'] = planets
+
         return to_return
 
     def cartesian_distance(self, other_system):
@@ -232,7 +245,7 @@ class System(object):
 
 
 
-def generate_system():
+def generate_system(name, scheme):
     """
     Returns:
         A `System` generated at random.
@@ -246,7 +259,8 @@ def generate_system():
     num_planets = random.randint(SYSTEM_MIN_PLANETS, SYSTEM_MAX_PLANETS)
 
     # Generate a random spectral class.
-    # Given the spectral class, now calculate a random size for the star.
+    star_spectral_class = _random_spectral_class()
+
     # Now calculate the maximum and minimum distances planets can be between.
     min_orbit_dist = 0.1
     max_orbit_dist = 30.0 # TODO
@@ -266,8 +280,35 @@ def generate_system():
     # rocky as a function of its orbital distance.
     chance_habitable = lambda d: 0.25 # TODO
 
-    # We decide the naming scheme of the system.
-    pass
+    # Begin creating the planets
+    planets = []
+    a = 1 # used for iteration
+    for distance in orbit_distances:
+        planet = None
+        dice = random.random()
+
+        # Case: Rocky or habitable planet
+        if dice <= chance_rocky(distance):
+            # Case: Habitable planet
+            dice = random.random()
+            if dice <= chance_habitable(distance):
+                planet = planet_lib.HabitablePlanet(orbit_distance=distance)
+
+            # Case: Rocky planet
+            else:
+                planet = planet_lib.RockyPlanet(orbit_distance=distance)
+
+        # Case: Gas Planet
+        else:
+            planet = planet_lib.GasPlanet(orbit_distance=distance)
+
+        # TODO setup planet
+        planet.name = _planet_name(name, scheme, a)
+        planets.append(planet)
+        a += 1
+
+    # Setup the system that we will return
+    system = System(name, star_spectral_class=star_spectral_class)
 
 
 
@@ -278,12 +319,13 @@ def system_from_dict(data, game):
     y = data['y']
     z = data['z']
     star_size = data['star_size']
-    star_spectral_class = data['star_color']
+    star_spectral_class = data['star_spectral_class']
     planets = [planet_lib.planet_from_dict(p, game) for p in data['planets']]
 
     # Setup the system.
     system = System(
         name,
+        star_spectral_class=star_spectral_class
         planets=planets
     )
     system.star_spectral_class = star_spectral_class
@@ -294,3 +336,28 @@ def system_from_dict(data, game):
 
     # We're done here.
     return system
+
+
+
+def _random_spectral_class():
+    global SPECTRAL_CLASSES
+    return random.choice(SPECTRAL_CLASSES)
+
+
+
+def _planet_name(system_name, scheme, n):
+    # Import required modules.
+    import galaxy as galaxy_lib
+    from other import int_to_roman
+
+    # Define global variables.
+    global SYSTEM_SCHEME_STAR
+    global SYSTEM_SCHEME_SYLLABLES
+
+    # Case: named after star
+    if scheme == SYSTEM_SCHEME_STAR:
+        return system_name+" "+int_to_roman(n)
+
+    # Case: random name
+    else:
+        return galaxy_lib.generate_name()
