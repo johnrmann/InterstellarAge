@@ -47,13 +47,13 @@ NAME_MIN_WORDS = 2
 NAME_MAX_WORDS = 3
 
 # Read the syllables.
-SYLLABLES = []
+SYLLABLES = ["herp", "derp"]
 
 # Read the greek alphabet.
 GREEK = ["Alpha", "Beta", "Gamma", "Delta", "Epsilon"]
 
 # Read the bayer words.
-BAYER = []
+BAYER = ["Cygnus", "Vega"]
 
 class Galaxy(object):
     """
@@ -111,48 +111,40 @@ class Galaxy(object):
             # Add the system to the galaxy
             self.systems.append(system_obj)
 
-        # Generate new systems.
-        x = -GALAXY_LENGTH
-        y = -GALAXY_WIDTH
-        z = -GALAXY_HEIGHT
+        # Creates inclusive range
+        irange = lambda n, k: range(n, k+1)
+
+        # The dimensions of the galaxy
+        width = irange(-GALAXY_WIDTH, GALAXY_WIDTH)
+        length = irange(-GALAXY_LENGTH, GALAXY_LENGTH)
+        height = irange(-GALAXY_HEIGHT, GALAXY_HEIGHT)
+
+        positions = [(x, y, z) for x in width for y in length for z in height]
         default_range = lambda x, y, z: (x + y + z <= GALAXY_DEFAULT_RANGE)
 
         # Loop through the galatic grid.
         generated = 0
         dice = 0
-        while x <= GALAXY_LENGTH:
-            y = -GALAXY_WIDTH
-            while y <= GALAXY_WIDTH:
-                z = -GALAXY_HEIGHT
-                while z <= GALAXY_HEIGHT:
-                    dice = random.random()
-                    if default_range(x, y, z):
-                        z += 1
-                        continue
+        for (x, y, z) in positions:
+            dice = random.random()
+            if default_range(x, y, z):
+                continue
 
-                    # Generate a system.
-                    elif dice <= STARS_PER_CUBIC_LY:
-                        generated += 1
-                        self._system_unique_counter += 1
-                        new_sys = self._create_system(x, y, z)
-                        new_sys.unique = self._system_unique_counter
+            # Generate a system.
+            elif dice <= STARS_PER_CUBIC_LY:
+                generated += 1
+                self._system_unique_counter += 1
+                new_sys = self._create_system(x, y, z)
+                new_sys.unique = self._system_unique_counter
 
-                        # Assign the new planets unique identifiers.
-                        new_sys_planets = new_sys.flat_planets()
-                        for planet in new_sys_planets:
-                            self._planet_unique_counter += 1
-                            planet.unique = self._planet_unique_counter
+                # Assign the new planets unique identifiers.
+                new_sys_planets = new_sys.flat_planets()
+                for planet in new_sys_planets:
+                    self._planet_unique_counter += 1
+                    planet.unique = self._planet_unique_counter
 
-                        # Add the system to this galaxy.
-                        self.systems.append(new_sys)
-
-                    # Go to the next space
-                    z += 1
-                # end z loop
-                y += 1
-            # end y loop
-            x += 1
-        # end x loop
+                # Add the system to this galaxy.
+                self.systems.append(new_sys)
 
         print "Generated {0} systems".format(str(generated))
 
