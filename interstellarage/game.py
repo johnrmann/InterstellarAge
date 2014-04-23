@@ -18,6 +18,10 @@ from interstellarage import db
 import galaxy as galaxy_lib
 import orders as order_lib
 
+# Define global variables.
+GAME_MIN_PLAYERS = 1
+GAME_MAX_PLAYERS = 4
+
 class Game(db.Model):
     """
     Attributes:
@@ -115,6 +119,23 @@ def create_game(user, join_code, faction):
 
 
 
+def find(unique=None):
+    """
+    Keyword Args:
+        unique (int):
+
+    Returns:
+        A `Game` with matching parameters or `None` if no such `Game` was
+        found.
+    """
+
+    if unique != None:
+        return Game.query.filter_by(unique=unique).first()
+    else:
+        return None
+
+
+
 @app.route('/game/create')
 def web_create_game():
     import user as user_lib
@@ -125,3 +146,31 @@ def web_create_game():
 
     # TODO
     return
+
+
+
+@app.route('/game/join/<gameid>')
+def web_join_game(gameid):
+    import user as user_lib
+    user = user_lib.current_user()
+    game = find(unique=gameid)
+
+    if user is None:
+        return "Not logged in", 400
+    elif game is None:
+        return "Game does not exist.", 400
+
+    # Get the given join code
+    join_code = request.find['join_code']
+
+    # Is the game full?
+    # Did we get the join_code right?
+    if join_code is not game.join_code:
+        return "Incorrect password", 400
+    # Has the game already started?
+    if game.started:
+        return "Game already started.", 400
+    # Is the desired faction alright?
+
+    # Success!
+    pass

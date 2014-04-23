@@ -16,26 +16,39 @@ SYSTEM_MAX_PLANETS = 10
 class System(object):
     """
     Attributes:
+        unique (int): Unique identifier for this `System` within the context of
+            the current `Game`.
+
         name (str):
         position ( (int, int) ): The Cartesian position of this `System` in the
             Galaxy Map. A `position` of `(0, 0, 0)` represents the center square
             in the grid.
 
-        star_color (str):
-        star_brightness (float):
+        star_size (float): The radius of the star in terms of the radius of our
+            sun.
+        star_spectral_class (str): The spectral class of this system's star. An
+            example: our sun is spectral class G2V.
 
         planets (list of Planet): The `Planet`s in this `System`. Ordered such
             that the closest `Planet` to the star is at index 0.
 
-        discovered_by (list of Player): The `Player`s that have discovered this
-            `System`.
+        discovered_by (set of Player): The `Player`s that have discovered this
+            `System` (able to travel to it).
+        planets_discovered_by (set of Player): The `Player`s that are able to
+            travel to specific `Planet`s in this `System`. This value is
+            always a subset of `discovered_by`.
+
+        galaxy (Galaxy): The `Galaxy` that contains this `System`.
     """
+
+    unique = 0
 
     name = ""
     position = (0, 0, 0)
 
     star_color = ""
-    star_brightness = 0.0
+    star_spectral_class = ""
+    star_size = 0.0
 
     planets = []
 
@@ -44,7 +57,7 @@ class System(object):
 
     galaxy = None
 
-    def __init__(self, name, star_brightness=None, planets=None):
+    def __init__(self, name, planets=None):
         """
         Args:
             name (str): The name of this system.
@@ -59,13 +72,16 @@ class System(object):
             self.planets = planets
             for planet in self.planets:
                 planet.parent = self
-            return
+        else:
+            self.planets = []
 
-        # Randomly generate planets
-        global SYSTEM_MIN_PLANETS
-        global SYSTEM_MAX_PLANETS
-        num_planets = random.randint(SYSTEM_MIN_PLANETS, SYSTEM_MAX_PLANETS)
-        # TODO
+    def __contains__(self, other):
+        """
+        Returns `True` if and only if the given `Planet` we call `other` is
+        inside this `System`.
+        """
+
+        return other in self.planets
 
     def as_dict(self, hide_planets=False):
         """
@@ -86,7 +102,8 @@ class System(object):
             "x" : self.position[0],
             "y" : self.position[1],
             "z" : self.position[2],
-            "star_brightness" : self.star_brightness,
+            "star_size" : self.star_size,
+            "star_spectral_class" : self.star_spectral_class,
             "planets" : [planet.as_dict() for planet in self.planets]
         }
 
@@ -139,6 +156,23 @@ class System(object):
         for system in self.galaxy.systems_near_system(self, DISCOVER_DISTANCE):
             system.discovered_by.add(by_player)
 
+    def flat_planets(self):
+        """
+        Returns:
+            A `list` of the `Planet`s in this `System` and the `Planet`s that
+            are moons of those `Planet`s. In other words: think of a solar
+            system as a tree with the sun being the root node, planets being
+            leafs, and moons being the leafs of planets. This method returns
+            all leafs in the tree in a one-dimensional list (not including
+            the root node).
+        """
+
+        to_return = []
+        for planet in self.planets:
+            to_return.append(planet)
+            to_return.extend(planet.flat_moons())
+        return to_return
+
     def grid_distance(self, other_system):
         """
         Args:
@@ -165,7 +199,7 @@ class System(object):
         """
         Args:
             other_system (System):
-            fleet_size (int):
+            fleet_size (int): The number of ships in the departing fleet.
 
         Returns:
             An `int` representing how many turns it will take a fleet of
@@ -177,7 +211,7 @@ class System(object):
     def receive_fleet(self, incoming_fleet_size, from_player):
         # Ensure data structure invariants
         assert from_player not in self.planets_discovered_by
-        assert from_player in self.planets_discovered_by
+        assert from_player in self.discovered_by
 
         # Send the fleet to the nearset planet
         self.planets[-1].receive_fleet(incoming_fleet_size, from_player)
@@ -185,37 +219,16 @@ class System(object):
 
     def owners(self):
         """
-        Returns a set
+        Returns:
+            The `set` of `Player`s who occupy at least one `Planet` in this
+            `System`.
         """
 
-        pass
-
-    def _generate_planet(self, n):
-        """
-        Args:
-            n (int):
-        """
-
-        chance_habitable = max(0.0, 0.1-((3-n)/10)**2)
-        chance_rocky = max(0.0, 0.8-0.06*x)
-        chance_gas = 1.0 - chance_habitable - chance_rocky
-
-        roll = random.random()
-        planet = None
-
-        # Habitable planet
-        if 0 <= roll < chance_habitable:
-            pass
-
-        # Rocky planet
-        elif chance_habitable <= roll < chance_habitable + chance_rocky:
-            pass
-
-        # Gas planet
-        else:
-            pass
-
-        return planet
+        all_planets = self.flat_planets()
+        to_return = set()
+        for planet in all_planets:
+            to_return.add(planet.owner)
+        return to_return
 
 
 
@@ -225,6 +238,35 @@ def generate_system():
         A `System` generated at random.
     """
 
+    # Declare global variables.
+    global SYSTEM_MAX_PLANETS
+    global SYSTEM_MIN_PLANETS
+
+    # How many planets does this system have?
+    num_planets = random.randint(SYSTEM_MIN_PLANETS, SYSTEM_MAX_PLANETS)
+
+    # Generate a random spectral class.
+    # Given the spectral class, now calculate a random size for the star.
+    # Now calculate the maximum and minimum distances planets can be between.
+    min_orbit_dist = 0.1
+    max_orbit_dist = 30.0 # TODO
+
+    # Calculate the orbiting distances between the planets.
+    orbit_distances = []
+    for a in xrange(0, num_planets):
+        distance = random.randrange(min_orbit_dist, max_orbit_dist)
+        orbit_distances.append(distance)
+    orbit_distances.sort()
+
+    # This is the probability of a planet being rocky as a function of its
+    # orbital distance from its star.
+    chance_rocky = lambda d: 0.5 # TODO
+
+    # This is the probability of a planet being habitable GIVEN that it is
+    # rocky as a function of its orbital distance.
+    chance_habitable = lambda d: 0.25 # TODO
+
+    # We decide the naming scheme of the system.
     pass
 
 
@@ -235,16 +277,17 @@ def system_from_dict(data, game):
     x = data['x']
     y = data['y']
     z = data['z']
-    star_brightness = data['star_brightness']
-    star_color = data['star_color']
+    star_size = data['star_size']
+    star_spectral_class = data['star_color']
     planets = [planet_lib.planet_from_dict(p, game) for p in data['planets']]
 
     # Setup the system.
     system = System(
         name,
-        planets=planets,
-        star_brightness=star_brightness
+        planets=planets
     )
+    system.star_spectral_class = star_spectral_class
+    system.star_size = star_size
     system.position = (x, y, z)
     system.star_color = star_color
     system.galaxy = game.galaxy

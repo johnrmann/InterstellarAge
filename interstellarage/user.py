@@ -65,7 +65,8 @@ class User(db.Model):
 
     def get_games(self):
         """
-        Returns a list of all the `Game`s this `User` is part of.
+        Returns:
+            A `list` of all the `Game`s this `User` is part of.
         """
 
         return [player.game for player in self.playing]

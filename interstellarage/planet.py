@@ -20,13 +20,21 @@ class Planet(object):
         moons (list of Planet): The `Planet`s that orbit this `Planet`.
         parent (Planet or System): The body which the `Planet` orbits.
 
-        space_colonies (list of SpaceColony):
-        ground_colonies (list of GroundColony):
+        space_colonies (list of Colony):
+        ground_colonies (list of Colony):
 
         owner (Player or None): The `Player` that last had a fleet above this
             `Planet` (if there is such a `Player`).
         fleets (list of int): The value `fleets[a]` is the number of starships
             in fleet number `a`.
+
+        orbit_distance (float):
+        orbit_period (float):
+        size (float):
+        texture (str): 
+        rings (str or None): If the planet has rings (like Saturn), then
+            `rings` is the filename of their texture. It is set to `None` if
+            the planet does not have rings.
 
     Private Attributes:
         _next_assign (int):
@@ -100,6 +108,21 @@ class Planet(object):
         space_output = len(self.space_colonies) * self.max_space_colonies()
 
         return ground_output + space_output
+
+    def flat_moons(self):
+        """
+        Returns:
+            A one-dimensional `list` of `Planet`s in orbit of this `Planet` and
+            the `Planet`s that would orbit those `Planet`s. In other words, if
+            we think of a planetary system as a tree, this method returns the
+            nodes in that tree (not including the root node).
+        """
+
+        to_return = []
+        for moon in self.moons:
+            to_return.append(moon)
+            to_return.extend(moon.flat_moons())
+        return to_return
 
     def fleet_departs(self, fleet_number):
         """
@@ -197,6 +220,11 @@ class Planet(object):
         return sum(self.fleets)
 
     def system(self):
+        """
+        Returns:
+            The `System` that contains this `Planet`.
+        """
+        
         if isinstance(self.parent, System):
             return self.parent
         elif isinstance(self.parent, Planet):
