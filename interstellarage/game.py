@@ -6,13 +6,16 @@ InterstellarAge
 from datetime import datetime
 
 # Import Flask
-from flask import request
+from flask import Blueprint, request
 
 # Import SQLAlchemy
 from flask.ext.sqlalchemy import SQLAlchemy
 
-# Import the app and database from the main file
-from interstellarage import app, db
+# Setup blueprint
+game_pages = Blueprint('game_pages', __name__)
+
+# Import the database from the main file
+from interstellarage import db
 
 # Import the user class
 import player as player_lib
@@ -145,7 +148,7 @@ def find(unique=None):
 
 
 
-@app.route('/game/create')
+@game_pages.route('/game/create')
 def web_create_game():
     # Declare global variables
     global MIN_JOINCODE_LENGTH
@@ -176,7 +179,7 @@ def web_create_game():
 
 
 
-@app.route('/game/join/<gameid>')
+@game_pages.route('/game/join/<gameid>')
 def web_join_game(gameid):
     import user as user_lib
     user = user_lib.current_user()
