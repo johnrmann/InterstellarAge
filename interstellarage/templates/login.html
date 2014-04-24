@@ -10,7 +10,7 @@
 	<body>
         <h1>Interstellar Age</h1>
 		<div class="container-login">
-			<div class="alert" id="error" style="display:none;"></div>
+			<div class="alert" id="error"></div>
 
 			<input type="text" name="username" placeholder="username" id="username"></input>
 			<input type="password" name="password" placeholder="password" id="password"></input>
@@ -25,7 +25,8 @@
 	<script type="text/javascript">
 		$(document).ready(function () {
 			var displayFailure = function (failure) {
-				$("div.error").show().html(failure);
+                $("div.alert#error").text(failure);
+				$("div.alert#error").show();
 			};
 
 			/* When the user clicks the "login" button. */
@@ -43,11 +44,14 @@
 						'password' : password,
 					},
 					success: function(fromServer) {
-                        window.location = window.location;
+                        if (fromServer == "success")
+                            window.location = window.location;
+                        else
+                            displayFailure(fromServer);
 					},
 					error: function(jqXHR, textStatus, errorThrown) {
 						/* Inform the user why he/she failed. */
-						displayFailure(errorThrown);
+						displayFailure("Please try again");
 					}
 				});
 			});

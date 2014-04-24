@@ -53,6 +53,14 @@ input {
     text-decoration: none;
 }
 
+.alert {
+    color: red;
+    display: none;
+    font-size: 15px;
+    font-weight: bold;
+    padding: 5px;
+}
+
 .button {
     background: #8A8A8A;
     border: 1px solid #999;

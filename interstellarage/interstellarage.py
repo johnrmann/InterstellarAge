@@ -96,7 +96,7 @@ def login():
         return "Wrong password"
     else:
         session["user_id"] = user.unique
-        return "Login worked!"
+        return "success"
 
 
 
