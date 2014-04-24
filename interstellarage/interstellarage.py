@@ -26,12 +26,8 @@ from flask_wtf import Form, RecaptchaField
 from wtforms import StringField, PasswordField
 from wtforms.validators import DataRequired, Length, Email, EqualTo
 
-# Game pages
-from game import game_pages
-
 # Setup the application
 app = Flask(__name__)
-app.register_blueprint(game_pages)
 app.debug = True
 app.config["SECRET_KEY"] = "space"
 app.config["SQLALCHEMY_DATABASE_URI"] = "mysql://InterstellarAge:starship@mysql.server/InterstellarAge$default"
@@ -43,6 +39,8 @@ db = SQLAlchemy(app)
 
 # Import our modules
 import user as user_lib
+from game import game_pages
+app.register_blueprint(game_pages)
 
 # Global variables
 ROOT_DIR = "/home/InterstellarAge/interstellarage"

@@ -11,9 +11,6 @@ from flask import Blueprint, request
 # Import SQLAlchemy
 from flask.ext.sqlalchemy import SQLAlchemy
 
-# Setup blueprint
-game_pages = Blueprint('game_pages', __name__)
-
 # Import the database from the main file
 from interstellarage import db
 
@@ -28,6 +25,9 @@ GAME_MAX_PLAYERS = 4
 
 MIN_JOINCODE_LENGTH = 1
 MAX_JOINCODE_LENGTH = 25
+
+game_pages = Blueprint('game_pages', __name__)
+
 
 class Game(db.Model):
     """
