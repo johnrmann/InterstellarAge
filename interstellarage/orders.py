@@ -39,7 +39,57 @@ class Order(object):
 
 
 class Result(object):
-    orderer = None
+    """
+    Attributes:
+        planet (Planet):
+
+        new_owner (Player or None):
+
+        new_fleets (list of 3 int or None): If the fleets of `planet` have
+            changed, then `new_fleet` will be a `list` representing the new
+            fleets. Otherwise, it will be `None`.
+
+        new_space_colonies (list of str or None): If the 
+
+        new_ground_colonies (list of str or None):
+    """
+
+    # Required data
+    planet = None
+
+    # Optional data
+    new_owner = None
+    new_fleets = None
+    new_space_colonies = None
+    new_ground_colonies = None
+
+    def __init__(self, planet):
+        assert planet is not None
+        self.planet = planet
+
+    def as_dict(self):
+        unique = self.planet.unique
+        to_return = {
+            'planet_unique' : unique
+        }
+
+        f = lambda name: {'name' : name}
+
+        if self.new_owner is not None:
+            to_return['new_owner'] = self.new_owner.faction_shortname()
+
+        if self.new_fleets is not None:
+            to_return['new_fleets'] = self.new_fleets
+
+        if self.new_space_colonies is not None:
+            cols = self.new_space_colonies
+            to_return['new_space_colonies'] = [f(name) for name in cols]
+
+        if self.new_ground_colonies is not None:
+            cols = self.new_ground_colonies
+            to_return['new_ground_colonies'] = [f(name) for name in cols]
+
+        return to_return
 
 
 
@@ -53,13 +103,23 @@ class MoveOrder(Order):
 
     Private Attributes:
         _phase (int): 
+
         _fleet_size (int): The number of ships in the fleet that this
             `MoveOrder` is supposed to move.
+
+        _from_result (Result):
+
+        _to_result (Result):
     """
 
     to_planet = None
     from_planet = None
     fleet_number = -1
+
+    _fleet_size = -1
+
+    _from_result = None
+    _to_result = None
 
     def __init__(self, orderer, from_planet, to_planet, fleet_number):
         # Preconditions.
@@ -75,21 +135,15 @@ class MoveOrder(Order):
         self.to_planet = to_planet
         self.fleet_number = fleet_number
         self._phase = 1
+        self._from_result = Result(self.from_planet)
+        self._to_result = Result(self.to_planet)
+
+        # Setup results
+        self._from_result.new_fleets = self.from_planet.fleets
 
     def execute(self, galaxy):
         """
         Returns:
-            A tuple in the format `(int, MoveResult or None)`.
-
-            The first item in the tuple is a code representing the general
-            outcome of the order. For example, if the order is still
-            incomplete, then the first item of the tuple will be
-            `ORDER_NOT_FINISHED`.
-
-            If the order is finished (`ORDER_NEXT_TURN`), then the second
-            item of the tuple will be a `MoveOrder` object detailing the
-            outcome of the move. This object will be returned as a `dict` to
-            all players. This is to the clientside can update the game board.
         """
 
         # Declare global variables.
@@ -101,34 +155,28 @@ class MoveOrder(Order):
         assert self.to_planet in galaxy
 
         # PHASE 1: Colonies built
-        if self._phase == 1:
-            self._phase = 2
-            return (ORDER_NOT_FINISHED, None)
+        if self._phase == 1 or self._phase == 3:
+            self._phase += 1
+            return ORDER_NOT_FINISHED
 
         # PHASE 2: Fleets leave their planet.
         if self._phase == 2:
             fleet_size = self.from_planet.fleet_departs(self.fleet_number)
             assert fleet_size > 0
+
+            # Update from result
+            self._from_result.new_fleets[self.fleet_number] = 0
+
+            # Update variables
             self._fleet_size = fleet_size
             self._phase = 3
-            return (ORDER_NOT_FINISHED, None)
-
-        # PHASE 3: Fleets are built
-        if self._phase == 3:
-            self._phase = 4
-            return (ORDER_NOT_FINISHED, None)
+            return ORDER_NOT_FINISHED
 
         # PHASE 4: Fleets arrive at destination. They do combat if required.
         elif self._phase == 4:
-            self.to_planet.receive_fleet(self._fleet_size, self.orderer)
-            result = MoveResult(self)
-            return (ORDER_NEXT_TURN, result)
-
-
-
-class MoveResult(Result):
-    def __init__(self, move_order):
-        pass
+            fs = self._fleet_size
+            self.to_planet.receive_fleet(fs, self.orderer)
+            return ORDER_NEXT_TURN
 
 
 
@@ -184,7 +232,7 @@ class HyperspaceOrder(Order):
         # PHASE 1: Colonies are build
         if self._phase == 1:
             self._phase = 2
-            return (ORDER_NOT_FINISHED, None)
+            return ORDER_NOT_FINISHED
 
         # PHASE 2: Fleets depart planets
         if self._phase == 2:
@@ -197,30 +245,29 @@ class HyperspaceOrder(Order):
             eta = from_system.hyperspace_distance(self.to_system, fleet_size)
             self._eta = eta
             self._phase = 3
-            return (ORDER_NOT_FINISHED, None)
+            return ORDER_NOT_FINISHED
 
         # PHASE 3: Fleets are built
         if self._phase == 3:
             self._phase = 4
-            return (ORDER_NOT_FINISHED, None)
+            return ORDER_NOT_FINISHED
 
         # PHASE 4: Fleets arrive at intrasystem destinations
         elif self._phase == 4:
             self._phase = 5
-            return (ORDER_NOT_FINISHED_NEXT_TURN, None)
+            return ORDER_NOT_FINISHED_NEXT_TURN
 
         # PHASE 5: Hyperspace travel
         elif self._phase == 5:
             self._eta -= 1
             if self._eta == 0:
-                result = None # TODO
                 if self.to_planet is not None:
                     self.to_planet.receive_fleet(self._fleet_size, self.orderer)
                 else:
                     self.to_system.receive_fleet(self._fleet_size, self.orderer)
-                return (ORDER_NEXT_TURN, result)
+                return ORDER_NEXT_TURN
             else:
-                return (ORDER_NOT_FINISHED_NEXT_TURN, None)
+                return ORDER_NOT_FINISHED_NEXT_TURN
 
 
 
@@ -272,7 +319,7 @@ class UpgradePlanetOrder(Order):
 
         # Is the planet at capacity?
         if current == maximum:
-            return (ORDER_FAILED, None)
+            return ORDER_FAILED
 
         # Create the new colony.
         import colony as colony_lib
@@ -284,8 +331,32 @@ class UpgradePlanetOrder(Order):
 
         # Colony added. We're done here.
         galaxy.update()
-        result = None # TODO
-        return (ORDER_NEXT_TURN, result)
+        return ORDER_NEXT_TURN
+
+
+
+def upgrade_planet_order_from_dict(data, game, user):
+    """
+    Args:
+        data (dict):
+        game (Game): The current `Game`.
+        user (User): The `User` who sent the order.
+
+    Returns:
+        An `UpgradePlanetOrder`
+    """
+
+    player = game.player_for_user(user)
+    galaxy = game.galaxy
+
+    planet_to_upgrade_unique = int(data['planet_to_upgrade'])
+    upgrade_type = int(data['upgrade_type'])
+    name = data['new_colony_name']
+
+    planet_to_upgrade = galaxy.planet_for_unique(planet_to_upgrade_unique)
+
+    # Return the UpgradePlanetOrder
+    return UpgradePlanetOrder(player, planet_to_upgrade, upgrade_type, name)
 
 
 
@@ -297,7 +368,7 @@ class BuildFleetOrder(Order):
     def __init__(self, orderer, at_planet, in_fleet, ships):
         """
         Args:
-            orderer (Playet):
+            orderer (Player):
             at_planet (Planet):
             in_fleet (int):
             ships (int): The number of ships to build.
@@ -323,18 +394,42 @@ class BuildFleetOrder(Order):
 
         if self._phase != 3:
             self._phase += 1
-            return (ORDER_NOT_FINISHED, None)
+            return ORDER_NOT_FINISHED
         else:
             # See if we have enough money to build the fleet
             cost = self.at_planet.starship_build_cost(self.ships)
             if cost > self.orderer.money:
-                return (ORDER_FAILED, None)
+                return ORDER_FAILED
             else:
                 self.orderer.money -= cost
                 self.at_planet.fleets[self.in_fleet] += ships
                 db.session.commit()
-                result = None
-                return (ORDER_NEXT_TURN, result)
+                return ORDER_NEXT_TURN
+
+
+
+def build_fleet_order_from_dict(data, game, user):
+    """
+    Args:
+        data (dict):
+        game (Game):
+        user (User):
+
+    Returns:
+        A `BuildFleetOrder`
+    """
+
+    player = game.player_for_user(user)
+    galaxy = game.galaxy
+
+    at_planet_unique = int(data['at_planet'])
+    in_fleet = int(data['in_fleet'])
+    ships = int(data['ships'])
+
+    at_planet = galaxy.planet_for_unique(at_planet_unique)
+
+    # Return the BuildFleetOrder
+    return BuildFleetOrder(player, at_planet, in_fleet, ships)
 
 
 

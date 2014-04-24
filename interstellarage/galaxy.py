@@ -177,6 +177,14 @@ class Galaxy(object):
             return new_to_return
         return to_return
 
+    def planet_for_unique(self, unique):
+        for system in self.systems:
+            all_planets = system.flat_planets()
+            for planet in all_planets:
+                if planet.unique == unique:
+                    return planet
+        return None
+
     def system_at_position(self, x, y, z):
         """
         Args:
@@ -194,6 +202,12 @@ class Galaxy(object):
             if system.position == pos:
                 return True
         return False
+
+    def system_for_unique(self, unique):
+        for system in self.systems:
+            if system.unique == unique:
+                return system
+        return None
 
     def systems_near_system(self, near_system, distance):
         """

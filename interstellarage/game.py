@@ -159,6 +159,12 @@ class Game(db.Model):
                     return player
         return None
 
+    def player_for_user(self, user):
+        for player in self.players:
+            if player.user == user:
+                return player
+        return None
+
 
 
 def create_game(user, join_code, faction):
