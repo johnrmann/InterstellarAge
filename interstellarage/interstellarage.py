@@ -20,6 +20,7 @@ from flask import make_response, send_file
 
 # SQL Alchemy
 from flask.ext.sqlalchemy import SQLAlchemy
+from sqlalchemy.exc import IntegrityError
 
 # Flask-WTF
 from flask_wtf import Form, RecaptchaField
@@ -114,8 +115,12 @@ def logout():
 
 
 class AccountForm(Form):
-    username = StringField('username', validators=[DataRequired(), Length(min=4, max=32)])
-    password = PasswordField('password', validators=[DataRequired(), Length(min=8, max=32),
+    username = StringField('username', validators=[
+        DataRequired(message=u'Please enter a username'),
+        Length(min=4, max=32, message=u'Username must be between 4 and 32 characters')])
+    password = PasswordField('password', validators=[
+        DataRequired(message=u'Please enter a password'),
+        Length(min=8, max=32, message=u'Password must be between 8 and 32 characters'),
         EqualTo('confirm_password', message=u'Passwords must match')])
     confirm_password = PasswordField('confirm_password')
     email = StringField('email', validators=[Email(message=u'Invalid email address')])
@@ -129,11 +134,6 @@ def register():
     If ".../register" is accessed with a POST request, then we scan the request
     for registration information. We validate that information. If the data
     is valid, then we register the user.
-
-    Returns:
-        Returns a JSON object with the newly registered user's information if
-        the registration was successful. If the registration wasn't successful,
-        then a JSON object detailing the error with a new captcha is returned.
     """
     if request.method == 'POST':
         form = AccountForm()
@@ -141,24 +141,27 @@ def register():
             username = form.username.data
             password = form.password.data
             email = form.email.data
-            
             try:
                 hasher = hashlib.sha1()
                 hasher.update(password)
                 password_hash = hasher.hexdigest()
                 user = user_lib.User(username, password_hash, email)
-                return "{0} {1}".format(str(user.unique), username)
-            except AssertionError as exception:
-                return exception.args[0]
-            
-            return user.to_json()
+            except IntegrityError as exception:
+                form.errors["db"]= [u"Username or email not unique"]
+                return render_template("register.html", form=form)
+            return redirect(url_for("success"))
         else:
-            return "not validated"
+            return render_template("register.html", form=form)
 
     else:
         form = AccountForm()
         return render_template("register.html", form=form)
         
+
+
+@app.route("/success")
+def success():
+    return render_template("success.html")
 
 
 

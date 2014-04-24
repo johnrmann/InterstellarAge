@@ -10,7 +10,8 @@
 	<body>
         <h1>Create New Account</h1>
 		<div class="container-register">
-            <form method="POST" action="{{ url_for('register') }}">
+			<div class="alert" id="error"></div>
+            <form id="registerForm" method="POST" action="{{ url_for('register') }}">
             {{ form.csrf_token }}
             <table>
                 <tr>
@@ -31,19 +32,17 @@
                 </tr>
             </table>
             <br>
+                {% if form.errors %}
+                    {% for field_errors in form.errors.values() %}
+                        {% for error in field_errors %}
+                            <div class="alert">{{ error }}</div>
+                        {% endfor %}
+                    {% endfor %}
+                {% endif %}
+            </ul>
             <br>
-            <input type="submit" value="Create Account">
+            <input class="button" type="submit" value="Create Account">
             </form>
         </div>
 	</body>
-
-    <script type="text/javascript">
-		$(document).ready(function () {
-			/* When the user clicks the "Create Account" button. */
-			$('div.button#register').click(function () {
-                /* Show the user why he/she failed. */
-                //displayFailure(errorObj.reason);
-			});
-		});
-	</script>
 </html>

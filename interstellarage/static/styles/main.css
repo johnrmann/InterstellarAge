@@ -11,6 +11,12 @@ h1 {
     text-transform: uppercase;
 }
 
+h2 {
+    color: white;
+    text-shadow: 0px 0px 10px rgba(255,255,255,0.7);
+    text-align: center;
+}
+
 .container-login, .container-register {
     background: rgba(0,0,0,0.6);
     margin: auto;
@@ -49,13 +55,13 @@ input {
     -webkit-box-shadow: rgba(0,0,0,0.1) 0px 0px 8px; 
 }
 
-.container-login a {
+a {
+    color: white;
     text-decoration: none;
 }
 
 .alert {
     color: red;
-    display: none;
     font-size: 15px;
     font-weight: bold;
     padding: 5px;
@@ -71,6 +77,7 @@ input {
     margin: 6px auto;
     padding: 0.5em 1em;
     width: 150px;
+    text-align: center;
     text-decoration: none;
 }
 
