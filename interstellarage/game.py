@@ -9,7 +9,7 @@ from datetime import datetime
 from flask import Blueprint, request
 
 # Import SQLAlchemy
-from flask.ext.sqlalchemy import SQLAlchemy
+from flask.ext.sqlalchemy import SQLAlchemy, event
 
 # Import the database from the main file
 from interstellarage import db
@@ -60,6 +60,9 @@ class Game(db.Model):
         # Save changes to the sql database
         db.session.add(self)
         db.session.commit()
+
+    def on_load(self, context):
+        pass
 
     def execute_orders(self):
         orders = [] # TODO
@@ -204,3 +207,7 @@ def web_join_game(gameid):
 
     # Success!
     pass
+
+
+
+event.listen(Game, 'load', Game.on_load)

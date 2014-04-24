@@ -282,3 +282,24 @@ def process_orders(user, game, move=[], hyperspace=[], build_ships=[],
 
     # Ensure that the provided user can access this game.
     assert game.has_user(user)
+
+
+
+@app.route('/game/getorders', methods=['POST'])
+def web_get_orders():
+    # Get the current user.
+    from interstellarage import current_user
+    user = current_user()
+    if user is None:
+        return "Not logged in", 400
+
+    # Get the game from the input.
+    game_id = int(request.form['game'])
+    game = game_lib.find(unique=game_id)
+    if game is None:
+        return "No game with that ID exists", 400
+    elif user not in game:
+        return "You are not in this game", 400
+
+    # TODO
+    pass

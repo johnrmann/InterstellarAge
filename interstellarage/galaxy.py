@@ -247,9 +247,22 @@ class Galaxy(object):
 
 
 
-def galaxy_from_json(json_str):
-    data = json.loads(json_str)
-    pass
+def galaxy_from_dict(data, game):
+    """
+    Args:
+        data (list):
+        game (Game):
+    """
+
+    systems = []
+    for system_dict in data:
+        system = system_lib.system_from_dict(system_dict)
+        systems.append(system)
+
+    # Create the galaxy and return it.
+    galaxy = Galaxy(game)
+    galaxy.systems = systems
+    return galaxy
 
 
 
