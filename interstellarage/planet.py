@@ -1,3 +1,17 @@
+"""
+InterstellarAge
+planet.py
+
+Players vie for control of Planets in Interstellar Age. Planets allow Players
+to build ships, found colonies, and dispatch fleets for expansion and invasion.
+
+This module defines four classes: the `Planet` class is the abstract base class
+for the `GasPlanet`, `HabitablePlanet`, and `RockyPlanet` classes. Gas planets
+can only have colonies in space. Rocky planets can have colonies in space and
+on the surface. Habitable planets can have colonies in space and twice as many
+colonies on the surface.
+"""
+
 # Import python modules
 import json
 import random
@@ -25,27 +39,42 @@ class Planet(object):
         unique (int): Positive number uniquely identifying this `Planet`.
 
         name (str): The name of this `Planet`.
+
         moons (list of Planet): The `Planet`s that orbit this `Planet`.
+
         parent (Planet or System): The body which the `Planet` orbits.
 
-        space_colonies (list of Colony):
+        space_colonies (list of Colony): The `Colony`s that are in orbit of
+            this `Planet`. Any type of planet can have up to four of these
+            colonies.
+
         ground_colonies (list of Colony):
 
         owner (Player or None): The `Player` that last had a fleet above this
             `Planet` (if there is such a `Player`).
+
         fleets (list of int): The value `fleets[a]` is the number of starships
             in fleet number `a`.
 
-        orbit_distance (float):
-        orbit_period (float):
-        size (float):
-        texture (str): 
+        orbit_distance (float): The distance at which this planet orbits its
+            parent. Measured in astronomical units (AU).
+
+        orbit_period (float): The number of years it takes this planet to
+            complete an orbit around its parent.
+
+        size (float): The radius of this `Planet` in terms of multiples of
+            Earth's radius.
+
+        texture (str): The texture to be used for the 3D rendering of this
+            planet.
+
         rings (str or None): If the planet has rings (like Saturn), then
             `rings` is the filename of their texture. It is set to `None` if
             the planet does not have rings.
 
     Private Attributes:
         _next_assign (int):
+
         _since_conquered (int): The number of turns since this `Planet` was
             conquered by another `Player`.
     """
@@ -61,6 +90,13 @@ class Planet(object):
 
     owner = None
     fleets = [0, 0, 0]
+
+    # Astronomy attributes.
+    orbit_distance = 0.00
+    orbit_period = 0.00
+    size = 1.00
+    texture = "earth.jpg"
+    rings = None
 
     _next_assign = 0
     _since_conquered = -1
@@ -105,13 +141,19 @@ class Planet(object):
         parent_str = "" # TODO
 
         return {
+            "unique" : self.unique,
             "name" : self.name,
             "type" : self.__class__.__name__,
             "moons" : [moon.as_dict() for moon in self.moons],
             "space_colonies" : [col.as_dict() for col in self.space_colonies],
             "ground_colonies" : [col.as_dict() for col in self.ground_colonies],
             "owner" : owner_str,
-            "fleets" : self.fleets
+            "fleets" : self.fleets,
+            "orbit_distance" : self.orbit_distance,
+            "orbit_period" : self.orbit_period,
+            "size" : self.size,
+            "texture" : self.texture,
+            "rings" : self.rings
         }
 
     def economic_output(self):
@@ -175,6 +217,9 @@ class Planet(object):
         TODO:
             - Space stations (`space_colonies`) might be part of combat --
               maybe add them in?
+            - If a planet is conquered, then maybe half of its colonies should
+              disappear? There has to be some sort of penalty for annexation
+              and occupation.
         """
 
         system = self.system()
@@ -260,10 +305,32 @@ class Planet(object):
     def max_space_colonies(self):
         return 4
 
+    def space_upgrade_cost(self):
+        pass
+
+    def ground_upgrade_cost(self):
+        pass
+
+    def valid(self):
+        """
+        Returns `True` if and only if this `Planet` is ready for the game.
+        """
+
+        # TODO
+        if self.unique <= 0:
+            return False
+        return True
+
+
 
 class GasPlanet(Planet):
     """
-    TODO
+    Objects of this class represent planets that have super-thick atmospheres,
+    leaving no possibility for any human settlement. Real-life examples of
+    such planets include Saturn and Jupiter.
+
+    `GasPlanet`s are the only type of planets that cannot have surface
+    colonies (`ground_colonies`).
     """
 
     def __init__(self, name=None, orbit_distance=None):
@@ -289,6 +356,18 @@ class GasPlanet(Planet):
 
     def max_space_colonies(self):
         return 4
+
+    def space_upgrade_cost(self):
+        num_colonies = len(self.space_colonies)
+        return 1000 * (1 + num_colonies)
+
+    def ground_upgrade_cost(self):
+        """
+        Returns:
+            `None` because `GasPlanet`s cannot have `Colony`s on their surface.
+        """
+
+        return None
 
 
 
@@ -334,6 +413,14 @@ class RockyPlanet(Planet):
     def max_space_colonies(self):
         return 4
 
+    def space_upgrade_cost(self):
+        num_colonies = len(self.space_colonies)
+        return 1000 * (1 + num_colonies)
+
+    def ground_upgrade_cost(self):
+        num_colonies = len(self.ground_colonies)
+        return 500 * (1 + num_colonies)
+
 
 
 class HabitablePlanet(RockyPlanet):
@@ -341,6 +428,9 @@ class HabitablePlanet(RockyPlanet):
     Objects of this class reperesent planets that are naturally suitable for
     human life. So far, Earth is the only real-life example of this sort of
     planet.
+
+    Due to their nice atmospheres and abundance of water, it costs less money
+    to settle colonies on `HabitablePlanet`s.
     """
 
     def __init__(self, name=None, orbit_distance=None):
@@ -366,6 +456,14 @@ class HabitablePlanet(RockyPlanet):
     def max_space_colonies(self):
         return 4
 
+    def space_upgrade_cost(self):
+        num_colonies = len(self.space_colonies)
+        return 750 * (1 + num_colonies)
+
+    def ground_upgrade_cost(self):
+        num_colonies = len(self.ground_colonies)
+        return 250 * (1 + num_colonies)
+
 
 
 class Colony(object):
@@ -389,7 +487,15 @@ def planet_from_dict(data, game):
 
     planet = None
 
-    unique = data['unique']
+    # If the planet does not have a unique integer id, we assign "-1" as its
+    # temporary value. If this happens, the planet *must* be assigned a unique
+    # ID at some point before the game starts.
+    if 'unique' in data:
+        unique = int(data['unique'])
+    else:
+        unique = -1
+
+    # Get basic information.
     name = data['name']
     moons = [planet_from_dict(moon, game) for moon in data['moons']]
     space_colonies = [colony_from_dict(col) for col in data['space_colonies']]

@@ -104,6 +104,7 @@ class System(object):
         """
 
         to_return = {
+            "unique" : self.unique,
             "name" : self.name,
             "x" : self.position[0],
             "y" : self.position[1],
@@ -117,8 +118,9 @@ class System(object):
             to_return['planets'] = []
 
         if include_discoveries:
-            star = list(self.discovered_by)
-            planets = list(self.planets_discovered_by)
+            faction = lambda p: p.faction_shortname()
+            star = [faction(p) for p in self.discovered_by]
+            planets = [faction(p) for p in self.planets_discovered_by]
             to_return['discovered_by'] = star
             to_return['planets_discovered_by'] = planets
 

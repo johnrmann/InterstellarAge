@@ -62,11 +62,50 @@ class Game(db.Model):
         db.session.commit()
 
     def on_load(self, context):
-        pass
+        """
+        Called after a `Game` object has been loaded from the SQL database.
+
+        This method loads the `Game`'s `Galaxy` and any queued `Order`s from
+        the JSON files.
+        """
+
+        # Filenames to open.
+        galaxy_filename = "{0}.galaxy.json".format(str(self.unique))
+        orders_filename = "{0}.orders.json".format(str(self.unique))
+        # TODO root directory
+
+        # Parse the Galaxy.
+        galaxy_file = open(galaxy_filename)
+        galaxy_dict = json.reads(galaxy_file.read())
+        galaxy_file.close()
+        self.galaxy = galaxy_lib.galaxy_from_dict()
+
+        # Parse the orders.
+        orders_file = open(orders_filename)
+        orders_list = json.reads(orders_file.read())
+        orders_file.close()
+
+    def queue_orders(self, orders):
+        """
+        TODO
+        """
+
+        # Add the orders
+        self.orders.extend(orders)
+
+        # See if every player has sent orders. If this is the case, then
+        # execute the orders.
+        for player in self.players:
+            for order in self.orders:
+                if order.orderer is player:
+                    break
+            else:
+                return # don't execute
+
+        # Execute the orders
+        self.execute_orders()
 
     def execute_orders(self):
-        orders = [] # TODO
-        galaxy = None # TODO
         phase = 1
         orders_finished = False
         not_done = order_lib.ORDER_NOT_FINISHED
@@ -76,8 +115,8 @@ class Game(db.Model):
             orders_finished = True
             new_orders = []
 
-            for order in orders:
-                result = order.execute(galaxy)
+            for order in self.orders:
+                result = order.execute(self.galaxy)
                 if result is not_done:
                     orders_finished = False
                 elif result is finished:
@@ -85,7 +124,7 @@ class Game(db.Model):
                 new_orders.append(order)
 
             # Remove completed orders
-            orders = new_orders
+            self.orders = new_orders
 
         # Return the results
         return [] # TODO
@@ -210,4 +249,6 @@ def web_join_game(gameid):
 
 
 
+# When we load a Game from the SQL database, it is important that we also
+# load its galaxy and queued orders from the JSON.
 event.listen(Game, 'load', Game.on_load)
