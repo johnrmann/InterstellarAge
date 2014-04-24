@@ -84,13 +84,13 @@ def login():
     # Hash the password
     hasher = hashlib.sha1()
     hasher.update(password)
-    password_hashed = hasher.hexdigest()
+    password_hash = hasher.hexdigest()
 
     # Get user with matching username
     user = user_lib.find(username=username)
     if user == None:
         return "No such user"
-    elif user.password_hashed != password_hashed:
+    elif user.password_hash != password_hash:
         return "Wrong password"
     else:
         session["user_id"] = user.unique
@@ -143,8 +143,8 @@ def register():
             try:
                 hasher = hashlib.sha1()
                 hasher.update(password)
-                password_hashed = hasher.hexdigest()
-                user = user_lib.User(username, password_hashed, email)
+                password_hash = hasher.hexdigest()
+                user = user_lib.User(username, password_hash, email)
                 return "{0} {1}".format(str(user.unique), username)
             except AssertionError as exception:
                 return exception.args[0]
