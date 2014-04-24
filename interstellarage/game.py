@@ -11,8 +11,8 @@ from flask import request
 # Import SQLAlchemy
 from flask.ext.sqlalchemy import SQLAlchemy
 
-# Import the database from the main file
-from interstellarage import db
+# Import the app and database from the main file
+from interstellarage import app, db
 
 # Import the user class
 import player as player_lib
