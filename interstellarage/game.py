@@ -106,7 +106,6 @@ class Game(db.Model):
         self.execute_orders()
 
     def execute_orders(self):
-        phase = 1
         orders_finished = False
         not_done = order_lib.ORDER_NOT_FINISHED
         finished = order_lib.ORDER_NEXT_TURN

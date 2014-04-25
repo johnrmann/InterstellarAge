@@ -151,8 +151,17 @@ class Galaxy(object):
 
         print "Generated {0} systems".format(str(generated))
 
-    def as_list(self, for_player=None, for_user=None):
+    def as_list(self, for_player=None, for_user=None, discoveries=False):
         """
+        Keyword Args:
+            for_player (Player):
+
+            for_user (User):
+
+            discoveries (boolean): Set to `False` by default. Set to `True` if
+                information about the factions that have discovered the systems
+                is to be included in the returned list.
+
         Returns:
             The contents of this `Galaxy` formatted as a `list`. This `list`
             can then be turned into JSON, which can be sent to the end user or
@@ -160,24 +169,42 @@ class Galaxy(object):
         """
 
         if for_user is not None:
-            for player in self.game.players:
-                if player.user == for_user:
-                    for_player = player
-                    break
-            else:
-                raise Exception("User doesn't have access")
+            for_player = game.player_for_user(for_user)
 
-        to_return = [system.as_dict() for system in self.systems]
-        if for_player is not None:
-            new_to_return = []
-            for system in to_return:
-                if for_player not in system.discovered_by:
-                    continue
-                new_to_return.append(system)
-            return new_to_return
-        return to_return
+        def can_see_system(s):
+            if for_player is None:
+                return True
+            else:
+                return for_player in s.discovered_by
+
+        def can_see_planets(s):
+            if for_player is None:
+                return True
+            else:
+                return for_player in s.planets_discovered_by
+
+        return_systems = []
+        for system in self.systems:
+            if not can_see_system(system):
+                continue
+            system_dict = system.as_dict(
+                hide_planets=(not can_see_planets(system)),
+                include_discoveries=discoveries
+            )
+            return_systems.append(system_dict)
+
+        return return_systems
 
     def planet_for_unique(self, unique):
+        """
+        Args:
+            unique (int):
+
+        Returns:
+            The `Planet` in this `Galaxy` whose unique ID matches the provided
+            one or `None` if no such `Planet` was found.
+        """
+
         for system in self.systems:
             all_planets = system.flat_planets()
             for planet in all_planets:
@@ -264,8 +291,11 @@ class Galaxy(object):
 def galaxy_from_dict(data, game):
     """
     Args:
-        data (list):
-        game (Game):
+        data (list): The list of `System` dictionaries.
+        game (Game): The `Game` that the `Galaxy` is used for.
+
+    Returns:
+        The `Galaxy` that was parsed from the given `dict` and `Game`.
     """
 
     systems = []

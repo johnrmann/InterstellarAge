@@ -2,6 +2,7 @@
  * Requires:
  * 		- THREE.js
  *		- jquery
+ *      - orders.js
  */
 
 var galaxyMap = {

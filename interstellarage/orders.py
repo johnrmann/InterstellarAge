@@ -154,7 +154,7 @@ class MoveOrder(Order):
         assert self.from_planet in galaxy
         assert self.to_planet in galaxy
 
-        # PHASE 1: Colonies built
+        # PHASE 1/3: Colonies built; fleets built
         if self._phase == 1 or self._phase == 3:
             self._phase += 1
             return ORDER_NOT_FINISHED
@@ -177,6 +177,28 @@ class MoveOrder(Order):
             fs = self._fleet_size
             self.to_planet.receive_fleet(fs, self.orderer)
             return ORDER_NEXT_TURN
+
+
+
+def move_order_from_dict(data, game, user):
+    """
+    Args:
+
+    Returns:
+    """
+
+    player = game.player_for_user(user)
+    galaxy = game.galaxy
+
+    from_unique = int(data['from_planet'])
+    to_unique = int(data['to_planet'])
+    fleet_number = int(data['fleet_number'])
+
+    from_planet = galaxy.planet_for_unique(from_unique)
+    to_planet = galaxy.planet_for_unique(to_unique)
+
+    # Return the MoveOrder
+    return MoveOrder(player, from_unique, to_planet, fleet_number)
 
 
 
@@ -271,6 +293,32 @@ class HyperspaceOrder(Order):
 
 
 
+def hyperspace_order_from_dict(data, game, user):
+    """
+    Args:
+
+    Returns:
+    """
+
+    player = game.player_for_user(user)
+    galaxy = game.galaxy
+
+    from_unique = int(data['from_planet'])
+    if 'to_system' in data:
+        to_system_unique = int(data['to_system'])
+        destination = galaxy.system_for_unique(to_system_unique)
+    elif 'to_planet' in data:
+        to_planet_unique = int(data['to_planet'])
+        destination = galaxy.planet_for_unique(to_planet_unique)
+
+    fleet_number = int(data['fleet_number'])
+    from_planet = galaxy.planet_for_unique(from_planet)
+
+    # Return the order
+    return HyperspaceOrder(player, from_planet, desination, fleet_number)
+
+
+
 class UpgradePlanetOrder(Order):
     """
     `Order`s of this type are issued when a `Player` wants to found a new
@@ -349,7 +397,7 @@ def upgrade_planet_order_from_dict(data, game, user):
     player = game.player_for_user(user)
     galaxy = game.galaxy
 
-    planet_to_upgrade_unique = int(data['planet_to_upgrade'])
+    planet_to_upgrade_unique = int(data['planet'])
     upgrade_type = int(data['upgrade_type'])
     name = data['new_colony_name']
 
@@ -433,27 +481,8 @@ def build_fleet_order_from_dict(data, game, user):
 
 
 
-def process_orders(user, game, move=[], hyperspace=[], build_ships=[],
-                   upgrade_planet=[]):
-    """
-    Args:
-        user (User):
-        game (Game):
-
-    Keyword Args:
-        move
-        hyperspace
-        build_ships
-        upgrade_planet
-    """
-
-    # Ensure that the provided user can access this game.
-    assert game.has_user(user)
-
-
-
-@app.route('/game/getorders', methods=['POST'])
-def web_get_orders():
+@app.route('/game/submitorders', methods=['POST'])
+def web_submit_orders():
     # Get the current user.
     from interstellarage import current_user
     user = current_user()
@@ -468,5 +497,29 @@ def web_get_orders():
     elif user not in game:
         return "You are not in this game", 400
 
-    # TODO
-    pass
+    # Parse the JSON in the order fields
+    move_order_dicts = json.reads(request.form['move'])
+    ftl_order_dicts = json.reads(request.form['hyperspace'])
+    colony_order_dicts = json.reads(request.form['colonize'])
+    build_order_dicts = json.reads(request.form['build'])
+
+    # Calls one of the "from_dict" functions defined below their respective
+    # classes in this module.
+    process = lambda f, L: [f(d, game, user) for d in L]
+
+    # Parse the dicts into order objects.
+    move = process(move_order_from_dict, move_order_dicts)
+    ftl = process(hyperspace_order_from_dict, ftl_order_dicts)
+    colonize = process(upgrade_planet_order_from_dict, colony_order_dicts)
+    build = process(build_fleet_order_from_dict, build_order_dicts)
+
+    # Queue the orders into the game.
+    orders = []
+    orders.extend(move)
+    orders.extend(ftl)
+    orders.extend(colonize)
+    orders.extend(build)
+    game.queue_orders(orders)
+
+    # We're done here.
+    return "Copy, Commander. Orders recieved.", 200
