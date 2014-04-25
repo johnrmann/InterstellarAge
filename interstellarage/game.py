@@ -220,7 +220,7 @@ def find(unique=None):
 
 
 
-@game_pages.route('/game/create')
+@game_pages.route('/game/create', methods=['POST'])
 def web_create_game():
     # Declare global variables
     global MIN_JOINCODE_LENGTH
@@ -249,7 +249,7 @@ def web_create_game():
 
 
 
-@game_pages.route('/game/join/<gameid>')
+@game_pages.route('/game/join/<gameid>', methods=['POST'])
 def web_join_game(gameid):
     from interstellarage import current_user
     user = current_user()
@@ -282,7 +282,7 @@ def web_join_game(gameid):
 
 
 
-@game_pages.route('/game/start/<gameid>')
+@game_pages.route('/game/start/<gameid>', methods=['POST'])
 def web_start_game(gameid):
     from interstellarage import current_user
     user = current_user()
