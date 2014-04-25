@@ -161,6 +161,7 @@ function systemViewPlanetClicked (event) {
                                        SCENE SETUP
 **************************************************************************************************/
 
+/*
 createGalaxyMap([
 	{
 		name : "Solar System",
@@ -176,4 +177,17 @@ createGalaxyMap([
 		z : 0
 	}
 ]);
-galaxyMapRender();
+galaxyMapRender();*/
+
+$.ajax({
+	type : 'POST',
+	url : '/game/galaxy/entire',
+	data : {
+		'game' : gameId
+	},
+	success: function(fromServer) {
+		var j = JSON.parse(fromServer);
+		createGalaxyMap(j);
+		galaxyMapRender();
+	}
+});

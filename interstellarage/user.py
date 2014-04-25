@@ -63,6 +63,14 @@ class User(db.Model):
         db.session.add(self)
         db.session.commit()
 
+    def __eq__(self, other):
+        if isinstance(other, User):
+            return int(other.unique) == int(self.unique)
+        return False
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
     def get_games(self):
         """
         Returns:

@@ -152,6 +152,7 @@ class Game(db.Model):
 
         # Add the orders
         self.orders.extend(orders)
+        self.commit()
 
         # See if every player has sent orders. If this is the case, then
         # execute the orders.
@@ -221,6 +222,8 @@ class Game(db.Model):
         self.orders = []
         self.on_turn = 1
         self.started = True
+        for player in self.players:
+            player.start()
         self.commit()
         db.session.commit()
 
@@ -237,6 +240,8 @@ class Game(db.Model):
         for player in self.players:
             if player.user == user:
                 return player
+        print self.players
+        print user
         return None
 
     def player_for_unique(self, unique):
@@ -244,9 +249,6 @@ class Game(db.Model):
             if player.unique == unique:
                 return player
         return None
-
-    def orders_dict(self):
-        pass
 
     def commit(self):
         # Find out where we will write the galaxy and orders.

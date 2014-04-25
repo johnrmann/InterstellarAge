@@ -182,5 +182,67 @@
 				"texture" : "Neptune.jpeg"
 			}
 		]
+	},
+
+	{
+		"name" : "Sirius",
+		"x" : -6,
+		"y" : -6,
+		"z" : -1,
+		"star_spectral_class" : "A",
+		"star_size" : 2.03,
+		"planets" : [
+			{
+				"name" : "Merlin",
+				"type" : "RockyPlanet",
+				"moons" : [],
+				"space_colonies" : [],
+				"owner" : "FSR",
+				"fleets" : [0, 0, 0],
+				"orbit_distance" : 1.15,
+				"orbit_period" : 0.24,
+				"size" : 0.51,
+				"texture" : "Mercury.jpeg"
+			},
+
+			{
+				"name" : "Avalon",
+				"type" : "HabitablePlanet",
+				"moons" : [
+					{
+						"name" : "Excalibur",
+						"type" : "RockyPlanet",
+						"moons" : [],
+						"space_colonies" : [],
+						"ground_colonies" : [
+							{"name" : "Excalibur City"}
+						],
+						"owner" : "FSR",
+						"fleets" : [0, 0, 0],
+						"orbit_distance" : 0.05,
+						"orbit_period" : 0.02,
+						"size" : 0.16,
+						"texture" : "Luna.jpeg"
+					}
+				],
+				"space_colonies" : [],
+				"ground_colonies" : [
+					{"name" : "New Cambridge"},
+					{"name" : "Sherwood"},
+					{"name" : "Shalott"},
+					{"name" : "Newton"},
+					{"name" : "Copernicus"},
+					{"name" : "Hawking"},
+					{"name" : "Kepler"},
+					{"name" : "Faraday"}
+				],
+				"owner" : "FSR",
+				"fleets" : [3, 3, 3],
+				"orbit_distance" : 3.27,
+				"orbit_period" : 1.16,
+				"size" : 0.97,
+				"texture" : "Earth.jpeg"
+			}
+		]
 	}
 ]
