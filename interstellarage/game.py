@@ -79,7 +79,7 @@ class Game(db.Model):
         assert not self.full()
         assert not self.faction_taken(faction_code)
 
-        new_player = Player(user, self, faction_code)
+        new_player = player_lib.Player(user, self, faction_code)
         if creator:
             self.creator_unique = user.unique
         db.session.commit()
