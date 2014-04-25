@@ -93,10 +93,21 @@ class Game(db.Model):
         the JSON files.
         """
 
+        # If we have not started this game, then we do not need to parse the
+        # galaxy or orders.
+        if not self.started:
+            return
+
+        # Find out where the "data" directory is.
+        import os
+        current_directory = os.path.dirname(__file__)
+        data_directory = current_directory+"/data/"
+
         # Filenames to open.
         galaxy_filename = "{0}.galaxy.json".format(str(self.unique))
         orders_filename = "{0}.orders.json".format(str(self.unique))
-        # TODO root directory
+        galaxy_filename = data_directory + galaxy_filename
+        orders_filename = data_directory + orders_filename
 
         # Parse the Galaxy.
         galaxy_file = open(galaxy_filename)
@@ -106,8 +117,16 @@ class Game(db.Model):
 
         # Parse the orders.
         orders_file = open(orders_filename)
-        orders_list = json.reads(orders_file.read())
+        orders_dict = json.reads(orders_file.read())
         orders_file.close()
+        for order in orders_dict['move']:
+            continue
+        for order in orders_dict['hyperspace']:
+            continue
+        for order in orders_dict['build']:
+            continue
+        for order in orders_dict['colonize']:
+            continue
 
     def queue_orders(self, orders):
         """
@@ -182,8 +201,10 @@ class Game(db.Model):
         # Setup the galaxy for this game.
         game_galaxy = Galaxy(self, generate=True)
         self.galaxy = game_galaxy
+        self.orders = []
         self.on_turn = 1
         self.started = True
+        self.commit()
         db.session.commit()
 
     def player_for_faction(self, faction_shortname):
@@ -200,6 +221,24 @@ class Game(db.Model):
             if player.user == user:
                 return player
         return None
+
+    def orders_dict(self):
+        pass
+
+    def commit(self):
+        # Find out where we will write the galaxy and orders.
+        import os
+        current_directory = os.path.dirname(__file__)
+        data_directory = current_directory+"/data/"
+
+        # Get the dict version of the galaxy and write it.
+        output = self.galaxy.as_list(discoveries=True)
+        galaxy_filename = self.galaxy.get_json_filename()
+        galaxy_file = open(data_directory+galaxy_filename, 'w')
+        galaxy_file.write(json.dumps(output))
+        galaxy_file.close()
+
+        # Get the dict version of the orders and write it.
 
 
 
