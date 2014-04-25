@@ -36,60 +36,8 @@ class Order(object):
     def execute(self, galaxy):
         pass
 
-
-
-class Result(object):
-    """
-    Attributes:
-        planet (Planet):
-
-        new_owner (Player or None):
-
-        new_fleets (list of 3 int or None): If the fleets of `planet` have
-            changed, then `new_fleet` will be a `list` representing the new
-            fleets. Otherwise, it will be `None`.
-
-        new_space_colonies (list of str or None): If the 
-
-        new_ground_colonies (list of str or None):
-    """
-
-    # Required data
-    planet = None
-
-    # Optional data
-    new_owner = None
-    new_fleets = None
-    new_space_colonies = None
-    new_ground_colonies = None
-
-    def __init__(self, planet):
-        assert planet is not None
-        self.planet = planet
-
     def as_dict(self):
-        unique = self.planet.unique
-        to_return = {
-            'planet_unique' : unique
-        }
-
-        f = lambda name: {'name' : name}
-
-        if self.new_owner is not None:
-            to_return['new_owner'] = self.new_owner.faction_shortname()
-
-        if self.new_fleets is not None:
-            to_return['new_fleets'] = self.new_fleets
-
-        if self.new_space_colonies is not None:
-            cols = self.new_space_colonies
-            to_return['new_space_colonies'] = [f(name) for name in cols]
-
-        if self.new_ground_colonies is not None:
-            cols = self.new_ground_colonies
-            to_return['new_ground_colonies'] = [f(name) for name in cols]
-
-        return to_return
+        pass
 
 
 
@@ -106,10 +54,6 @@ class MoveOrder(Order):
 
         _fleet_size (int): The number of ships in the fleet that this
             `MoveOrder` is supposed to move.
-
-        _from_result (Result):
-
-        _to_result (Result):
     """
 
     to_planet = None
@@ -117,9 +61,6 @@ class MoveOrder(Order):
     fleet_number = -1
 
     _fleet_size = -1
-
-    _from_result = None
-    _to_result = None
 
     def __init__(self, orderer, from_planet, to_planet, fleet_number):
         # Preconditions.
@@ -135,11 +76,6 @@ class MoveOrder(Order):
         self.to_planet = to_planet
         self.fleet_number = fleet_number
         self._phase = 1
-        self._from_result = Result(self.from_planet)
-        self._to_result = Result(self.to_planet)
-
-        # Setup results
-        self._from_result.new_fleets = self.from_planet.fleets
 
     def execute(self, galaxy):
         """
@@ -164,9 +100,6 @@ class MoveOrder(Order):
             fleet_size = self.from_planet.fleet_departs(self.fleet_number)
             assert fleet_size > 0
 
-            # Update from result
-            self._from_result.new_fleets[self.fleet_number] = 0
-
             # Update variables
             self._fleet_size = fleet_size
             self._phase = 3
@@ -178,16 +111,30 @@ class MoveOrder(Order):
             self.to_planet.receive_fleet(fs, self.orderer)
             return ORDER_NEXT_TURN
 
+    def as_dict(self):
+        return {
+            'orderer' : self.orderer.unique,
+            'from_planet' : self.from_planet.unique,
+            'to_planet' : self.to_planet.unique,
+            'fleet_number' : self.fleet_number
+        }
 
 
-def move_order_from_dict(data, game, user):
+
+def move_order_from_dict(data, game, user=None):
     """
     Args:
 
     Returns:
     """
 
-    player = game.player_for_user(user)
+    if user is not None:
+        player = game.player_for_user(user)
+    elif 'orderer' in data:
+        orderer_unique = int(data['orderer'])
+        player = game.player_for_unique(orderer_unique)
+    else:
+        raise Exception("No user given!")
     galaxy = game.galaxy
 
     from_unique = int(data['from_planet'])
@@ -210,7 +157,7 @@ class HyperspaceOrder(Order):
 
     _eta = -1
 
-    def __init__(self, orderer, from_planet, dest, fleet_number):
+    def __init__(self, orderer, from_planet, dest, fleet_number, eta=None):
         """
         Args:
             orderer (Player):
@@ -230,8 +177,12 @@ class HyperspaceOrder(Order):
         self.from_planet = from_planet
         if isinstance(dest, planet_lib.Planet):
             self.to_planet = dest
+            self.to_system = None
         else:
             self.to_system = dest
+            self.to_planet = None
+        if eta is not None:
+            self._eta = eta
         self.fleet_number = fleet_number
         self._phase = 1
 
@@ -291,31 +242,55 @@ class HyperspaceOrder(Order):
             else:
                 return ORDER_NOT_FINISHED_NEXT_TURN
 
+    def as_dict(self):
+        to_return = {
+            'orderer' : self.orderer.unique,
+            'from_planet' : self.from_planet.unique,
+            'fleet_number' : self.fleet_number
+        }
+
+        if self.to_planet is not None:
+            to_return['to_planet'] = self.to_planet.unique
+        elif self.to_system is not None:
+            to_return['to_system'] = self.to_system.unique
+
+        to_return['_eta'] = self._eta
+        return to_return
 
 
-def hyperspace_order_from_dict(data, game, user):
+
+def hyperspace_order_from_dict(data, game, user=None):
     """
     Args:
 
     Returns:
     """
 
-    player = game.player_for_user(user)
+    if user is not None:
+        player = game.player_for_user(user)
+    elif 'orderer' in data:
+        orderer_unique = int(data['orderer'])
+        player = game.planet_for_unique(orderer_unique)
+    else:
+        raise Exception("No user or player given")
     galaxy = game.galaxy
 
     from_unique = int(data['from_planet'])
     if 'to_system' in data:
         to_system_unique = int(data['to_system'])
-        destination = galaxy.system_for_unique(to_system_unique)
+        destin = galaxy.system_for_unique(to_system_unique)
     elif 'to_planet' in data:
         to_planet_unique = int(data['to_planet'])
-        destination = galaxy.planet_for_unique(to_planet_unique)
+        destin = galaxy.planet_for_unique(to_planet_unique)
+
+    if '_eta' in data:
+        eta = int(data['_eta'])
 
     fleet_number = int(data['fleet_number'])
     from_planet = galaxy.planet_for_unique(from_planet)
 
     # Return the order
-    return HyperspaceOrder(player, from_planet, desination, fleet_number)
+    return HyperspaceOrder(player, from_planet, desin, fleet_number, eta=eta)
 
 
 
@@ -336,6 +311,10 @@ class UpgradePlanetOrder(Order):
     new_colony_name = ""
 
     def __init__ (self, orderer, planet, up_type, name):
+        # Declare global variables.
+        global ORDER_UPGRADE_SPACE_TYPE
+        global ORDER_UPGRADE_GROUND_TYPE
+
         # Preconditions.
         cond1 = up_type == ORDER_UPGRADE_SPACE_TYPE
         cond2 = up_type == ORDER_UPGRADE_GROUND_TYPE
@@ -381,20 +360,36 @@ class UpgradePlanetOrder(Order):
         galaxy.update()
         return ORDER_NEXT_TURN
 
+    def as_dict(self):
+        return {
+            'orderer' : self.orderer.unique,
+            'planet' : self.planet_to_upgrade.unique,
+            'upgrade_type' : self.upgrade_type,
+            'new_colony_name' : self.new_colony_name
+        }
 
 
-def upgrade_planet_order_from_dict(data, game, user):
+
+def upgrade_planet_order_from_dict(data, game, user=None):
     """
     Args:
         data (dict):
         game (Game): The current `Game`.
+
+    Keyword Args:
         user (User): The `User` who sent the order.
 
     Returns:
         An `UpgradePlanetOrder`
     """
 
-    player = game.player_for_user(user)
+    if user is not None:
+        player = game.player_for_user(user)
+    elif 'orderer' in data:
+        orderer_unique = int(data['orderer'])
+        player = game.player_for_unique(orderer_unique)
+    else:
+        raise Exception("No user given!")
     galaxy = game.galaxy
 
     planet_to_upgrade_unique = int(data['planet'])
@@ -454,20 +449,36 @@ class BuildFleetOrder(Order):
                 db.session.commit()
                 return ORDER_NEXT_TURN
 
+    def as_dict(self):
+        return {
+            'orderer' : self.orderer.unique,
+            'at_planet' : self.at_planet.unique,
+            'in_fleet' : self.in_fleet,
+            'ships' : self.ships
+        }
 
 
-def build_fleet_order_from_dict(data, game, user):
+
+def build_fleet_order_from_dict(data, game, user=None):
     """
     Args:
         data (dict):
         game (Game):
+
+    Keyword Args:
         user (User):
 
     Returns:
         A `BuildFleetOrder`
     """
 
-    player = game.player_for_user(user)
+    if user is not None:
+        player = game.player_for_user(user)
+    elif 'orderer' in data:
+        orderer_unique = int(data['orderer'])
+        player = game.player_for_unique(orderer_unique)
+    else:
+        raise Exception("No user given!")
     galaxy = game.galaxy
 
     at_planet_unique = int(data['at_planet'])
@@ -505,7 +516,7 @@ def web_submit_orders():
 
     # Calls one of the "from_dict" functions defined below their respective
     # classes in this module.
-    process = lambda f, L: [f(d, game, user) for d in L]
+    process = lambda f, L: [f(d, game, user=user) for d in L]
 
     # Parse the dicts into order objects.
     move = process(move_order_from_dict, move_order_dicts)

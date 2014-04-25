@@ -222,6 +222,12 @@ class Game(db.Model):
                 return player
         return None
 
+    def player_for_unique(self, unique):
+        for player in self.players:
+            if player.unique == unique:
+                return player
+        return None
+
     def orders_dict(self):
         pass
 

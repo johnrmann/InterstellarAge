@@ -254,7 +254,7 @@ class Galaxy(object):
         Returns the location of this Galaxy's JSON file on the filesystem.
         """
 
-        pass
+        return "{0}.galaxy.json".format(str(self.game.unique))
 
     def commit(self):
         """
