@@ -14,7 +14,11 @@
 				"space_colonies" : [],
 				"ground_colonies" : [],
 				"owner" : "ISCA",
-				"fleets" : [0, 0, 0]
+				"fleets" : [0, 0, 0],
+				"orbit_distance" : 0.39,
+				"orbit_period" : 0.24,
+				"size" : 0.382,
+				"texture" : "Mercury.jpeg"
 			},
 
 			{
@@ -24,7 +28,11 @@
 				"space_colonies" : [],
 				"ground_colonies" : [],
 				"owner" : "ISCA",
-				"fleets" : [0, 0, 0]
+				"fleets" : [0, 0, 0],
+				"orbit_distance" : 0.72,
+				"orbit_period" : 0.62,
+				"size" : 0.949,
+				"texture" : "Venus.jpeg"
 			},
 
 			{
@@ -40,7 +48,11 @@
 							{"name" : "Armstrong"}
 						],
 						"owner" : "ISCA",
-						"fleets" : [0, 0, 0]
+						"fleets" : [0, 0, 0],
+						"orbit_distance" : 0.05,
+						"orbit_period" : 0.02,
+						"size" : 0.16,
+						"texture" : "Luna.jpeg"
 					}
 				],
 				"space_colonies" : [],
@@ -55,7 +67,11 @@
 					{"name" : "Vancouver"}
 				],
 				"owner" : "ISCA",
-				"fleets" : [3, 3, 3]
+				"fleets" : [3, 3, 3],
+				"orbit_distance" : 1.00,
+				"orbit_period" : 1.00,
+				"size" : 1.00,
+				"texture" : "Earth.jpeg"
 			},
 
 			{
@@ -65,7 +81,11 @@
 				"space_colonies" : [],
 				"ground_colonies" : [],
 				"owner" : "ISCA",
-				"fleets" : [0, 0, 0]
+				"fleets" : [0, 0, 0],
+				"orbit_distance" : 1.88,
+				"orbit_period" : 1.52,
+				"size" : 0.532,
+				"texture" : "Mars.jpeg"
 			},
 
 			{
@@ -80,7 +100,11 @@
 						"space_colonies" : [],
 						"ground_colonies" : [],
 						"owner" : "ISCA",
-						"fleets" : [0, 0, 0]
+						"fleets" : [0, 0, 0],
+						"orbit_distance" : 0.05,
+						"orbit_period" : 0.02,
+						"size" : 0.245,
+						"texture" : "Europa.jpeg"
 					},
 
 					{
@@ -90,11 +114,19 @@
 						"space_colonies" : [],
 						"ground_colonies" : [],
 						"owner" : "ISCA",
-						"fleets" : [0, 0, 0]
+						"fleets" : [0, 0, 0],
+						"orbit_distance" : 0.10,
+						"orbit_period" : 0.05,
+						"size" : 0.413,
+						"texture" : "Ganymede.jpeg"
 					}
 				],
 				"owner" : "ISCA",
-				"fleets" : [0, 0, 0]
+				"fleets" : [0, 0, 0],
+				"orbit_distance" : 5.20,
+				"orbit_period" : 11.86,
+				"size" : 11.209,
+				"texture" : "Jupiter.jpeg"
 			},
 
 			{
@@ -109,11 +141,19 @@
 						"space_colonies" : [],
 						"ground_colonies" : [],
 						"owner" : "ISCA",
-						"fleets" : [0, 0, 0]
+						"fleets" : [0, 0, 0],
+						"orbit_distance" : 0.05,
+						"orbit_period" : 0.02,
+						"size" : 0.404,
+						"texture" : "Titan.jpeg"
 					}
 				],
 				"owner" : "ISCA",
-				"fleets" : [0, 0, 0]
+				"fleets" : [0, 0, 0],
+				"orbit_distance" : 9.54,
+				"orbit_period" : 29.46,
+				"size" : 9.44,
+				"texture" : "Saturn.jpeg"
 			},
 
 			{
@@ -122,7 +162,11 @@
 				"moons" : [],
 				"space_colonies" : [],
 				"owner" : "ISCA",
-				"fleets" : [0, 0, 0]
+				"fleets" : [0, 0, 0],
+				"orbit_distance" : 19.18,
+				"orbit_period" : 84.01,
+				"size" : 4.007,
+				"texture" : "Uranus.jpeg"
 			},
 
 			{
@@ -131,7 +175,11 @@
 				"moons" : [],
 				"space_colonies" : [],
 				"owner" : "ISCA",
-				"fleets" : [0, 0, 0]
+				"fleets" : [0, 0, 0],
+				"orbit_distance" : 30.06,
+				"orbit_period" : 164.8,
+				"size" : 3.883,
+				"texture" : "Neptune.jpeg"
 			}
 		]
 	}
