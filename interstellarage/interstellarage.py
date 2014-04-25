@@ -187,6 +187,7 @@ def show_game(gameid):
     else:
         return render_template(
             'lobby.html',
+            user=user,
             game=game,
             joined=joined,
             is_creator=is_creator

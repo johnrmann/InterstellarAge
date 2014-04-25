@@ -8,6 +8,7 @@
 	</head>
 
 	<body>
+		<div class="container">
 		{% if not joined %}
 		{% elif is_creator %}
 			You are going to play as {{ game.faction_shortname_for_user(user) }}.
@@ -15,6 +16,7 @@
 		{% elif joined %}
 			You have joined this game as {{ game.faction_shortname_for_user(user) }}.
 		{%- endif %}
+		</div>
 	</body>
 
 	{% if not joined %}
