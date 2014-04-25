@@ -22,9 +22,34 @@ NUMBER_OF_FACTIONS = 4
 
 class Player(db.Model):
     """
-    TODO
+    Objects of the `Player` class serve as a container of sorts for objects
+    of the `User` class.
+
+    Since users can play different games at the same time, it does not make
+    sense to store game information like money and factions inside the user
+    table. This is why we use the `Player` class to store information such as
+    the faction a user is playing as in a certain game and the amount of money
+    a user has in a certain came.
 
     Attributes:
+        unique (int): Uniquely identifies this player. Assigned by the SQL
+            database.
+
+        user_id (int): The `unique` attribute of the `User` this `Player`
+            represents.
+
+        game_id (int): The `unique` attribute of the `Game` this `Player` is
+            playing.
+
+        user (User): The actual `User` this `Player` represents.
+
+        game (Game): The actual `Game` this `Player` is playing.
+
+        faction_code (int): The code for the faction that the user is playing
+            as in this game.
+
+        money (int): The amount of money (in interstellar dollars) that this
+            player has available to spend.
     """
 
     __tablename__ = 'player'
@@ -41,22 +66,42 @@ class Player(db.Model):
     faction_code = db.Column(db.Integer)
     money = db.Column(db.Integer)
 
-    def __init__ (self, user, game, faction_code):
+    def __init__(self, user, game, faction_code):
         """
-        TODO
+        This is the constructor for the `Player` class.
+
+        Args:
+            user (User): The `User` this `Player` represents.
+
+            game (Game): The `Game` that this `Player` will be part of.
+
+            faction_code (int): The `int` identifying the faction that the
+                user wishes to play as.
         """
 
+        # Preconditions.
+        assert user is not None
+        assert game is not None
+        assert check_faction(faction_code)
+
+        # Assign attributes.
         self.user_id = user.unique
         self.game_id = game.unique
         self.user = user
         self.game = game
         self.faction_code = faction_code
+        self.money = -1
 
-        # Record this new player in the SQL database
+        # Record this new player in the SQL database.
         db.session.add(self)
         db.session.commit()
 
     def faction_shortname(self):
+        """
+        Returns a `str` representing the short name for the faction that this
+        Player is playing.
+        """
+
         global FACTION_CODE_ISCA
         global FACTION_CODE_GALAXYCORP
         global FACTION_CODE_FSR
@@ -74,6 +119,11 @@ class Player(db.Model):
             return None
 
     def faction_name(self):
+        """
+        Returns a `str` representing the full "fancy" name for the faction that
+        this Player is playing.
+        """
+
         global FACTION_CODE_ISCA
         global FACTION_CODE_GALAXYCORP
         global FACTION_CODE_FSR
@@ -102,7 +152,18 @@ class Player(db.Model):
 
 
 def check_faction(faction_code):
-    global NUMBER_OF_FACTIONS
+    """
+    This function checks to see if a given `int` is a faction code defined in
+    the beginning of this module.
+
+    Args:
+        faction_code (int): The faction code we wish to check.
+
+    Returns:
+        `True` if and only if the given `faction_code` is one defined as a
+        constant in this module.
+    """
+
     global FACTION_CODE_ISCA
     global FACTION_CODE_GALAXYCORP
     global FACTION_CODE_FSR
@@ -115,7 +176,4 @@ def check_faction(faction_code):
         FACTION_CODE_PRIVATEER
     ]
 
-    for code in codes:
-        if faction_code is code:
-            return True
-    return False
+    return faction_code in codes
