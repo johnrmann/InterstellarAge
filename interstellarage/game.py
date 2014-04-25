@@ -120,13 +120,21 @@ class Game(db.Model):
         orders_dict = json.reads(orders_file.read())
         orders_file.close()
         for order in orders_dict['move']:
-            continue
+            parser = order_lib.move_order_from_dict
+            as_dict = parser(order, self)
+            self.orders.append(as_dict)
         for order in orders_dict['hyperspace']:
-            continue
+            parser = order_lib.hyperspace_order_from_dict
+            as_dict = parser(order, self)
+            self.orders.append(as_dict)
         for order in orders_dict['build']:
-            continue
+            parser = order_lib.build_fleet_order_from_dict
+            as_dict = parser(order, self)
+            self.orders.append(as_dict)
         for order in orders_dict['colonize']:
-            continue
+            parser = order_lib.upgrade_planet_order_from_dict
+            as_dict = parser(order, self)
+            self.orders.append(as_dict)
 
     def queue_orders(self, orders):
         """
@@ -140,7 +148,7 @@ class Game(db.Model):
         # execute the orders.
         for player in self.players:
             for order in self.orders:
-                if order.orderer is player:
+                if order.orderer == player:
                     break
             else:
                 return # don't execute
@@ -159,9 +167,9 @@ class Game(db.Model):
 
             for order in self.orders:
                 result = order.execute(self.galaxy)
-                if result is not_done:
+                if result == not_done:
                     orders_finished = False
-                elif result is finished:
+                elif result == finished:
                     continue
                 new_orders.append(order)
 
@@ -245,6 +253,23 @@ class Game(db.Model):
         galaxy_file.close()
 
         # Get the dict version of the orders and write it.
+        output = {
+            'move' : [],
+            'hyperspace' : [],
+            'build' : [],
+            'colonize' : []
+        }
+        for order in self.orders:
+            if not isinstance(order, order_lib.Order):
+                raise Exception("Something went wrong - nonorder item in list")
+            to_put = order.as_dict()
+            output[order.dict_index()].append(to_put)
+
+        # Write it to the file.
+        order_filename = "{0}.orders.json".format(str(self.unique))
+        order_file = open(data_directory+order_filename, 'w')
+        order_file.write(json.dumps(output))
+        order_file.close()
 
 
 

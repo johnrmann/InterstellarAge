@@ -39,6 +39,9 @@ class Order(object):
     def as_dict(self):
         pass
 
+    def dict_index(self):
+        pass
+
 
 
 class MoveOrder(Order):
@@ -118,6 +121,9 @@ class MoveOrder(Order):
             'to_planet' : self.to_planet.unique,
             'fleet_number' : self.fleet_number
         }
+
+    def dict_index(self):
+        return 'move'
 
 
 
@@ -257,6 +263,9 @@ class HyperspaceOrder(Order):
         to_return['_eta'] = self._eta
         return to_return
 
+    def dict_index(self):
+        return 'hyperspace'
+
 
 
 def hyperspace_order_from_dict(data, game, user=None):
@@ -368,6 +377,9 @@ class UpgradePlanetOrder(Order):
             'new_colony_name' : self.new_colony_name
         }
 
+    def dict_index(self):
+        return 'colonize'
+
 
 
 def upgrade_planet_order_from_dict(data, game, user=None):
@@ -456,6 +468,9 @@ class BuildFleetOrder(Order):
             'in_fleet' : self.in_fleet,
             'ships' : self.ships
         }
+
+    def dict_index(self):
+        return 'build'
 
 
 
