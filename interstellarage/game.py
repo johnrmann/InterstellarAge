@@ -312,7 +312,7 @@ def web_create_game():
 
     # Create the game and add the player who made it.
     new_game = Game(join_code)
-    game.add_user(user, faction_code, creator=True)
+    new_game.add_user(user, faction_code, creator=True)
 
     # Return the URL
     return "/game/{0}".format(str(new_game.unique))

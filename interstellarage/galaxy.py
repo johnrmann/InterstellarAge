@@ -105,6 +105,10 @@ class Galaxy(object):
             system_obj = system_lib.system_from_dict(system)
             system_obj.unique = self._system_unique_counter
 
+            # Default systems are discovered by all players.
+            system_obj.discovered_by = game.players
+            system_obj.planets_discovered_by = game.player
+
             # Assign the planets of this system unique identifiers
             system_planets = system_obj.flat_planets()
             for planet in system_planets:
@@ -149,6 +153,8 @@ class Galaxy(object):
                 # Add the system to this galaxy.
                 self.systems.append(new_sys)
 
+        # Save to disk
+        self.game.commit()
         print "Generated {0} systems".format(str(generated))
 
     def as_list(self, for_player=None, for_user=None, discoveries=False):
