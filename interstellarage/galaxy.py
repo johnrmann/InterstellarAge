@@ -364,8 +364,8 @@ def random_name(system=False):
 @app.route('/game/galaxy/entire', methods=['POST'])
 def web_entire_galaxy():
     # Get the current user.
-    import user as user_lib
-    user = user_lib.current_user()
+    from interstellarage import current_user
+    user = current_user()
     if user is None:
         return "Not logged in", 400
 
