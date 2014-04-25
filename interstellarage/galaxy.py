@@ -23,7 +23,7 @@ from interstellarage import app
 # This is the path to the file of the default galaxy JSON. It contains the
 # systems that spawn with every galaxy (such as the Solar System, Sirus, Alpha
 # Centauri).
-GALAXY_START_JSON = ""
+GALAXY_START_JSON = "/static/json/default_galaxy.json"
 
 # These constants are used for galaxy generation
 STARS_PER_CUBIC_LY = (1.0 / (4.0 * 4.0 * 4.0))
@@ -93,9 +93,12 @@ class Galaxy(object):
         global STARS_PER_CUBIC_LY
 
         # Open the JSON
-        json_f = open(GALAXY_START_JSON)
+        import os
+        current_directory = os.path.dirname(__file__)
+        json_f = open(current_directory+GALAXY_START_JSON)
         json_contents = json_f.read()
         data = json.reads(json_contents)
+        json_f.close()
 
         # Append default systems.
         for system in data:
@@ -286,7 +289,7 @@ class Galaxy(object):
         """
 
         # Generate a name for the system.
-        system_name = _random_name(system=True)
+        system_name = random_name(system=True)
         scheme = random.choice([1, 2]) # TODO
         system = system_lib.generate_system(system_name, scheme)
         system.position = (x, y, z)
