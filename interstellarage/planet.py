@@ -124,6 +124,8 @@ class Planet(object):
             self.orbit_distance = -1
             self.orbit_period = -1
 
+    def __contains__(self, other):
+        return other in self.moons
 
     def as_dict(self):
         """

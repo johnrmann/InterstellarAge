@@ -61,6 +61,15 @@ class Game(db.Model):
         db.session.add(self)
         db.session.commit()
 
+    def __contains__(self, other):
+        import user as user_lib
+        if isinstance(other, player_lib.Player):
+            return other in self.players
+        elif isinstance(other, user_lib.User):
+            return self.player_for_user(other) is not None
+        else:
+            return False
+
     def add_user(self, user, faction_code, creator=False):
         """
         Args:

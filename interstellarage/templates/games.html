@@ -18,7 +18,7 @@
 		<div class="container game">
 			{% for game in user.get_games() %}
 				<div class="game">
-					Game created on {{ str(game.started_when) }}.
+					Game created on {{ game.started_when|string }}.
 				</div>
 			{%- endfor %}
 		</div>
