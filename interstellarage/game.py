@@ -148,6 +148,9 @@ class Game(db.Model):
         # Setup the galaxy for this game.
         game_galaxy = Galaxy(self, generate=True)
         self.galaxy = game_galaxy
+        self.on_turn = 1
+        self.started = True
+        db.session.commit()
 
     def player_for_faction(self, faction_shortname):
         if faction_shortname == "":
@@ -228,8 +231,8 @@ def web_create_game():
 
 @game_pages.route('/game/join/<gameid>')
 def web_join_game(gameid):
-    import user as user_lib
-    user = user_lib.current_user()
+    from interstellarage import current_user
+    user = current_user()
     game = find(unique=gameid)
 
     if user is None:
@@ -251,6 +254,24 @@ def web_join_game(gameid):
 
     # Success!
     pass
+
+
+
+@game_pages.route('/game/start/<gameid>')
+def web_start_game(gameid):
+from interstellarage import current_user
+    user = current_user()
+    game = find(unique=gameid)
+
+    if user is None:
+        return "Not logged in", 400
+    elif game is None:
+        return "Game does not exist.", 400
+    elif user.unique != game.creator_unique:
+        return "Not authorized", 400
+
+    game.start()
+    return "Started game"
 
 
 
