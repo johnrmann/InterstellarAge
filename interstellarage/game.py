@@ -9,7 +9,7 @@ from datetime import datetime
 from flask import Blueprint, request
 
 # Import SQLAlchemy
-from flask.ext.sqlalchemy import SQLAlchemy, event
+from sqlalchemy import event
 
 # Import the database from the main file
 from interstellarage import db
