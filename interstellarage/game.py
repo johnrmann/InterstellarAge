@@ -24,7 +24,7 @@ GAME_MIN_PLAYERS = 1
 GAME_MAX_PLAYERS = 4
 
 MIN_JOINCODE_LENGTH = 1
-MAX_JOINCODE_LENGTH = 25
+MAX_JOINCODE_LENGTH = 40
 
 game_pages = Blueprint('game_pages', __name__)
 
@@ -45,7 +45,7 @@ class Game(db.Model):
     started_when = db.Column(db.DateTime)
     on_turn = db.Column(db.Integer)
     started = db.Column(db.Boolean)
-    join_code = db.Column(db.String)
+    join_code = db.Column(db.String(40))
 
     def __init__ (self, join_code):
         """
