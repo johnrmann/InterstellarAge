@@ -11,8 +11,28 @@
 		{% if not joined %}
 		{% elif is_creator %}
 			You are going to play as {{ game.faction_shortname_for_user(user) }}.
+			<div class="button" id="start">Start Game</div>
 		{% elif joined %}
 			You have joined this game as {{ game.faction_shortname_for_user(user) }}.
 		{%- endif %}
 	</body>
+
+	{% if not joined %}
+	{% elif is_creator %}
+		<script type="text/javascript">
+		$(document).ready(function () {
+			$("#start").click(function () {
+				$.ajax({
+					type : 'POST',
+					url : '/game/start/{{ game.unique }}',
+					success : function(fromServer) {
+						// TODO: redirect to game
+						console.log(fromServer);
+					}
+				});
+			});
+		});
+		</script>
+	{% elif joined %}
+	{%- endif %}
 </html>
