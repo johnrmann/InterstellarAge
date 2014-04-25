@@ -315,12 +315,18 @@ def generate_system(name, scheme):
 
 
 def system_from_dict(data, game):
+    # Find the unique.
+    if 'unique' in data:
+        unique = int(data['unique'])
+    else:
+        unique = -1
+
     # Get data from the dictionary.
     name = data['name']
-    x = data['x']
-    y = data['y']
-    z = data['z']
-    star_size = data['star_size']
+    x = int(data['x'])
+    y = int(data['y'])
+    z = int(data['z'])
+    star_size = float(data['star_size'])
     star_spectral_class = data['star_spectral_class']
     planets = [planet_lib.planet_from_dict(p, game) for p in data['planets']]
 
@@ -329,10 +335,10 @@ def system_from_dict(data, game):
         name,
         star_spectral_class=star_spectral_class
     )
+    system.unique = unique
     system.planets = planets
     system.star_size = star_size
     system.position = (x, y, z)
-    system.star_color = star_color
     system.galaxy = game.galaxy
 
     # We're done here.

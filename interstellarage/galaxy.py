@@ -105,7 +105,7 @@ class Galaxy(object):
             # Parse the system dict and assign the system object a unique
             # ID.
             self._system_unique_counter += 1
-            system_obj = system_lib.system_from_dict(system)
+            system_obj = system_lib.system_from_dict(system, game)
             system_obj.unique = self._system_unique_counter
 
             # Default systems are discovered by all players.
@@ -130,7 +130,7 @@ class Galaxy(object):
         height = irange(-GALAXY_HEIGHT, GALAXY_HEIGHT)
 
         positions = [(x, y, z) for x in width for y in length for z in height]
-        default_range = lambda x, y, z: (x + y + z <= GALAXY_DEFAULT_RANGE)
+        default_range = lambda x, y, z: (abs(x) + abs(y) + abs(z) <= GALAXY_DEFAULT_RANGE)
 
         # Loop through the galatic grid.
         generated = 0
@@ -309,7 +309,7 @@ def galaxy_from_dict(data, game):
 
     systems = []
     for system_dict in data:
-        system = system_lib.system_from_dict(system_dict)
+        system = system_lib.system_from_dict(system_dict, game)
         systems.append(system)
 
     # Create the galaxy and return it.
