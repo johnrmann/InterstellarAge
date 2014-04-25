@@ -253,7 +253,7 @@ def web_create_game():
 def web_join_game(gameid):
     from interstellarage import current_user
     user = current_user()
-    game = find(unique=gameid)
+    game = find(unique=int(gameid))
 
     if user is None:
         return "Not logged in", 400
@@ -286,7 +286,7 @@ def web_join_game(gameid):
 def web_start_game(gameid):
     from interstellarage import current_user
     user = current_user()
-    game = find(unique=gameid)
+    game = find(unique=int(gameid))
 
     if user is None:
         return "Not logged in", 400
