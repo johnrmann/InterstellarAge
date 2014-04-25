@@ -9,7 +9,7 @@
 
 	<body>
         <h1>Create New Account</h1>
-		<div class="container-register">
+		<div class="container register">
 			<div class="alert" id="error"></div>
             <form id="registerForm" method="POST" action="{{ url_for('register') }}">
             {{ form.csrf_token }}

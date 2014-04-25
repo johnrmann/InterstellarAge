@@ -17,7 +17,7 @@ h2 {
     text-align: center;
 }
 
-.container-login, .container-register {
+.container {
     background: rgba(0,0,0,0.6);
     margin: auto;
     border-radius: 10px;
@@ -25,22 +25,22 @@ h2 {
     text-align: center;
 }
 
-.container-login {
+.container.login {
     width: 300px;
 }
 
-.container-register {
+.container.register {
     color: white;
     font-size: 14px;
     width: 440px;
 }
 
-.container-register table {
+.container.register table {
     margin: auto;
     text-align: left;
 }
 
-.container-register table td {
+.container.register table td {
     padding: 0 5px;
 }
 
