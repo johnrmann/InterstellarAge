@@ -97,7 +97,7 @@ class Galaxy(object):
         current_directory = os.path.dirname(__file__)
         json_f = open(current_directory+GALAXY_START_JSON)
         json_contents = json_f.read()
-        data = json.reads(json_contents)
+        data = json.loads(json_contents)
         json_f.close()
 
         # Append default systems.
@@ -110,7 +110,7 @@ class Galaxy(object):
 
             # Default systems are discovered by all players.
             system_obj.discovered_by = game.players
-            system_obj.planets_discovered_by = game.player
+            system_obj.planets_discovered_by = game.players
 
             # Assign the planets of this system unique identifiers
             system_planets = system_obj.flat_planets()

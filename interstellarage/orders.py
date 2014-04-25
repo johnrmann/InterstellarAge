@@ -524,10 +524,10 @@ def web_submit_orders():
         return "You are not in this game", 400
 
     # Parse the JSON in the order fields
-    move_order_dicts = json.reads(request.form['move'])
-    ftl_order_dicts = json.reads(request.form['hyperspace'])
-    colony_order_dicts = json.reads(request.form['colonize'])
-    build_order_dicts = json.reads(request.form['build'])
+    move_order_dicts = json.loads(request.form['move'])
+    ftl_order_dicts = json.loads(request.form['hyperspace'])
+    colony_order_dicts = json.loads(request.form['colonize'])
+    build_order_dicts = json.loads(request.form['build'])
 
     # Calls one of the "from_dict" functions defined below their respective
     # classes in this module.
