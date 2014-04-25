@@ -61,6 +61,30 @@ class Game(db.Model):
         db.session.add(self)
         db.session.commit()
 
+    def add_user(self, user, faction_code, creator=False):
+        """
+        Args:
+            user (User):
+            faction_code (int):
+
+        Keyword Args:
+            creator (boolean): Set to `True` if the given `User` created this
+                `Game`.
+
+        Returns:
+            TODO
+        """
+
+        # Preconditions.
+        assert not self.full()
+        assert not self.faction_taken(faction_code)
+
+        new_player = Player(user, self, faction_code)
+        if creator:
+            self.creator_unique = user.unique
+        db.session.commit()
+        return new_player
+
     def on_load(self, context):
         """
         Called after a `Game` object has been loaded from the SQL database.
@@ -134,6 +158,16 @@ class Game(db.Model):
                 return player.faction_shortname()
         return ""
 
+    def faction_taken(self, faction_code):
+        for player in self.players:
+            if player.faction_code == faction_code:
+                return True
+        return False
+
+    def full(self):
+        global GAME_MAX_PLAYERS
+        return len(self.players) == GAME_MAX_PLAYERS
+
     def start(self):
         """
         Starts the game.
@@ -169,18 +203,6 @@ class Game(db.Model):
 
 
 
-def create_game(user, join_code, faction):
-    # Create the game object.
-    game = Game(join_code)
-
-    # Create the player object.
-    player = Player(user, game, faction)
-
-    # Return the URL of the game
-    return "/game/{0}".format(str(game.unique))
-
-
-
 def find(unique=None):
     """
     Keyword Args:
@@ -204,8 +226,8 @@ def web_create_game():
     global MIN_JOINCODE_LENGTH
     global MAX_JOINCODE_LENGTH
 
-    import user as user_lib
-    user = user_lib.current_user()
+    from interstellarage import current_user
+    user = current_user()
 
     if user is None:
         return "Not logged in", 400
@@ -218,14 +240,12 @@ def web_create_game():
     faction_code = int(request.form['faction'])
     # TODO
 
-    # Create the game.
+    # Create the game and add the player who made it.
     new_game = Game(join_code)
-    new_game.creator_unique = user.unique
-    db.session.commit()
+    game.add_user(user, faction_code, creator=True)
 
-    # Create the Player for the User
-    new_player = Player(user, game, faction_code)
-    return "Game created"
+    # Return the URL
+    return "/game/{0}".format(str(new_game.unique))
 
 
 
@@ -239,27 +259,32 @@ def web_join_game(gameid):
         return "Not logged in", 400
     elif game is None:
         return "Game does not exist.", 400
-
-    # Get the given join code
-    join_code = request.form['join_code']
-
-    # Is the game full?
-    # Did we get the join_code right?
-    if join_code is not game.join_code:
-        return "Incorrect password", 400
-    # Has the game already started?
-    if game.started:
+    elif game.started:
         return "Game already started.", 400
+    elif game.full():
+        return "Game full", 400
+
+    # Check to see if the join code is correct.
+    join_code = request.form['join_code']
+    if join_code != game.join_code:
+        return "Incorrect password", 400
+
     # Is the desired faction alright?
+    faction_code = int(request.form['faction'])
+    if not player_lib.check_faction(faction_code):
+        return "Invalid faction", 400
+    elif game.faction_taken(faction_code):
+        return "Faction taken", 400
 
     # Success!
-    pass
+    game.add_user(user, faction_code)
+    return "Joined", 200
 
 
 
 @game_pages.route('/game/start/<gameid>')
 def web_start_game(gameid):
-from interstellarage import current_user
+    from interstellarage import current_user
     user = current_user()
     game = find(unique=gameid)
 

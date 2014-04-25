@@ -98,3 +98,24 @@ class Player(db.Model):
         global PLAYER_START_MONEY
         self.money = PLAYER_START_MONEY
         db.session.commit()
+
+
+
+def check_faction(faction_code):
+    global NUMBER_OF_FACTIONS
+    global FACTION_CODE_ISCA
+    global FACTION_CODE_GALAXYCORP
+    global FACTION_CODE_FSR
+    global FACTION_CODE_PRIVATEER
+
+    codes = [
+        FACTION_CODE_ISCA,
+        FACTION_CODE_GALAXYCORP,
+        FACTION_CODE_FSR,
+        FACTION_CODE_PRIVATEER
+    ]
+
+    for code in codes:
+        if faction_code is code:
+            return True
+    return False
