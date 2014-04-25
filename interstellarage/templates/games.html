@@ -16,7 +16,7 @@
 		</div>
 
 		<div class="container game">
-			{% for game in user.get_cames() %}
+			{% for game in user.get_games() %}
 				<div class="game">
 					Game created on {{ str(game.started_when) }}.
 				</div>

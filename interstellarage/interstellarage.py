@@ -68,6 +68,10 @@ def start_page():
     Shows the login page if there is no user logged in.
     """
 
+    # Find out where we are
+    import os
+    print os.path.dirname(__file__)
+
     user = current_user()
     if user == None:
         # Render login/registration
