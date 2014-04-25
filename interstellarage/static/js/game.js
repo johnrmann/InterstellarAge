@@ -187,7 +187,7 @@ $.ajax({
 	},
 	success: function(fromServer) {
 		var j = JSON.parse(fromServer);
-		createGalaxyMap(j);
+		createGalaxyMap(j.galaxy);
 		galaxyMapRender();
 	}
 });

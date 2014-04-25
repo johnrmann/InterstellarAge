@@ -26,14 +26,14 @@ from interstellarage import app
 GALAXY_START_JSON = ""
 
 # These constants are used for galaxy generation
-STARS_PER_CUBIC_LY = (1 / (4 * 4 * 4))
+STARS_PER_CUBIC_LY = (1.0 / (4.0 * 4.0 * 4.0))
 
 # The grid distance (in grid spaces/lightyears) where the default systems end
 # and procedurally generated systems begin.
 GALAXY_DEFAULT_RANGE = 20
-GALAXY_LENGTH = 125
-GALAXY_WIDTH = 125
-GALAXY_HEIGHT = 20
+GALAXY_LENGTH = 50
+GALAXY_WIDTH = 50
+GALAXY_HEIGHT = 10
 
 # The chance that a solar system won't have a name randomly generated from
 # syllables.
@@ -385,4 +385,8 @@ def web_entire_galaxy():
         return "You are not part of this game", 400
 
     # Return the galaxy as JSON
-    return json.dumps(game.galaxy.as_list(for_user=user))
+    return json.dumps({
+        'galaxy' : game.galaxy.as_list(for_user=user),
+        'turn' : game.on_turn,
+        'money' : game.player_for_user(user).money
+    })

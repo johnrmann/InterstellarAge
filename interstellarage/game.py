@@ -1,5 +1,6 @@
 """
 InterstellarAge
+game.py
 """
 
 # Import python modules
@@ -205,6 +206,21 @@ class Game(db.Model):
         global GAME_MAX_PLAYERS
         return len(self.players) == GAME_MAX_PLAYERS
 
+    def next_turn(self):
+        # Add planet GDP to players.
+        systems = self.galaxy.systems
+        for system in systems:
+            planets = system.flat_planets()
+            for planet in planets:
+                if planet.owner is None:
+                    continue
+                money = planet.economic_output()
+                planet.owner.money += money
+
+        # Increment turn
+        self.on_turn += 1
+        db.session.commit()
+
     def start(self):
         """
         Starts the game.
@@ -217,7 +233,7 @@ class Game(db.Model):
         assert len(self.players) >= GAME_MIN_PLAYERS
 
         # Setup the galaxy for this game.
-        game_galaxy = Galaxy(self, generate=True)
+        game_galaxy = galaxy_lib.Galaxy(self, generate=True)
         self.galaxy = game_galaxy
         self.orders = []
         self.on_turn = 1
@@ -259,7 +275,7 @@ class Game(db.Model):
         # Get the dict version of the galaxy and write it.
         output = self.galaxy.as_list(discoveries=True)
         galaxy_filename = self.galaxy.get_json_filename()
-        galaxy_file = open(data_directory+galaxy_filename, 'w')
+        galaxy_file = open(data_directory+galaxy_filename, 'w+')
         galaxy_file.write(json.dumps(output))
         galaxy_file.close()
 
@@ -278,7 +294,7 @@ class Game(db.Model):
 
         # Write it to the file.
         order_filename = "{0}.orders.json".format(str(self.unique))
-        order_file = open(data_directory+order_filename, 'w')
+        order_file = open(data_directory+order_filename, 'w+')
         order_file.write(json.dumps(output))
         order_file.close()
 
