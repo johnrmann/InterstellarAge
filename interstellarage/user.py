@@ -1,5 +1,14 @@
 """
 InterstellarAge
+user.py
+
+This module defines the `User` class. The `User` class is the Python model
+for rows in the SQL database's "user" table.
+
+Please note that the classes, methods, constants, etc. in this module have
+little or no relevence to actual gameplay. No gameplay information like
+money, planet control, etc. is manipulated. If this is what you're interested
+in, please see "player.py".
 """
 
 # Import SQLAlchemy
@@ -21,9 +30,17 @@ class User(db.Model):
 
     Public Attributes:
         unique (int):
-        username (str): TODO
-        password_hash (str): The hashed version of this `User`'s password.
-        email (str): The `User`'s e-mail address.
+            Uniquely identifies this `User` from every other one in the
+            database. Assigned by SQL.
+
+        username (str):
+            TODO
+
+        password_hash (str):
+            The hashed version of this `User`'s password.
+
+        email (str):
+            The `User`'s e-mail address.
     """
 
     __tablename__ = 'user'
@@ -64,11 +81,24 @@ class User(db.Model):
         db.session.commit()
 
     def __eq__(self, other):
+        """
+        Returns `True` if this `User` is equal to another `User` we call
+        `other`.
+
+        Note about implementation: since we know that no two users have the
+        same `User.unique` attribute, it is necessary and sufficient to check
+        for equality based on `User.unique`.
+        """
+
         if isinstance(other, User):
             return int(other.unique) == int(self.unique)
         return False
 
     def __ne__(self, other):
+        """
+        `True` if and only if `User.__eq__` is `False`.
+        """
+
         return not self.__eq__(other)
 
     def get_games(self):
@@ -86,10 +116,15 @@ def find(unique=None, username=None, email=None):
     Finds a user and returns their `User` object.
 
     Args:
-        unique (int): The `User`'s unique ID given to it during the initial SQL
+        unique (int):
+            The `User`'s unique ID given to it during the initial SQL
             insert query.
+
         username (str):
+            The username the `User` chose for him/herself at registration.
+
         email (str):
+            The email address the `User` provided at registration.
 
     Returns:
         The `User` object if it was found. If it wasn't found, then `None` is

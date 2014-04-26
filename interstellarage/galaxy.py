@@ -22,7 +22,7 @@ from flask import request
 from interstellarage import app
 
 # Import other useful things
-from other import coinflip
+from other import coinflip, irange
 
 # Define constants.
 
@@ -37,9 +37,9 @@ STARS_PER_CUBIC_LY = (1.0 / (4.0 * 4.0 * 4.0))
 # The grid distance (in grid spaces/lightyears) where the default systems end
 # and procedurally generated systems begin.
 GALAXY_DEFAULT_RANGE = 20
-GALAXY_LENGTH = 50
-GALAXY_WIDTH = 50
-GALAXY_HEIGHT = 10
+GALAXY_LENGTH = 101
+GALAXY_WIDTH = 101
+GALAXY_HEIGHT = 21
 
 # The chance that a solar system won't have a name randomly generated from
 # syllables.
@@ -66,7 +66,27 @@ BAYER = ["Cygnus", "Vega"]
 
 class Galaxy(object):
     """
-    TODO
+    For every `Game` being played, there is one and only one `Galaxy`
+    associated with that `Game`. `Galaxy`s contain `System`s, which contain
+    `Planet`s, which are the whole purpose behind the game.
+
+    Attributes:
+        game (Game):
+            The game associated with this `Galaxy`.
+
+        systems (list of System):
+            The `System`s in this `Galaxy`.
+
+    Private Attributes:
+        _planet_unique_counter (int):
+            This attribute is incremented every time a new planet is created in
+            this `Galaxy`. This way, every `Planet` is assigned a unique `int`
+            in its `unique` field.
+
+        _system_unique_counter (int):
+            This attribute is incremented every time a new system is created in
+            this `Galaxy`. This way, every `System` is assigned a unique `int`
+            in its `unique` field.
     """
 
     game = None
@@ -77,6 +97,11 @@ class Galaxy(object):
 
     def __init__(self, game, generate=False):
         """
+        Not only is this the constructor for the `Galaxy` class, this also will
+        generate a random `Galaxy` if and only if the correct and precise
+        keyword arguments are passed in (hint: to generate a `Galaxy`, set
+        `generate` to `True`).
+
         Args:
             game (Game):
                 The `Game` which this `Galaxy` will be used for.
@@ -113,12 +138,11 @@ class Galaxy(object):
 
         # Append default systems.
         for system in data:
-            # Parse the system dict and assign the system object a unique
-            # ID.
+            # Parse the system dict and assign the system object a unique ID.
             self._system_unique_counter += 1
             system_obj = system_lib.system_from_dict(system, game)
             system_obj.unique = self._system_unique_counter
-            system_obj.galaxy = galaxy
+            system_obj.galaxy = self
 
             # Default systems are discovered by all players
             system_obj.discovered_by = set(self.players)
@@ -132,23 +156,21 @@ class Galaxy(object):
 
             self.systems.append(system_obj)
 
-        # Creates inclusive range
-        irange = lambda n, k: range(n, k+1)
-
-        # The dimensions of the galaxy
-        width = irange(-GALAXY_WIDTH, GALAXY_WIDTH)
-        length = irange(-GALAXY_LENGTH, GALAXY_LENGTH)
-        height = irange(-GALAXY_HEIGHT, GALAXY_HEIGHT)
+        # The dimensions of the galaxy.
+        adj_dim = lambda x: (x - 1) / 2
+        width = irange(-adj_dim(GALAXY_WIDTH), adj_dim(GALAXY_WIDTH))
+        length = irange(-adj_dim(GALAXY_LENGTH), adj_dim(GALAXY_LENGTH))
+        height = irange(-adj_dim(GALAXY_HEIGHT), adj_dim(GALAXY_HEIGHT))
 
         positions = [(x, y, z) for x in width for y in length for z in height]
-        in_default_range = lambda x, y, z: (abs(x) + abs(y) + abs(z) <= GALAXY_DEFAULT_RANGE)
-        in_discover_range = lambda x, y, z: (abs(x) + abs(y) + abs(z) <= GALAXY_DEFAULT_RANGE + 4)
+        gdr = GALAXY_DEFAULT_RANGE
+        in_default_range = lambda x, y, z: (abs_sum(x, y, z) <= gdr)
+        in_discover_range = lambda x, y, z: (abs_sum(x, y, z) <= gdr + 4)
 
         # Loop through the galatic grid. For the positions outside the range of
         # default systems, randomly create new ones.
         generated = 0
         for (x, y, z) in positions:
-            dice = random.random()
             if in_default_range(x, y, z):
                 continue
             elif coinflip(STARS_PER_CUBIC_LY):
@@ -156,7 +178,6 @@ class Galaxy(object):
                 self._system_unique_counter += 1
                 new_sys = self._create_system(x, y, z)
                 new_sys.unique = self._system_unique_counter
-                new_sys.galaxy = galaxy
 
                 if in_discover_range(x, y, z):
                     new_sys.discovered_by = set(game.players)
@@ -177,8 +198,13 @@ class Galaxy(object):
         """
         Keyword Args:
             for_player (Player):
+                If this information is to be returned to an end user, then
+                `for_player` should be set to said end user's `Player` object
+                for the current game.
 
             for_user (User):
+                If no `Player` object is readily available, then `for_user` may
+                be used instead.
 
             discoveries (boolean):
                 Set to `False` by default. Set to `True` if information about
@@ -199,12 +225,18 @@ class Galaxy(object):
         # Preconditions.
         assert for_player is not None
 
+        # This helper function returns "True" if the player in question can
+        # plot hyperspace routes to the system. If no player is provided, then
+        # the system is always visible.
         def can_see_system(s):
             if for_player is None:
                 return True
             else:
                 return for_player in s.discovered_by
 
+        # This helper function returns "True" if the player in question can
+        # send fleets to specific planets in the system. If no player is
+        # provided, then the planets are always visible.
         def can_see_planets(s):
             if for_player is None:
                 return True
@@ -264,6 +296,15 @@ class Galaxy(object):
         return False
 
     def system_for_unique(self, unique):
+        """
+        Args:
+            unique (int):
+
+        Returns:
+            The `System` whose `System.unique` attribute matches `unique` or
+            `None` if no such `System` in this `Galaxy` exists.
+        """
+
         for system in self.systems:
             if system.unique == unique:
                 return system
@@ -271,7 +312,16 @@ class Galaxy(object):
 
     def systems_near_system(self, near_system, distance):
         """
+        Args:
+            near_system (System):
+
+            distance (int):
+                The search radius (in grid spaces).
+
         Returns:
+            The `list` of all `System`s in this `Galaxy` that are within
+            `distance` grid spaces of `near_system`. This `list` does not
+            include `near_system`.
         """
 
         return_systems = []
@@ -294,10 +344,17 @@ class Galaxy(object):
         PRIVATE METHOD
 
         Args:
-            x (int): The x-coordinate of where we want to make the new
-                `System`.
-            y (int): Ditto.
-            z (int): Ditto.
+            x (int):
+                The x-coordinate of where we want to make the new `System`.
+
+            y (int):
+                Ditto.
+
+            z (int):
+                Ditto.
+
+        Returns:
+            A new `System`.
         """
 
         # Generate a name for the system.
@@ -305,6 +362,7 @@ class Galaxy(object):
         scheme = random.choice([1, 2]) # TODO
         system = system_lib.generate_system(system_name, scheme)
         system.position = (x, y, z)
+        system.galaxy = self
         assert system is not None
         return system
 
@@ -312,6 +370,8 @@ class Galaxy(object):
 
 def galaxy_from_dict(data, game):
     """
+    Creates the `Galaxy` for `game` from the `dict` `data`.
+
     Args:
         data (list):
             The list of `System` dictionaries.
@@ -337,6 +397,10 @@ def galaxy_from_dict(data, game):
 
 def random_name(system=False):
     """
+    Generates a name. These names can be used for planets or solar systems.
+    Names more suited for solar systems can be generated if `system` is set to
+    `True`.
+
     Keyword Args:
         system (boolean):
             Set to `True` if we want to include "solar systemish" names such
@@ -379,7 +443,7 @@ def random_name(system=False):
         for a in xrange(0, words):
             name += random.choice(pool)
             name += " "
-        # Lop off the last spaces
+        # Lop off the last space.
         name = name[:-1]
 
     # We're done here.
@@ -389,6 +453,22 @@ def random_name(system=False):
 
 @app.route('/game/galaxy/entire', methods=['POST'])
 def web_entire_galaxy():
+    """
+    This function is called when the client needs to update its local galaxy
+    information. This method therefore reads outputs the `Galaxy` dict as JSON
+    along with some other useful information such as funds available and
+    current turn number.
+
+    Request Fields:
+        game (int):
+            The unique id for the game that is being played.
+
+    Returns:
+        A JSON `str` including the JSON for the galaxy in the "galaxy" field,
+        the amount of money the player has in the "money" field, and the game's
+        turn number in the "turn" field.
+    """
+
     # Get the current user.
     from interstellarage import current_user
     user = current_user()

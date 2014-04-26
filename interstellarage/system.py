@@ -152,6 +152,9 @@ class System(object):
 
     def cartesian_distance(self, other_system):
         """
+        The *actual* distance between the positions of this `System` and
+        `other_system`.
+        
         Args:
             other_system (System):
                 The returned `float` will be the distance between this `System`
@@ -378,6 +381,7 @@ def system_from_dict(data, game):
         data (dict):
 
         game (Game):
+            The `Game` which the returned `System` will be a part of.
 
     Returns:
     """

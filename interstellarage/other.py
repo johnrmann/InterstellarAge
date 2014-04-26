@@ -5,6 +5,16 @@ other.py
 Defines miscelaneous constants and functions.
 """
 
+def coinflip(p):
+    """
+    Simulates a biased coin that yields heads with probability `p` (`float`).
+    """
+    
+    import random
+    return random.random() <= p
+
+
+
 def int_to_roman(input):
     """
     Given an integer, this function returns a `str` of that integer written
@@ -22,6 +32,15 @@ def int_to_roman(input):
 
 
 
+def irange(n, k):
+    """
+    Inclusive range.
+    """
+
+    return range(n, k+1)
+
+
+
 def rand_float_range(a, b):
     import random
 
@@ -30,9 +49,3 @@ def rand_float_range(a, b):
     result = d * dice
     result += a
     return result
-
-
-
-def coinflip(p):
-    import random
-    return random.random() <= p

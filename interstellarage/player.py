@@ -1,5 +1,6 @@
 """
 InterstellarAge
+player.py
 """
 
 # Import SQLAlchemy
@@ -32,24 +33,29 @@ class Player(db.Model):
     a user has in a certain came.
 
     Attributes:
-        unique (int): Uniquely identifies this player. Assigned by the SQL
-            database.
+        unique (int):
+            Uniquely identifies this player. Assigned by the SQL database.
 
-        user_id (int): The `unique` attribute of the `User` this `Player`
-            represents.
+        user_id (int):
+            The `unique` attribute of the `User` this `Player` represents.
 
-        game_id (int): The `unique` attribute of the `Game` this `Player` is
-            playing.
+        game_id (int):
+            The `unique` attribute of the `Game` this `Player` is playing.
 
-        user (User): The actual `User` this `Player` represents.
+        user (User):
+            The actual `User` this `Player` represents.
 
-        game (Game): The actual `Game` this `Player` is playing.
+        game (Game):
+            The actual `Game` this `Player` is playing.
 
-        faction_code (int): The code for the faction that the user is playing
-            as in this game.
+        faction_code (int):
+            The code for the faction that the user is playing as in this game.
+            Must be equal to one of the faction codes defined earlier in this
+            module.
 
-        money (int): The amount of money (in interstellar dollars) that this
-            player has available to spend.
+        money (int):
+            The amount of money (in interstellar dollars) that this player has
+            available to spend.
     """
 
     __tablename__ = 'player'
@@ -71,12 +77,15 @@ class Player(db.Model):
         This is the constructor for the `Player` class.
 
         Args:
-            user (User): The `User` this `Player` represents.
+            user (User):
+                The `User` this `Player` represents.
 
-            game (Game): The `Game` that this `Player` will be part of.
+            game (Game):
+                The `Game` that this `Player` will be part of.
 
-            faction_code (int): The `int` identifying the faction that the
-                user wishes to play as.
+            faction_code (int):
+                The `int` identifying the faction that the user wishes to play
+                as.
         """
 
         # Preconditions.
@@ -157,7 +166,8 @@ def check_faction(faction_code):
     the beginning of this module.
 
     Args:
-        faction_code (int): The faction code we wish to check.
+        faction_code (int):
+            The faction code we wish to check.
 
     Returns:
         `True` if and only if the given `faction_code` is one defined as a

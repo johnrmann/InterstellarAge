@@ -110,6 +110,22 @@ class Planet(object):
 
     def __init__(self, name=None, orbit_distance=None, min_size=0.0,
                  max_size=0.0):
+        """
+        This is the constructor for the `Planet` class. Since `Planet` is an
+        abstract class, this constructor should never be called unless called
+        by one of `Planet`'s three subclasses.
+
+        Keyword Args:
+            name (str):
+                The name of the planet we're creating.
+
+            orbit_distance (float):
+
+            min_size (float);
+
+            max_size (float):
+        """
+
         # Preconditions.
         assert min_size != 0.0
         assert max_size != 0.0
