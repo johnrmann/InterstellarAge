@@ -363,7 +363,7 @@ def _planet_name(system_name, scheme, n):
 
     # Case: random name
     else:
-        return galaxy_lib.generate_name()
+        return galaxy_lib.random_name()
 
 
 

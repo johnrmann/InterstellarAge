@@ -159,6 +159,14 @@ class Galaxy(object):
                 # Add the system to this galaxy.
                 self.systems.append(new_sys)
 
+        # Loop through the galactic grid again -- this time to discover the
+        # default systems.
+        for system in self.systems:
+            (x, y, z) = system.position
+            if not default_range(x, y, z):
+                continue
+            system.discover()
+
         # Save to disk
         self.game.commit()
         print "Generated {0} systems".format(str(generated))
