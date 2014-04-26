@@ -41,6 +41,8 @@ function View () {
     this.setCameraPosition = null;
     this.cameraPositionLerp = null;
     this.setCameraRotation = null;
+
+    // Events
     this.onclick = null;
 }
 
@@ -115,7 +117,7 @@ var systemView = new View();
 var systems;
 
 /**************************************************************************************************
-                                       GALAXY MAP FUNCTIONS
+                                    GALAXY MAP DISPLAY FUNCTIONS
 **************************************************************************************************/
 
 function galaxyMapSetup () {
@@ -125,9 +127,6 @@ function galaxyMapSetup () {
     galaxyMap.onMeshClick = createSystemView;
 
     galaxyMap.show();
-
-    // The projector performs world/screen calculations.
-    
 }
 
 function createGalaxyMap (startSystems) {
@@ -143,7 +142,9 @@ function createGalaxyMap (startSystems) {
         var y = system.z;
         var z = system.y;
 
-        var sphere = new THREE.SphereGeometry(1, 20, 20);
+        var size = system.size;
+
+        var sphere = new THREE.SphereGeometry(size, 20, 20);
         var mat = new THREE.MeshBasicMaterial( {color: 0xffff00 });
         var mesh = new THREE.Mesh(sphere, mat);
 
@@ -153,6 +154,23 @@ function createGalaxyMap (startSystems) {
     }
 }
 
+function galaxyMapWorldToGrid (pos) {
+    var x = pos.x;
+    var y = pos.y;
+    var z = pos.z;
+
+    return new THREE.Vector3(x / 2.0, y / 2.0, z / 2.0);
+}
+
+var galaxyMapRender = function () {
+    requestAnimationFrame(galaxyMapRender);
+    galaxyMap.renderer.render(galaxyMap.scene, galaxyMap.camera);
+};
+
+/**************************************************************************************************
+                                 GALAXY MAP INTERACTION FUNCTIONS
+**************************************************************************************************/
+
 /*
  * Called when the server confirms that we have discovered new systems in the galaxy. This function
  * creates new star meshes for said systems and adds them to the Galaxy Map scene.
@@ -161,10 +179,34 @@ function updateGalaxyMap (newSystems) {
 
 }
 
-var galaxyMapRender = function () {
-    requestAnimationFrame(galaxyMapRender);
-    galaxyMap.renderer.render(galaxyMap.scene, galaxyMap.camera);
-};
+function galaxyMapKeyboard (keyCode) {
+    var goForward = (keyCode === document.keyCodes.upArrow || keyCode === document.keyCodes.w);
+    var goLeft = (keyCode === document.keyCodes.leftArrow || keyCode === document.keyCodes.a);
+    var goBackward = (keyCode === document.keyCodes.downArrow || keyCode === document.keyCodes.s);
+    var goRight = (keyCode === document.keyCodes.rightArrow || keyCode === document.keyCodes.d);
+}
+
+function galaxyMapMouseHover () {
+
+}
+
+function galaxyMapMove (goForward, goLeft, goBackward, goRight) {
+    if (goForward) {
+        // TODO
+    }
+
+    else if (goLeft) {
+        // TODO
+    }
+
+    else if (goBackward) {
+        // TODO
+    }
+
+    else if (goRight) {
+        // TODO
+    }
+}
 
 /**************************************************************************************************
                                        SYSTEM VIEW FUNCTIONS

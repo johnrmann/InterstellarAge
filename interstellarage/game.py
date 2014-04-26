@@ -132,13 +132,13 @@ class Game(db.Model):
 
         # Parse the Galaxy.
         galaxy_file = open(galaxy_filename)
-        galaxy_dict = json.reads(galaxy_file.read())
+        galaxy_dict = json.loads(galaxy_file.read())
         galaxy_file.close()
         self.galaxy = galaxy_lib.galaxy_from_dict()
 
         # Parse the orders.
         orders_file = open(orders_filename)
-        orders_dict = json.reads(orders_file.read())
+        orders_dict = json.loads(orders_file.read())
         orders_file.close()
         for order in orders_dict['move']:
             parser = order_lib.move_order_from_dict
