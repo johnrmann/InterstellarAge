@@ -12,8 +12,9 @@ from flask import Blueprint, request
 # Import SQLAlchemy
 from sqlalchemy import event
 
-# Import the database from the main file
+# TODO
 from interstellarage import db
+from other import irange
 
 # Import the user class
 import player as player_lib
@@ -23,6 +24,9 @@ import orders as order_lib
 # Define global variables.
 GAME_MIN_PLAYERS = 1
 GAME_MAX_PLAYERS = 4
+
+MIN_NAME_LENGTH = 1
+MAX_NAME_LENGTH = 40
 
 MIN_JOINCODE_LENGTH = 1
 MAX_JOINCODE_LENGTH = 40
@@ -34,6 +38,7 @@ class Game(db.Model):
     """
     Attributes:
         unique (int): This `Game`'s unique identifier.
+        name (str): The name of the `Game`.
         started_when (datetime): The date and time the game was started.
         on_turn (int): The current turn number.
     """
@@ -42,6 +47,7 @@ class Game(db.Model):
     __table_args__ = {'extend_existing':True}
 
     unique = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(40))
     creator_unique = db.Column(db.Integer)
     started_when = db.Column(db.DateTime)
     on_turn = db.Column(db.Integer)
@@ -51,11 +57,12 @@ class Game(db.Model):
     galaxy = None
     orders = []
 
-    def __init__ (self, join_code):
+    def __init__ (self, name, join_code):
         """
         TODO
         """
 
+        self.name = name
         self.started_when = datetime.now()
         self.on_turn = -1
         self.started = False
@@ -239,10 +246,10 @@ class Game(db.Model):
         self.galaxy = galaxy_lib.Galaxy(self, generate=True)
         self.orders = []
         self.on_turn = 1
-        self.started = True
         for player in self.players:
             player.start()
         self.commit()
+        self.started = True
         db.session.commit()
 
     def player_for_faction(self, faction_shortname):
@@ -321,6 +328,22 @@ def find(unique=None):
 
 @game_pages.route('/game/create', methods=['POST'])
 def web_create_game():
+    """
+    Called when the user wants to create a new game.
+
+    Request Fields:
+        name (str):
+            The publicly displayed name of the `Game` we want to create.
+
+        join_code (str):
+            The password to join the `Game` we want to create.
+
+    Returns:
+        If successful, this function will return the URL to the lobby (and
+        later, gameplay) of the new `Game`. If not, we return an error header
+        with a message stating what went wrong in the body.
+    """
+
     # Declare global variables
     global MIN_JOINCODE_LENGTH
     global MAX_JOINCODE_LENGTH
@@ -331,16 +354,18 @@ def web_create_game():
     if user is None:
         return "Not logged in", 400
 
-    # Get the given join code
+    # Get the given join code and name.
     join_code = request.form['join_code']
-    assert len(join_code) in range(MIN_JOINCODE_LENGTH, MAX_JOINCODE_LENGTH)
+    name = request.form['name']
+    assert len(join_code) in irange(MIN_JOINCODE_LENGTH, MAX_JOINCODE_LENGTH)
+    assert len(name) in irange(MIN_NAME_LENGTH, MAX_NAME_LENGTH)
 
     # Ensure that the faction code looks good
     faction_code = int(request.form['faction'])
     # TODO
 
     # Create the game and add the player who made it.
-    new_game = Game(join_code)
+    new_game = Game(name, join_code)
     new_game.add_user(user, faction_code, creator=True)
 
     # Return the URL
@@ -350,6 +375,22 @@ def web_create_game():
 
 @game_pages.route('/game/join/<gameid>', methods=['POST'])
 def web_join_game(gameid):
+    """
+    Called when the end user wants to join an existing game.
+
+    Args:
+        gameid (int):
+            The unique of the `Game` the end user wants to join.
+
+    Request Fields:
+        join_code (str):
+            The password to the `Game` that the end user provided.
+
+    Returns:
+        A 200 response if successful, an error response detailing what went
+        wrong if not.
+    """
+
     from interstellarage import current_user
     user = current_user()
     game = find(unique=int(gameid))

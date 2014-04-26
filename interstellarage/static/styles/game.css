@@ -1,0 +1,29 @@
+.container.game {
+	width: 800px;
+}
+
+.game:not(.container) {
+	text-align: left;
+}
+
+.faction {
+	float:left;
+	text-align: center;
+	width: 25%;
+}
+
+.isca {
+	background-color: azure;
+}
+
+.galaxycorp {
+	background-color: green;
+}
+
+.fsr {
+	background-color: white;
+}
+
+.privateer {
+	background-color: red;
+}

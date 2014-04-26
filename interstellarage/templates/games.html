@@ -2,7 +2,8 @@
 <html>
 	<head>
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/main.css') }}">
-		<title>Interstellar Age - Login</title>
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/game.css') }}">
+		<title>Interstellar Age - My Games</title>
 
 		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 	</head>
@@ -11,13 +12,20 @@
 		<h1>My Games</h1>
 		<div class="container create">
 			<h1>Create Game</h1>
+			<input type="text" id="name" placeholder="Game Name..."></input>
+			<br/>
 			<input type="text" id="joincode" placeholder="Join password..."></input>
+			<div class="faction isca" code="0">ISCA</div>
+			<div class="faction galaxycorp" code="1">GalaxyCorp</div>
+			<div class="faction fsr" code="2">FSR</div>
+			<div class="faction privateer" code="3">Mercs</div>
 			<div class="button" id="create">Create</div>
 		</div>
 
 		<div class="container game">
 			{% for game in user.get_games() %}
 				<div class="game">
+					<h1>{{ game.name }}</h1>
 					Game created on {{ game.started_when|string }}.
 				</div>
 			{%- endfor %}
@@ -25,15 +33,18 @@
 	</body>
 
 	<script type="text/javascript">
+	var faction = 0;
+
 	$(document).ready(function () {
 		$("#create").click(function () {
 			var joincode = $("#joincode").val();
-			var faction = 0; // TODO -> currently only ISCA
+			var name = $("#name").val();
 
 			$.ajax({
 				type : 'POST',
 				url : '/game/create',
 				data : {
+					name : name,
 					join_code : joincode,
 					faction : faction
 				},
@@ -42,6 +53,16 @@
 					alert(fromServer);
 				}
 			});
+		});
+
+		$(".faction").click(function () {
+			var $this = $(this);
+			var code = parseInt($this.attr("code"));
+
+			faction = code;
+
+			$(".faction").removeClass("selected");
+			$this.addClass("selected");
 		});
 	});
 	</script>
