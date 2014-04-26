@@ -9,17 +9,31 @@
 
 	<body>
 		<div class="container">
+		<h1>{{ game.name }}</h1>
 		{% if not joined %}
+			<input type="text" id="password" placeholder="Join Password..."></input>
+			<div class="button" id="join">Join</div>
 		{% elif is_creator %}
 			You are going to play as {{ game.faction_shortname_for_user(user) }}.
 			<div class="button" id="start">Start Game</div>
 		{% elif joined %}
-			You have joined this game as {{ game.faction_shortname_for_user(user) }}.
+			You have joined this game as {{ game.faction_shortname_for_user(user) }}. Waiting for game creator to start.
 		{%- endif %}
 		</div>
 	</body>
 
 	{% if not joined %}
+		<script type="text/javascript">
+		var faction = 0; // TODO isca
+
+		$(document).ready(function () {
+			$("#join").click(function () {
+				$.ajax({
+					type : 'POST'
+				});
+			});
+		});
+		</script>
 	{% elif is_creator %}
 		<script type="text/javascript">
 		$(document).ready(function () {

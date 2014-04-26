@@ -2,18 +2,19 @@
 	width: 800px;
 }
 
-.game:not(.container) {
+.game {
 	text-align: left;
 }
 
 .faction {
 	float:left;
 	text-align: center;
-	width: 25%;
+	width: 200px;
+	height: 200px;
 }
 
 .isca {
-	background-color: azure;
+	background-color: blue;
 }
 
 .galaxycorp {
