@@ -16,6 +16,9 @@ colonies on the surface.
 import json
 import random
 
+# Import our stuff
+from other import rand_float_range
+
 # Define constants
 ROCKY_PLANET_MIN_SIZE = 0.10
 ROCKY_PLANET_MAX_SIZE = 5.00
@@ -108,18 +111,19 @@ class Planet(object):
         assert max_size != 0.0
         assert min_size < max_size
 
-        # Assign size.
-        self.size = random.randrange(min_size, max_size)
-
+        # Assign name.
         if name is not None:
             self.name = name
         else:
             self.name = ""
 
+        # Assign size.
+        self.size = rand_float_range(min_size, max_size)
+
         # If we are given an orbit distance, then calculate an orbital period
         if orbit_distance is not None:
             self.orbit_distance = orbit_distance
-            self.orbit_period = orbit_distance * random.randrange(0.5, 1.5)
+            self.orbit_period = orbit_distance * rand_float_range(0.5, 1.5)
         else:
             self.orbit_distance = -1
             self.orbit_period = -1

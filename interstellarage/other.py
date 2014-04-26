@@ -19,3 +19,20 @@ def int_to_roman(input):
         result += nums[i] * count
         input -= ints[i] * count
     return result
+
+
+
+def rand_float_range(a, b):
+    import random
+
+    d = b - a
+    dice = random.random()
+    result = d * dice
+    result += a
+    return result
+
+
+
+def coinflip(p):
+    import random
+    return random.random() <= p

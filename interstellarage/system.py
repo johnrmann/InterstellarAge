@@ -7,6 +7,7 @@ import random
 
 # Import InterstellarAge modules.
 import planet as planet_lib
+from other import rand_float_range, coinflip
 
 # Define global variables.
 DISCOVER_DISTANCE = 4
@@ -76,6 +77,7 @@ class System(object):
         if star_spectral_class is not None:
             self.star_spectral_class = star_spectral_class
             # TODO set size
+            self.star_size = rand_float_range(0.5, 3.0)
 
     def __contains__(self, other):
         """
@@ -270,7 +272,7 @@ def generate_system(name, scheme):
     # Calculate the orbiting distances between the planets.
     orbit_distances = []
     for a in xrange(0, num_planets):
-        distance = random.randrange(min_orbit_dist, max_orbit_dist)
+        distance = rand_float_range(min_orbit_dist, max_orbit_dist)
         orbit_distances.append(distance)
     orbit_distances.sort()
 
@@ -286,23 +288,17 @@ def generate_system(name, scheme):
     planets = []
     a = 1 # used for iteration
     for distance in orbit_distances:
-        planet = None
-        dice = random.random()
+        planet_type = None
 
         # Case: Rocky or habitable planet
-        if dice <= chance_rocky(distance):
-            # Case: Habitable planet
-            dice = random.random()
-            if dice <= chance_habitable(distance):
-                planet = planet_lib.HabitablePlanet(orbit_distance=distance)
-
-            # Case: Rocky planet
-            else:
-                planet = planet_lib.RockyPlanet(orbit_distance=distance)
-
-        # Case: Gas Planet
+        if coinflip(chance_rocky(distance)):
+            planet_type = planet_lib.RockyPlanet
+            if coinflip(chance_habitable(distance)):
+                planet_type = planet_lib.HabitablePlanet
         else:
-            planet = planet_lib.GasPlanet(orbit_distance=distance)
+            planet_type = planet_lib.GasPlanet
+
+        planet = planet_type(orbit_distance=distance)
 
         # TODO setup planet
         planet.name = _planet_name(name, scheme, a)
@@ -368,3 +364,8 @@ def _planet_name(system_name, scheme, n):
     # Case: random name
     else:
         return galaxy_lib.generate_name()
+
+
+
+def _size_for_spectral_class(spectral_class):
+    pass
