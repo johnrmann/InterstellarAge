@@ -17,7 +17,7 @@ import json
 from interstellarage import app, db
 
 # Import Flask stuff
-from Flask import request
+from flask import request
 
 # Import our modules
 import planet as planet_lib
