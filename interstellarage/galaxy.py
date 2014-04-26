@@ -226,9 +226,6 @@ class Galaxy(object):
         if for_user is not None:
             for_player = game.player_for_user(for_user)
 
-        # Preconditions.
-        assert for_player is not None
-
         # This helper function returns "True" if the player in question can
         # plot hyperspace routes to the system. If no player is provided, then
         # the system is always visible.
