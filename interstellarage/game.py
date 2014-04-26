@@ -48,6 +48,9 @@ class Game(db.Model):
     started = db.Column(db.Boolean)
     join_code = db.Column(db.String(40))
 
+    galaxy = None
+    orders = []
+
     def __init__ (self, join_code):
         """
         TODO
@@ -233,8 +236,7 @@ class Game(db.Model):
         assert len(self.players) >= GAME_MIN_PLAYERS
 
         # Setup the galaxy for this game.
-        game_galaxy = galaxy_lib.Galaxy(self, generate=True)
-        self.galaxy = game_galaxy
+        self.galaxy = galaxy_lib.Galaxy(self, generate=True)
         self.orders = []
         self.on_turn = 1
         self.started = True
