@@ -167,7 +167,7 @@ class Galaxy(object):
             (x, y, z) = system.position
             if not default_range(x, y, z):
                 continue
-            for player in self.players:
+            for player in self.game.players:
                 system.discover(player)
 
         # Save to disk
