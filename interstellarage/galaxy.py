@@ -167,7 +167,8 @@ class Galaxy(object):
             (x, y, z) = system.position
             if not default_range(x, y, z):
                 continue
-            system.discover()
+            for player in self.players:
+                system.discover(player)
 
         # Save to disk
         self.game.commit()
@@ -180,9 +181,10 @@ class Galaxy(object):
 
             for_user (User):
 
-            discoveries (boolean): Set to `False` by default. Set to `True` if
-                information about the factions that have discovered the systems
-                is to be included in the returned list.
+            discoveries (boolean):
+                Set to `False` by default. Set to `True` if information about
+                the factions that have discovered the systems is to be included
+                in the returned list.
 
         Returns:
             The contents of this `Galaxy` formatted as a `list`. This `list`
@@ -190,8 +192,13 @@ class Galaxy(object):
             written to a JSON file.
         """
 
+        # If we were supplied a User instead of a Player, get the player for
+        # that user.
         if for_user is not None:
             for_player = game.player_for_user(for_user)
+
+        # Preconditions.
+        assert for_player is not None
 
         def can_see_system(s):
             if for_player is None:
