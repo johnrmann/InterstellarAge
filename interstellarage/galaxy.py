@@ -158,6 +158,7 @@ class Galaxy(object):
 
         # The dimensions of the galaxy.
         adj_dim = lambda x: (x - 1) / 2
+        abs_sum = lambda x, y, z: abs(x) + abs(y) + abs(z)
         width = irange(-adj_dim(GALAXY_WIDTH), adj_dim(GALAXY_WIDTH))
         length = irange(-adj_dim(GALAXY_LENGTH), adj_dim(GALAXY_LENGTH))
         height = irange(-adj_dim(GALAXY_HEIGHT), adj_dim(GALAXY_HEIGHT))
