@@ -15,9 +15,9 @@ def int_to_roman(input):
     nums = ('M',  'CM', 'D', 'CD','C', 'XC','L','XL','X','IX','V','IV','I')
     result = ""
     for a in range(len(ints)):
-        count = int(input / ints[i])
-        result += nums[i] * count
-        input -= ints[i] * count
+        count = int(input / ints[a])
+        result += nums[a] * count
+        input -= ints[a] * count
     return result
 
 
