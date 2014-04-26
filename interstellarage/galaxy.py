@@ -164,6 +164,7 @@ class Galaxy(object):
         # Loop through the galactic grid again -- this time to discover the
         # default systems.
         for system in self.systems:
+            system.galaxy = self
             (x, y, z) = system.position
             if not default_range(x, y, z):
                 continue
