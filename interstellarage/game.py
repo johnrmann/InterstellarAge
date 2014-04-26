@@ -134,7 +134,7 @@ class Game(db.Model):
         galaxy_file = open(galaxy_filename)
         galaxy_dict = json.loads(galaxy_file.read())
         galaxy_file.close()
-        self.galaxy = galaxy_lib.galaxy_from_dict()
+        self.galaxy = galaxy_lib.galaxy_from_dict(galaxy_dict, self)
 
         # Parse the orders.
         orders_file = open(orders_filename)
