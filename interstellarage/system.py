@@ -368,6 +368,7 @@ def generate_system(name, scheme):
 
     # Setup the system that we will return
     system = System(name, star_spectral_class=star_spectral_class)
+    return system
 
 
 
