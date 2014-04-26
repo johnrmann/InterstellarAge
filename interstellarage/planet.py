@@ -39,17 +39,21 @@ class Planet(object):
           `GasPlanet`, `HabitablePlanet`, or `RockyPlanet`.
 
     Attributes:
-        unique (int): Positive number uniquely identifying this `Planet`.
+        unique (int):
+            Positive number uniquely identifying this `Planet`.
 
-        name (str): The name of this `Planet`.
+        name (str):
+            The name of this `Planet`.
 
-        moons (list of Planet): The `Planet`s that orbit this `Planet`.
+        moons (list of Planet):
+            The `Planet`s that orbit this `Planet`.
 
-        parent (Planet or System): The body which the `Planet` orbits.
+        parent (Planet or System):
+            The body which the `Planet` orbits.
 
-        space_colonies (list of Colony): The `Colony`s that are in orbit of
-            this `Planet`. Any type of planet can have up to four of these
-            colonies.
+        space_colonies (list of Colony):
+            The `Colony`s that are in orbit of this `Planet`. Any type of
+            planet can have up to four of these colonies.
 
         ground_colonies (list of Colony):
 
@@ -68,8 +72,8 @@ class Planet(object):
         size (float): The radius of this `Planet` in terms of multiples of
             Earth's radius.
 
-        texture (str): The texture to be used for the 3D rendering of this
-            planet.
+        texture (str):
+            The texture to be used for the 3D rendering of this planet.
 
         rings (str or None): If the planet has rings (like Saturn), then
             `rings` is the filename of their texture. It is set to `None` if
@@ -211,14 +215,16 @@ class Planet(object):
     def receive_fleet(self, incoming_fleet_size, from_player):
         """
         Args:
-            incoming_fleet_size (int): A positive `int` -- the number of ships
-                in the arriving navy.
-            from_player (Player): The `Player` who sent the `MoveOrder` or
-                `HyperspaceOrder` that sent the fleet to this `Planet`.
+            incoming_fleet_size (int):
+                A positive `int` -- the number of ships in the arriving navy.
+
+            from_player (Player):
+                The `Player` who sent the `MoveOrder` or `HyperspaceOrder`
+                that sent the fleet to this `Planet`.
 
         Side-Effects:
-            - If the `Player` takes control of the `Planet`, then the `System`
-              it is in is marked as being discovered by that `Player`.
+            If the `Player` takes control of the `Planet`, then the `System`
+            it is in is marked as being discovered by that `Player`.
 
         TODO:
             - Space stations (`space_colonies`) might be part of combat --
@@ -394,11 +400,21 @@ class RockyPlanet(Planet):
         """
         Keyword Args:
             name (str):
+                What we want to name the planet.
+
             orbit_distance (float):
-            min_size (float): The minimum size that this planet can be. This
-                arg should be considered *private* -- it may only be passed
-                in by members of this module.
+                The distance at which this planet will orbit its parent (in
+                AU).
+
+            min_size (float):
+                The minimum size that this planet can be. This arg should be
+                considered *private* -- it may only be passed in by members of
+                this module.
+
             max_size (float):
+                The maxumum size that this planet can be. This arg should be
+                considered *private* -- it may only be passed in by members of
+                this module.
         """
 
         super(RockyPlanet, self).__init__(
@@ -491,7 +507,13 @@ def planet_from_dict(data, game):
 
     Args:
         data (dict):
+            The `dict` we want to parse.
+
         game (Game):
+            The `Game` that this planet is part of.
+
+    Returns:
+        `Planet` -- a planet whose attributes match the provided `dict`.
     """
 
     planet = None

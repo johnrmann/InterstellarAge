@@ -1,5 +1,8 @@
 """
 InterstellarAge
+system.py
+
+This module defines the `System` class.
 """
 
 # Import python modules
@@ -22,29 +25,38 @@ SPECTRAL_CLASSES = ["O", "B", "A", "F", "G", "K", "M", "L", "T", "Y"]
 class System(object):
     """
     Attributes:
-        unique (int): Unique identifier for this `System` within the context of
-            the current `Game`.
+        unique (int):
+            Unique identifier for this `System` within the context of the
+            current `Game`.
 
         name (str):
-        position ( (int, int) ): The Cartesian position of this `System` in the
-            Galaxy Map. A `position` of `(0, 0, 0)` represents the center square
-            in the grid.
+            The name of this solar system.
 
-        star_size (float): The radius of the star in terms of the radius of our
-            sun.
-        star_spectral_class (str): The spectral class of this system's star. An
-            example: our sun is spectral class G2V.
+        position ( (int, int, int) ):
+            The Cartesian position of this `System` in the Galaxy Map. A
+            `position` of `(0, 0, 0)` represents the center square in the grid.
 
-        planets (list of Planet): The `Planet`s in this `System`. Ordered such
-            that the closest `Planet` to the star is at index 0.
+        star_size (float):
+            The radius of the star in terms of the radius of our sun.
 
-        discovered_by (set of Player): The `Player`s that have discovered this
-            `System` (able to travel to it).
-        planets_discovered_by (set of Player): The `Player`s that are able to
-            travel to specific `Planet`s in this `System`. This value is
-            always a subset of `discovered_by`.
+        star_spectral_class (str):
+            The spectral class of this system's star. An example: our sun is 
+            spectral class G.
 
-        galaxy (Galaxy): The `Galaxy` that contains this `System`.
+        planets (list of Planet):
+            The `Planet`s in this `System`. Ordered such that the closest
+            `Planet` to the star is at index 0.
+
+        discovered_by (set of Player):
+            The `Player`s that have discovered this `System` (able to travel
+            to it).
+
+        planets_discovered_by (set of Player):
+            The `Player`s that are able to travel to specific `Planet`s in this
+            `System`. This value is always a subset of `discovered_by`.
+
+        galaxy (Galaxy):
+            The `Galaxy` that contains this `System`.
     """
 
     unique = 0
@@ -65,7 +77,8 @@ class System(object):
     def __init__(self, name, star_spectral_class=None, generate_planets=False):
         """
         Args:
-            name (str): The name of this system.
+            name (str):
+                The name of this system.
 
         Postconditions:
             If a `star_spectral_class` was given, then a `star_size` will also
@@ -89,15 +102,20 @@ class System(object):
 
     def as_dict(self, hide_planets=False, include_discoveries=True):
         """
-        Keyword Args:
-            hide_planets (boolean): Set to `True` if an empty list is to be
-                returned in the "planets" field of the `dict`. A situation
-                where this is necessary is if the `Player` has not discovered
-                the `Planet`s in this `System` yet.
+        Gives a dictionary summary of this object. This is useful for returning
+        data to the web client or for saving as JSON to disk.
 
-            include_discoveries (boolean): Set to `True` if we are to include
-                information about the `Player`s that have discovered this
-                `System` with the return `dict`.
+        Keyword Args:
+            hide_planets (boolean):
+                Set to `True` if an empty list is to be returned in the
+                "planets" field of the `dict`. A situation where this is 
+                necessary is if the `Player` has not discovered the `Planet`s
+                in this `System` yet.
+
+            include_discoveries (boolean):
+                Set to `True` if we are to include information about the
+                `Player`s that have discovered this `System` with the return
+                `dict`.
 
         Returns:
             Important data about this `System` encased in a `dict`. This `dict`
@@ -116,9 +134,13 @@ class System(object):
             "planets" : [planet.as_dict() for planet in self.planets]
         }
 
+        # Hide planets if they are not discovered.
         if hide_planets:
             to_return['planets'] = []
 
+        # Include the users who have discovered this System (and the users who
+        # have discovered the planets in this system) if we're saving this
+        # information to disk.
         if include_discoveries:
             faction = lambda p: p.faction_shortname()
             star = [faction(p) for p in self.discovered_by]
@@ -132,9 +154,11 @@ class System(object):
         """
         Args:
             other_system (System):
+                The returned `float` will be the distance between this `System`
+                and `other_system`.
 
         Return:
-            A `float` representing the cartesian distance between the two
+            A `float` representing the actual distance between the two
             `System`s.
         """
 
@@ -165,7 +189,8 @@ class System(object):
         visible on the Galaxy Map.
 
         Args:
-            by_player (Player): The `Player` that made the recent discovery.
+            by_player (Player):
+                The `Player` that made the recent discovery.
         """
 
         global DISCOVER_DISTANCE
@@ -214,9 +239,17 @@ class System(object):
 
     def hyperspace_jump_length(self, other_system, fleet_size):
         """
+        Gives the number of turns it takes a fleet departing from this `System`
+        to reach another system `other_system` when traveling through
+        hyperspace.
+
         Args:
             other_system (System):
-            fleet_size (int): The number of ships in the departing fleet.
+                The destination of the fleet whose journey length we're
+                calculating.
+
+            fleet_size (int):
+                The number of ships in the departing fleet.
 
         Returns:
             An `int` representing how many turns it will take a fleet of
@@ -226,6 +259,21 @@ class System(object):
         return max(1, int(self.grid_distance(other_system) / 4))
 
     def receive_fleet(self, incoming_fleet_size, from_player):
+        """
+        This method is called when a `Player` sends a fleet to this `System`
+        for the first time. The reason why a `System` recieves a fleet instead
+        of a `Planet` in this case is because the `Planet`s in a `System` are
+        not discovered until a `System` is visited. (Exception: All planets in
+        default systems are discovered).
+
+        Args:
+            incoming_fleet_size (int):
+                The number of arriving ships.
+
+            from_player (Player):
+                The `Player` that sent said ships.
+        """
+
         # Ensure data structure invariants
         assert from_player not in self.planets_discovered_by
         assert from_player in self.discovered_by
@@ -251,8 +299,21 @@ class System(object):
 
 def generate_system(name, scheme):
     """
+    Args:
+        name (str):
+            What we want to name this `System`.
+
+        scheme (int):
+            A system naming scheme code defined at the top of this module. Use
+            `SYSTEM_SCHEME_SYLLABLES` to generate new names for planets. Use
+            `SYSTEM_SCHEME_STAR` to name planets after `name` (for example,
+            "Ceti Alpha V" and "Ceti Alpha VI").
+
     Returns:
         A `System` generated at random.
+
+    Notes:
+        The `position` attribute of the returned `System` will not be set.
     """
 
     # Declare global variables.
@@ -311,6 +372,15 @@ def generate_system(name, scheme):
 
 
 def system_from_dict(data, game):
+    """
+    Args:
+        data (dict):
+
+        game (Game):
+
+    Returns:
+    """
+
     # Find the unique.
     if 'unique' in data:
         unique = int(data['unique'])
@@ -343,12 +413,42 @@ def system_from_dict(data, game):
 
 
 def _random_spectral_class():
+    """
+    PRIVATE FUNCTION
+
+    Returns a random spectral class to be assigned to a `System` in the form
+    of a `str`.
+    """
+
     global SPECTRAL_CLASSES
     return random.choice(SPECTRAL_CLASSES)
 
 
 
 def _planet_name(system_name, scheme, n):
+    """
+    PRIVATE FUNCTION
+
+    Creates the name for the `n`th planet in the `System` named `system_name`
+    using the naming scheme `scheme`.
+
+    Args:
+        system_name (str):
+            The name of the `System` that the planet we're naming will be in.
+
+        scheme (int):
+            A system naming scheme code defined at the top of this module. Use
+            `SYSTEM_SCHEME_SYLLABLES` to generate new names for planets. Use
+            `SYSTEM_SCHEME_STAR` to name planets after `name` (for example,
+            "Ceti Alpha V" and "Ceti Alpha VI").
+
+        n (int):
+            The planet we're naming is the `n`th planet in its system.
+
+    Returns:
+        `str` -- what to name a planet.
+    """
+
     # Import required modules.
     import galaxy as galaxy_lib
     from other import int_to_roman

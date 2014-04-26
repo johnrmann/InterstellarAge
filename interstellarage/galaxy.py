@@ -122,6 +122,7 @@ class Galaxy(object):
                 planet.unique = self._planet_unique_counter
 
             # Add the system to the galaxy
+            assert system_obj is not None
             self.systems.append(system_obj)
 
         # Creates inclusive range
@@ -157,6 +158,7 @@ class Galaxy(object):
                     planet.unique = self._planet_unique_counter
 
                 # Add the system to this galaxy.
+                assert new_sys is not None
                 self.systems.append(new_sys)
 
         # Loop through the galactic grid again -- this time to discover the
@@ -276,18 +278,6 @@ class Galaxy(object):
 
         return "{0}.galaxy.json".format(str(self.game.unique))
 
-    def commit(self):
-        """
-        Compiles this format into one best for saving to disk and saves it.
-        """
-
-        to_save = self.as_list()
-        fname = self.get_json_filename()
-
-        # Open the file.
-        galaxy_file = open(fname)
-        pass
-
     def _create_system(self, x, y, z):
         """
         PRIVATE METHOD
@@ -304,6 +294,7 @@ class Galaxy(object):
         scheme = random.choice([1, 2]) # TODO
         system = system_lib.generate_system(system_name, scheme)
         system.position = (x, y, z)
+        assert system is not None
         return system
 
 
