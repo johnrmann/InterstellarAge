@@ -21,6 +21,9 @@ from flask import request
 # This is so we can bind URLs
 from interstellarage import app
 
+# Import other useful things
+from other import coinflip
+
 # Define constants.
 
 # This is the path to the file of the default galaxy JSON. It contains the
@@ -110,10 +113,11 @@ class Galaxy(object):
             self._system_unique_counter += 1
             system_obj = system_lib.system_from_dict(system, game)
             system_obj.unique = self._system_unique_counter
+            system_obj.galaxy = galaxy
 
-            # Default systems are discovered by all players.
-            system_obj.discovered_by = game.players
-            system_obj.planets_discovered_by = game.players
+            # Default systems are discovered by all players
+            system_obj.discovered_by = set(self.players)
+            system_obj.planets_discovered_by = set(self.players)
 
             # Assign the planets of this system unique identifiers
             system_planets = system_obj.flat_planets()
@@ -121,8 +125,6 @@ class Galaxy(object):
                 self._planet_unique_counter += 1
                 planet.unique = self._planet_unique_counter
 
-            # Add the system to the galaxy
-            assert system_obj is not None
             self.systems.append(system_obj)
 
         # Creates inclusive range
@@ -134,22 +136,24 @@ class Galaxy(object):
         height = irange(-GALAXY_HEIGHT, GALAXY_HEIGHT)
 
         positions = [(x, y, z) for x in width for y in length for z in height]
-        default_range = lambda x, y, z: (abs(x) + abs(y) + abs(z) <= GALAXY_DEFAULT_RANGE)
+        in_default_range = lambda x, y, z: (abs(x) + abs(y) + abs(z) <= GALAXY_DEFAULT_RANGE)
+        in_discover_range = lambda x, y, z: (abs(x) + abs(y) + abs(z) <= GALAXY_DEFAULT_RANGE + 4)
 
-        # Loop through the galatic grid.
+        # Loop through the galatic grid. For the positions outside the range of
+        # default systems, randomly create new ones.
         generated = 0
-        dice = 0
         for (x, y, z) in positions:
             dice = random.random()
-            if default_range(x, y, z):
+            if in_default_range(x, y, z):
                 continue
-
-            # Generate a system.
-            elif dice <= STARS_PER_CUBIC_LY:
+            elif coinflip(STARS_PER_CUBIC_LY):
                 generated += 1
                 self._system_unique_counter += 1
                 new_sys = self._create_system(x, y, z)
                 new_sys.unique = self._system_unique_counter
+
+                if in_discover_range(x, y, z):
+                    new_sys.discovered_by = set(game.players)
 
                 # Assign the new planets unique identifiers.
                 new_sys_planets = new_sys.flat_planets()
@@ -157,19 +161,7 @@ class Galaxy(object):
                     self._planet_unique_counter += 1
                     planet.unique = self._planet_unique_counter
 
-                # Add the system to this galaxy.
-                assert new_sys is not None
                 self.systems.append(new_sys)
-
-        # Loop through the galactic grid again -- this time to discover the
-        # default systems.
-        for system in self.systems:
-            system.galaxy = self
-            (x, y, z) = system.position
-            if not default_range(x, y, z):
-                continue
-            for player in self.game.players:
-                system.discover(player)
 
         # Save to disk
         self.game.commit()
@@ -245,9 +237,14 @@ class Galaxy(object):
     def system_at_position(self, x, y, z):
         """
         Args:
-            x (int): The x-coordinate to search for.
-            y (int): Ditto.
-            z (int): Ditto.
+            x (int):
+                The x-coordinate to search for.
+
+            y (int):
+                Ditto.
+
+            z (int):
+                Ditto.
 
         Returns:
             `True` if and only if this `Galaxy` has a position whose
@@ -310,8 +307,11 @@ class Galaxy(object):
 def galaxy_from_dict(data, game):
     """
     Args:
-        data (list): The list of `System` dictionaries.
-        game (Game): The `Game` that the `Galaxy` is used for.
+        data (list):
+            The list of `System` dictionaries.
+
+        game (Game):
+            The `Game` that the `Galaxy` is used for.
 
     Returns:
         The `Galaxy` that was parsed from the given `dict` and `Game`.
@@ -332,9 +332,10 @@ def galaxy_from_dict(data, game):
 def random_name(system=False):
     """
     Keyword Args:
-        system (boolean): Set to `True` if we want to include "solar systemish"
-            names such as "Epsilon Cygni" or "Tau Theta" in the name generation
-            process. Set to `False` by default.
+        system (boolean):
+            Set to `True` if we want to include "solar systemish" names such
+            as "Epsilon Cygni" or "Tau Theta" in the name generation process.
+            Set to `False` by default.
 
     Returns:
         `str` -- a randomly generated name.
