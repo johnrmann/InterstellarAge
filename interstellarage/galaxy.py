@@ -77,8 +77,13 @@ class Galaxy(object):
 
     def __init__(self, game, generate=False):
         """
-        Keyword Args:
+        Args:
             game (Game):
+                The `Game` which this `Galaxy` will be used for.
+
+        Keyword Args:
+            generate (boolean):
+                Set to `True` if this `Galaxy` is to be generated at random.
         """
 
         # Assign attributes.
@@ -151,6 +156,7 @@ class Galaxy(object):
                 self._system_unique_counter += 1
                 new_sys = self._create_system(x, y, z)
                 new_sys.unique = self._system_unique_counter
+                new_sys.galaxy = galaxy
 
                 if in_discover_range(x, y, z):
                     new_sys.discovered_by = set(game.players)
