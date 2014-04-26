@@ -475,6 +475,9 @@ class HabitablePlanet(RockyPlanet):
 class Colony(object):
     name = ""
 
+    def __init__(self, name):
+        self.name = name
+
     def as_dict(self):
         return {
             "name" : self.name
