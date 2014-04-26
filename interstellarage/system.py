@@ -194,9 +194,9 @@ class System(object):
         """
 
         global DISCOVER_DISTANCE
-        self.planets_discovered_by.add(by_player)
+        self.planets_discovered_by.append(by_player)
         for system in self.galaxy.systems_near_system(self, DISCOVER_DISTANCE):
-            system.discovered_by.add(by_player)
+            system.discovered_by.append(by_player)
 
     def flat_planets(self):
         """
