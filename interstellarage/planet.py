@@ -56,6 +56,8 @@ class Planet(object):
             planet can have up to four of these colonies.
 
         ground_colonies (list of Colony):
+            The `Colony`s that are placed on the surface of this `Planet`. Only
+            rocky and habitable planets can have such colonies.
 
         owner (Player or None): The `Player` that last had a fleet above this
             `Planet` (if there is such a `Player`).
@@ -293,6 +295,10 @@ class Planet(object):
 
     def starship_build_cost(self, number):
         """
+        Args:
+            number (int):
+                The number of ships we want to build.
+
         Returns:
             An `int` equal to the price (in interstellar dollars) of building
             `number` starships above this `Planet`.
@@ -331,9 +337,19 @@ class Planet(object):
         return 0
 
     def max_space_colonies(self):
+        """
+        Returns:
+            `int` -- the maximum number of colonies that can be in orbit of
+            this planet at any point.
+        """
+        
         return 4
 
     def space_upgrade_cost(self):
+        """
+        Returns:
+        """
+        
         pass
 
     def ground_upgrade_cost(self):
@@ -383,6 +399,12 @@ class GasPlanet(Planet):
         return 0
 
     def max_space_colonies(self):
+        """
+        Returns:
+            `int` -- the maximum number of colonies that can be in orbit of
+            this planet at any point.
+        """
+        
         return 4
 
     def space_upgrade_cost(self):
@@ -449,6 +471,12 @@ class RockyPlanet(Planet):
         return 4
 
     def max_space_colonies(self):
+        """
+        Returns:
+            `int` -- the maximum number of colonies that can be in orbit of
+            this planet at any point.
+        """
+        
         return 4
 
     def space_upgrade_cost(self):
@@ -492,6 +520,12 @@ class HabitablePlanet(RockyPlanet):
         return 8
 
     def max_space_colonies(self):
+        """
+        Returns:
+            `int` -- the maximum number of colonies that can be in orbit of
+            this planet at any point.
+        """
+
         return 4
 
     def space_upgrade_cost(self):

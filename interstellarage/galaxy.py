@@ -145,8 +145,8 @@ class Galaxy(object):
             system_obj.galaxy = self
 
             # Default systems are discovered by all players
-            system_obj.discovered_by = set(self.players)
-            system_obj.planets_discovered_by = set(self.players)
+            system_obj.discovered_by = set(game.players)
+            system_obj.planets_discovered_by = set(game.players)
 
             # Assign the planets of this system unique identifiers
             system_planets = system_obj.flat_planets()
