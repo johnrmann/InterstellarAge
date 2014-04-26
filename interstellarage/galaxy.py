@@ -109,6 +109,10 @@ class Galaxy(object):
         Keyword Args:
             generate (boolean):
                 Set to `True` if this `Galaxy` is to be generated at random.
+
+        Note:
+            It is the responsibility of the caller of this constructor to save
+            this galaxy to disk.
         """
 
         # Assign attributes.
@@ -192,7 +196,6 @@ class Galaxy(object):
                 self.systems.append(new_sys)
 
         # Save to disk
-        self.game.commit()
         print "Generated {0} systems".format(str(generated))
 
     def as_list(self, for_player=None, for_user=None, discoveries=False):
