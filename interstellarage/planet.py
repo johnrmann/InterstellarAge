@@ -507,8 +507,11 @@ def planet_from_dict(data, game):
     # Get basic information.
     name = data['name']
     moons = [planet_from_dict(moon, game) for moon in data['moons']]
-    space_colonies = [colony_from_dict(col) for col in data['space_colonies']]
-    ground_colonies = [colony_from_dict(col) for col in data['ground_colonies']]
+    space = [colony_from_dict(col) for col in data['space_colonies']]
+    if 'ground_colonies' in data:
+        ground = [colony_from_dict(col) for col in data['ground_colonies']]
+    else:
+        ground = []
     fleets = data['fleets']
 
     # Get astronomy data
@@ -539,8 +542,8 @@ def planet_from_dict(data, game):
     planet.unique = unique
     planet.name = name
     planet.moons = moons
-    planet.space_colonies = space_colonies
-    planet.ground_colonies = ground_colonies
+    planet.space_colonies = space
+    planet.ground_colonies = ground
     planet.fleets = fleets
 
     # Assign astronomy data.
