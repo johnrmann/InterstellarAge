@@ -256,8 +256,8 @@ class Game(db.Model):
         for player in self.players:
             if player.user == user:
                 return player
-        print self.players
-        print user
+        print "Players: "+str(self.players)
+        print "User: "+str(user)
         return None
 
     def player_for_unique(self, unique):

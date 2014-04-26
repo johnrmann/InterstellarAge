@@ -29,7 +29,6 @@ from wtforms.validators import DataRequired, Length, Email, EqualTo
 
 # Setup the application
 app = Flask(__name__)
-app.debug = True
 app.config["SECRET_KEY"] = "space"
 app.config["SQLALCHEMY_DATABASE_URI"] = "mysql://InterstellarAge:starship@mysql.server/InterstellarAge$default"
 app.config["RECAPTCHA_PUBLIC_KEY"] = "6Lf6NvISAAAAAFVZK25ouv5_W1MkSTTbo1dxtN_F"
