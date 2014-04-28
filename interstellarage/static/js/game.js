@@ -32,10 +32,13 @@ function View () {
     this.scene = new THREE.Scene();
     this.camera = new THREE.PerspectiveCamera(50, aspectRatio, 0.1, 1000);
     this.renderer = new THREE.CanvasRenderer();
+
+    this.visible = false;
 }
 
 View.prototype.show = function () {
     currentView = this;
+    this.visible = true;
 
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(this.renderer.domElement);
@@ -47,7 +50,10 @@ View.prototype.show = function () {
 };
 
 View.prototype.hide = function () {
-    document.body.removeChild(this.renderer.domElement);
+    if (this.visible) {
+        this.visible = false;
+        document.body.removeChild(this.renderer.domElement);
+    }
 };
 
 View.prototype.setCameraPosition = function (x, y, z) {
@@ -140,7 +146,7 @@ function createGalaxyMap (startSystems) {
 
         var sphere = new THREE.SphereGeometry(system.star_size / 2, 20, 20);
         var mat = new THREE.MeshBasicMaterial( {
-            color: spectralClassColor (system.star_spectral_class)
+            color: spectralClassColor(system.star_spectral_class)
         });
         var mesh = new THREE.Mesh(sphere, mat);
 

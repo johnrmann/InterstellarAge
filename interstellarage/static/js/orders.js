@@ -45,7 +45,10 @@ var orders = {
     reset : null,
 
     idCount : 0,
-    submitted : false
+    submitted : false,
+
+    a : 0, // iteration
+    b : 0  // counting
 };
 
 /**
@@ -54,11 +57,16 @@ var orders = {
  * in the same system as "fromPlanet".
  */
 orders.create.moveOrder = function (fromPlanet, toPlanet, fleetNumber) {
+    // Create the label for this order.
+    var label = "Move fleet number N from PLANET to PLANET.";
+
+    // Push order information to the global variable.
     orders.move.push({
         unique : orders.idCount,
         from_planet : fromPlanet,
         to_planet : toPlanet,
-        fleet_number : fleetNumber
+        fleet_number : fleetNumber,
+        label : label
     });
 
     orders.idCount += 1;
@@ -71,21 +79,34 @@ orders.create.moveOrder = function (fromPlanet, toPlanet, fleetNumber) {
  */
 orders.create.hyperspaceOrder = function (fromPlanet, toPlanet, toSystem,
                                           fleetNumber) {
+    // Declare variables.
+    var label;
+
     if (toPlanet === -1) {
+        // Create the label for this order.
+        label = "Move fleet number N from PLANET to SYSTEM.";
+
+        // Push order information to the global variable.
         orders.hyperspace.push({
             unique : orders.idCount,
             from_planet : fromPlanet,
             to_system : toSystem,
-            fleet_number : fleetNumber
+            fleet_number : fleetNumber,
+            label : label
         });
     }
 
     else if (toSystem === -1) {
+        // Create the label for this order.
+        label = "Move fleet number N from PLANET to PLANET.";
+
+        // Push order information to the global variable.
         orders.hyperspace.push({
             unique : orders.idCount,
             from_planet : fromPlanet,
             to_planet : toPlanet,
-            fleet_number : fleetNumber
+            fleet_number : fleetNumber,
+            label : label
         });
     }
 
@@ -93,22 +114,32 @@ orders.create.hyperspaceOrder = function (fromPlanet, toPlanet, toSystem,
 };
 
 orders.create.upgradePlanetOrder = function (planet, upgradeType, colonyName) {
+    // Create the label for this order.
+    var label = "Create colony at PLANET.";
+
+    // Push order information to the global variable.
     orders.colonize.push({
         unique : orders.idCount,
         planet : planet,
         upgrade_type : upgradeType,
-        new_colony_name : colonyName
+        new_colony_name : colonyName,
+        label : label
     });
 
     orders.idCount += 1;
 };
 
 orders.create.buildOrder = function (atPlanet, fleetNumber, ships) {
+    // Create the label for this order.
+    var label = "Build "+ships+" ships in fleet "+fleetNumber+" at PLANET.";
+
+    // Push order information to the global variable.
     orders.build.push({
         unique : orders.idCount,
         at_planet : atPlanet,
         fleet_number : fleetNumber,
-        ships : ships
+        ships : ships,
+        label : label
     });
 
     orders.idCount += 1;
@@ -152,6 +183,9 @@ orders.submit = function () {
     });
 };
 
+/**
+ * Resets the "orders" global variable for a new turn.
+ */
 orders.reset = function () {
     orders.submitted = false;
     orders.idCount = 0;
@@ -160,4 +194,67 @@ orders.reset = function () {
     orders.hyperspace = [];
     orders.build = [];
     orders.colonize = [];
+
+    orders.setupForLoop();
+};
+
+orders.setupForLoop = function () {
+    orders.a = 0;
+    orders.b = 0;
+};
+
+/**
+ * Returns the next order or "null" if we're at the end of orders.
+ */
+orders.next = function () {
+    var len = orders.move.length;
+
+    // For move orders
+    if (orders.b === 0) {
+        orders.a += 1;
+        if (orders.a === len) {
+            orders.b += 1;
+            orders.a = 0;
+            return orders.move[len - 1];
+        }
+        return orders.move[orders.a - 1];
+    }
+
+    // For FTL hyperspace orders
+    len = orders.hyperspace.length;
+    if (orders.b === 1) {
+        orders.a += 1;
+        if (orders.a === len) {
+            orders.b += 1;
+            orders.a = 0;
+            return orders.hyperspace[len - 1];
+        }
+        return orders.hyperspace[orders.a - 1];
+    }
+
+    // For colonize orders
+    len = orders.colonize.length;
+    if (orders.b === 2) {
+        orders.a += 1;
+        if (orders.a === len) {
+            orders.b += 1;
+            orders.a = 0;
+            return orders.colonize[len - 1];
+        }
+        return orders.colonize[orders.a - 1];
+    }
+
+    // For build orders
+    len = orders.build.length;
+    if (orders.b === 3) {
+        orders.a += 1;
+        if (orders.a === len) {
+            orders.b += 1;
+            orders.a = 0;
+            return orders.build[len - 1];
+        }
+        return orders.build[orders.a - 1];
+    }
+
+    return null;
 };
