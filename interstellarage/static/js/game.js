@@ -17,14 +17,6 @@ THREE.Vector3.prototype.lerp = function (pos, t) {
     );
 };
 
-var renderTargetParameters = {
-    minFilter: THREE.LinearFilter,
-    magFilter: THREE.LinearFilter, 
-    format: THREE.RGBFormat,
-    stencilBuffer: false
-};
-var renderTarget = new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight, renderTargetParameters );
-
 var aspectRatio = (window.innerWidth / window.innerHeight);
 
 var projector;
@@ -40,7 +32,6 @@ function View () {
     this.scene = new THREE.Scene();
     this.camera = new THREE.PerspectiveCamera(75, aspectRatio, 0.1, 1000);
     this.renderer = new THREE.WebGLRenderer();
-    this.composer = new THREE.EffectComposer(this.renderer, renderTarget);
 }
 
 View.prototype.show = function () {
