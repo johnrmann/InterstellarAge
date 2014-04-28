@@ -1,3 +1,54 @@
+// Define constants.
+var WORLD_SPACES_PER_AU = 10;
+
+function Planet (planetInfo) {
+    // Assign information from planetInfo.
+    this.unique = planetInfo.unique;
+    this.name = planetInfo.name;
+    this.type = planetInfo.type;
+    this.moons = [];
+    for (var a = 0; a < planetInfo.moons.length) {
+        var moon = new Planet(planetInfo.moons[a]);
+        this.moons.push(moon);
+    }
+    this.spaceColonies = [];
+    this.groundColonies = [];
+    this.owner = planetInfo.owner;
+
+    // Assign astronomy data.
+    this.size = planetInfo.size;
+    this.orbitPeriod = planetInfo.orbit_period;
+    this.orbitDistance = planetInfo.orbit_distance;
+
+    // Calculate a random orbit position.
+    this.orbitOffset = Math.random() * 2 * Math.PI;
+
+    // Uh...
+    this.parentSize = 0.0;
+}
+
+/**
+ * Calculates the cartesian (x, y) position of the Planet on a given turn number.
+ *
+ * Arguments:
+ *
+ * Returns:
+ */
+Planet.prototype.position = function (turnNumber, theta) {
+    var orbits;
+    turnNumber -= 1;
+
+    orbits = turnNumber * this.orbitPeriod;
+    orbits += this.orbitOffset;
+
+    var x = Math.sin(orbits + theta);
+    var y = Math.sin(orbits + theta);
+
+    var r = (this.orbitDistance * WORLD_SPACES_PER_AU) + this.parentSize;
+
+    return [x * r, y * r];
+};
+
 function spectralClassColor (spectralClass) {
     if (spectralClass === "O") {
         return 0x9bb0ff;
@@ -20,7 +71,7 @@ function spectralClassColor (spectralClass) {
     }
 
     else if (spectralClass === "K") {
-        return 0x44ddb4;
+        return 0xffddb4;
     }
 
     else if (spectralClass === "M") {

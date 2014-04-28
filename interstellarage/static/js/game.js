@@ -20,7 +20,7 @@ THREE.Vector3.prototype.lerp = function (pos, t) {
 var aspectRatio = (window.innerWidth / window.innerHeight);
 
 var projector;
-var targetList = [];
+var objects = [];
 var mouse = {
     x : 0,
     y : 0
@@ -40,7 +40,10 @@ View.prototype.show = function () {
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(this.renderer.domElement);
 
-    this.renderer.domElement.onclick = this.onclick;
+    var that = this;
+    this.renderer.domElement.onclick = function (event) {
+        that.onclick(event);  
+    };
 };
 
 View.prototype.hide = function () {
@@ -92,7 +95,7 @@ View.prototype.onclick = function (event) {
     var ray = new THREE.Raycaster(pos, vector.sub(pos).normalize());
 
     // This is an array of all objects in the scene that the ray intersected.
-    var intersects = ray.intersectObjects(targetList);
+    var intersects = ray.intersectObjects(objects);
     var clicked = intersects[0];
 
     // Click the system.
@@ -109,7 +112,7 @@ var systems;
 **************************************************************************************************/
 
 function galaxyMapSetup () {
-    galaxyMap.setCameraPosition(0, 40, 0);
+    galaxyMap.setCameraPosition(0, 50, 0);
     galaxyMap.setCameraRotation(-90, 0, 0);
 
     galaxyMap.onMeshClick = createSystemView;
@@ -130,15 +133,14 @@ function createGalaxyMap (startSystems) {
         var y = system.z;
         var z = system.y;
 
-        var size = system.size;
-
-        var sphere = new THREE.SphereGeometry(size, 20, 20);
+        var sphere = new THREE.SphereGeometry(system.star_size / 2, 20, 20);
         var mat = new THREE.MeshBasicMaterial( {
             color: spectralClassColor (system.star_spectral_class)
         });
         var mesh = new THREE.Mesh(sphere, mat);
 
         galaxyMap.scene.add(mesh);
+        objects.push(mesh);
         mesh.position = new THREE.Vector3(x * 2, y * 2, z * 2);
         mesh.userData = system;
     }
@@ -202,27 +204,84 @@ function galaxyMapMove (goForward, goLeft, goBackward, goRight) {
                                        SYSTEM VIEW FUNCTIONS
 **************************************************************************************************/
 
+var systemViewTheta = 0.0;
+var systemViewPlanets = [];
+
+function systemViewSetup () {
+    systemView.setCameraPosition(0, 50, 0);
+    systemView.setCameraRotation(-90, 0, 0);
+}
+
 function createSystemView (system) {
     console.log("creating system");
     var a = 0;
     var len = system.planets.length;
 
     // Create the mesh for the system's star.
-    var starSphere = new THREE.SphereGeometry(1, 20, 20);
-    var mat = new THREE.MeshBasicMaterial( {color: 0xffff00 });
-    var starMesh = new THREE.Mesh(sphere, mat);
+    var starSize = system.star_size * 5;
+    var starSphere = new THREE.SphereGeometry(starSize, 20, 20);
+    var starMat = new THREE.MeshBasicMaterial( {color: 0xffff00 });
+    var starMesh = new THREE.Mesh(starSphere, starMat);
+
+    systemViewSetup();
 
     // Add the mesh to the scene.
     systemView.scene.add(starMesh);
     starMesh.position = new THREE.Vector3(0, 0, 0);
 
     for (a = 0; a < len; a++) {
-        var planet = system.planets[a];
+        var planet = new Planet(system.planets[a]);
+        planet.parentSize = starSize;
+
+        // Calculate the initial cartesian position of this planet.
+        var pos = planet.position(0, systemViewTheta);
+        var x = pos[0];
+        var y = pos[1];
+
+        var planetSphere = new THREE.SphereGeometry(planet.size, 20, 20);
+        var planetMat = new THREE.MeshBasicMaterial( {
+            color: 0x0000ff
+        });
+        var planetMesh = new THREE.Mesh(planetSphere, planetMat);
+
+        objects.push(planetMesh);
+        systemViewPlanets.push(planetMesh);
+
+        systemView.scene.add(planetMesh);
+
+        planetMesh.position = new THREE.Mesh(x, y, 0);
+        planetMesh.userData = planet;
     }
 
     // Swap out the views.
     galaxyMap.hide();
     systemView.show();
+    animateSystemView();
+}
+
+var systemViewRender = function () {
+    var a = 0;
+
+    systemViewTheta += 0.01;
+
+    for (a = 0; a < systemViewPlanets.length; a++) {
+        var planetMesh = systemViewPlanets[a];
+        var planetObj = systemViewPlanets[a].userData;
+
+        var pos = planet.position(0, systemViewTheta);
+        var x = pos[0];
+        var y = pos[1];
+
+        planetMesh.position.x = x;
+        planetMesh.position.y = y;
+    }
+
+    systemView.renderer(systemView.scene, systemView.camera);
+};
+
+function animateSystemView () {
+    requestAnimationFrame(animateSystemView);
+    systemViewRender();
 }
 
 /**************************************************************************************************
