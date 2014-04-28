@@ -96,7 +96,7 @@ View.prototype.onclick = function (event) {
     var vector = new THREE.Vector3(mouse.x, mouse.y, 0.5);
     projector.unprojectVector(vector, this.camera);
     var pos = this.camera.position;
-    var ray = new THREE.Raycaster(pos, vector.subSelf(pos).normalize());
+    var ray = new THREE.Raycaster(pos, vector.sub(pos).normalize());
 
     // This is an array of all objects in the scene that the ray intersected.
     var intersects = ray.intersectObjects(objects);
@@ -145,7 +145,7 @@ function createGalaxyMap (startSystems) {
 
         galaxyMap.scene.add(mesh);
         objects.push(mesh);
-        mesh.position = new THREE.Vector3(x * 2, y * 2, z * 2);
+        mesh.position = new THREE.Vector3(x * 3, y * 3, z * 3);
         mesh.userData = system;
     }
 }
