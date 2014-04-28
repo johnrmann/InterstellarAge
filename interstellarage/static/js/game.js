@@ -407,16 +407,17 @@ function createSystemView (system) {
         var x = pos[0];
         var y = pos[1];
 
-        readyToRender = false;
         var size = Math.log(Math.E * planet.size) + 0.5 * (1 - planet.size);
         var planetSphere = new THREE.SphereGeometry(size, 20, 20);
+
+        // Texture and material.
         var planetImgUrl = "/static/img/textures/"+planet.texture;
-        var planetImg = new THREE.ImageUtils.loadTexture(planetImgUrl, function () {
-            readyToRender = true;
-        });
+        var planetImg = new THREE.ImageUtils.loadTexture(planetImgUrl);
         var planetMat = new THREE.MeshLambertMaterial({
             map : planetImg
         });
+
+        // Create the mesh.
         var planetMesh = new THREE.Mesh(planetSphere, planetMat);
 
         // Add the planet to our objects collections.
@@ -427,11 +428,6 @@ function createSystemView (system) {
 
         planetMesh.position = new THREE.Vector3(x, 0, y);
         planetMesh.userData = planet;
-    }
-
-    // Wait until we're ready to render.
-    while (!readyToRender) {
-        ;
     }
 
     // Swap out the views.
