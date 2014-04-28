@@ -17,6 +17,14 @@ THREE.Vector3.prototype.lerp = function (pos, t) {
     );
 };
 
+var renderTargetParameters = {
+    minFilter: THREE.LinearFilter,
+    magFilter: THREE.LinearFilter, 
+    format: THREE.RGBFormat,
+    stencilBuffer: false
+};
+var renderTarget = new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight, renderTargetParameters );
+
 var aspectRatio = (window.innerWidth / window.innerHeight);
 
 var projector;
@@ -32,6 +40,7 @@ function View () {
     this.scene = new THREE.Scene();
     this.camera = new THREE.PerspectiveCamera(75, aspectRatio, 0.1, 1000);
     this.renderer = new THREE.WebGLRenderer();
+    this.composer = new THREE.EffectComposer(this.renderer, renderTarget);
 }
 
 View.prototype.show = function () {
@@ -83,16 +92,20 @@ View.prototype.setCameraRotation = function (x, y, z) {
     this.camera.rotation.z = z;
 };
 
+View.prototype.render = function () {
+    this.renderer.render(this.scene, this.camera);
+};
+
 View.prototype.onclick = function (event) {
     // Update the mouse position.
     mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
     mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
     // Find intersections by casting a ray from the origin to the mouse position.
-    var vector = new THREE.Vector3(mouse.x, mouse.y, 1);
+    var vector = new THREE.Vector3(mouse.x, mouse.y, 0.5);
     projector.unprojectVector(vector, this.camera);
     var pos = this.camera.position;
-    var ray = new THREE.Raycaster(pos, vector.sub(pos).normalize());
+    var ray = new THREE.Raycaster(pos, vector.subSelf(pos).normalize());
 
     // This is an array of all objects in the scene that the ray intersected.
     var intersects = ray.intersectObjects(objects);
@@ -156,7 +169,7 @@ function galaxyMapWorldToGrid (pos) {
 
 var galaxyMapRender = function () {
     requestAnimationFrame(galaxyMapRender);
-    galaxyMap.renderer.render(galaxyMap.scene, galaxyMap.camera);
+    galaxyMap.render();
 };
 
 /**************************************************************************************************
@@ -220,7 +233,9 @@ function createSystemView (system) {
     // Create the mesh for the system's star.
     var starSize = system.star_size * 5;
     var starSphere = new THREE.SphereGeometry(starSize, 20, 20);
-    var starMat = new THREE.MeshBasicMaterial( {color: 0xffff00 });
+    var starMat = new THREE.MeshBasicMaterial( {
+        color: spectralClassColor(system.star_spectral_class)
+    });
     var starMesh = new THREE.Mesh(starSphere, starMat);
 
     systemViewSetup();
@@ -228,6 +243,9 @@ function createSystemView (system) {
     // Add the mesh to the scene.
     systemView.scene.add(starMesh);
     starMesh.position = new THREE.Vector3(0, 0, 0);
+
+    // Setup star render pass.
+    // TODO
 
     for (a = 0; a < len; a++) {
         var planet = new Planet(system.planets[a]);
@@ -281,7 +299,7 @@ var systemViewRender = function () {
 
 function animateSystemView () {
     requestAnimationFrame(animateSystemView);
-    systemViewRender();
+    systemView.render();
 }
 
 /**************************************************************************************************
