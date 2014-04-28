@@ -384,14 +384,15 @@ IAGUI.prototype.onmousedown = function (event) {
 IAGUI.prototype.onmouseup = function (event) {
     var a = 0; // iteration
 
-    var x;
-    var y;
+    var x = event.clientX;
+    var y = event.clientY;
 
     // Loop through buttons.
     for (a = 0; a < this._buttons.length; a++) {
         var button = this._buttons[a];
 
-        if (inside && button === this._mouseDownIn) {
+        // If we release the mouse inside the same button, run that button's function.
+        if (inside && button === this._mouseDownIn && button.toRun !== null) {
             this._mouseDownIn = null;
             button.toRun();
             return true;

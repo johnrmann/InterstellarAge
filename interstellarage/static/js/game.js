@@ -29,6 +29,8 @@ var mouse = {
 var currentView = null;
 var iagui = null;
 
+var readyToRender = false;
+
 /**
  * A "View" refers to a set of objects that would be displayed. Example views include the
  * Galaxy Map and the various solar systems.
@@ -54,9 +56,15 @@ View.prototype.show = function () {
 
     var that = this;
     document.onclick = function (event) {
+        if (!that.onclick) {
+            return;
+        }
         that.onclick(event);  
     };
     document.onmousemove = function(event) {
+        if (!that.mousehover) {
+            return;
+        }
         that.mousehover(event);
     };
 };
@@ -106,6 +114,20 @@ View.prototype.setCameraRotation = function (x, y, z) {
     this.camera.rotation.x = x;
     this.camera.rotation.y = y;
     this.camera.rotation.z = z;
+};
+
+View.prototype.cameraOrbit = function(distance, azimuth, altitude) {
+    // Adjust to radians.
+    azimuth *= (2 * Math.PI);
+    altitude *= (2 * Math.PI);
+
+    // Adjust the camera's position.
+    this.camera.position.x = distance * Math.cos(azimuth) * Math.sin(altitude);
+    this.camera.position.y = distance * Math.sin(azimuth) * Math.sin(altitude);
+    this.camera.position.z = distance * Math.cos(altitude);
+
+    // Look at the origin.
+    this.camera.lookAt(new THREE.Vector3(0, 0, 0));
 };
 
 /**
@@ -160,6 +182,8 @@ View.prototype.onmousedown = function(event) {
     if (iagui.onmousedown(event)) {
         return;
     }
+
+
 };
 
 View.prototype.onmouseup = function(event) {
@@ -176,6 +200,10 @@ View.prototype.mousehover = function (event) {
     else {
         this.onMeshHover(event.clientX, event.clientY, above.userData);
     }
+};
+
+View.prototype.mousescroll = function(event) {
+
 };
 
 var galaxyMap = null;
@@ -329,6 +357,10 @@ function galaxyMapHover (x, y, above) {
 // Global variables
 var systemViewTheta = 0.0;
 var systemViewPlanets = [];
+var systemViewCameraOrbit = false;
+var systemViewCameraAzi = 0.0;
+var systemViewCameraAlt = 0.0;
+var systemViewZoomDistance = 50.0;
 
 function systemViewSetup () {
     systemView.setCameraPosition(0, 50, 0);
@@ -365,6 +397,7 @@ function createSystemView (system) {
     // Setup star render pass.
     // TODO
 
+    // For every planet in this system...
     for (a = 0; a < len; a++) {
         var planet = new Planet(system.planets[a]);
         planet.parentSize = starSize;
@@ -374,13 +407,19 @@ function createSystemView (system) {
         var x = pos[0];
         var y = pos[1];
 
+        readyToRender = false;
         var size = Math.log(Math.E * planet.size) + 0.5 * (1 - planet.size);
         var planetSphere = new THREE.SphereGeometry(size, 20, 20);
-        var planetMat = new THREE.MeshBasicMaterial( {
-            color: 0x0000ff
+        var planetImgUrl = "/static/img/textures/"+planet.texture;
+        var planetImg = new THREE.ImageUtils.loadTexture(planetImgUrl, function () {
+            readyToRender = true;
+        });
+        var planetMat = new THREE.MeshLambertMaterial({
+            map : planetImg
         });
         var planetMesh = new THREE.Mesh(planetSphere, planetMat);
 
+        // Add the planet to our objects collections.
         objects.push(planetMesh);
         systemViewPlanets.push(planetMesh);
 
@@ -390,10 +429,49 @@ function createSystemView (system) {
         planetMesh.userData = planet;
     }
 
+    // Wait until we're ready to render.
+    while (!readyToRender) {
+        ;
+    }
+
     // Swap out the views.
     galaxyMap.hide();
     systemView.show();
     animateSystemView();
+}
+
+/**
+ * TODO
+ */
+function systemViewMouseDown(mouseX, mouseY, mouseButton) {
+    if (mouseButton !== 2) {
+        return;
+    }
+
+    systemViewCameraOrbit = true;
+    systemViewCameraAlt = mouseY;
+    systemViewCameraAzi = mouseX;
+}
+
+function systemViewMouseMove(mouseX, mouseY, mouseButton) {
+    if (mouseButton !== 2 || !systemViewCameraOrbit) {
+        return;
+    }
+
+    var dAzi = systemViewCameraAzi - mouseX;
+    var dAlt = systemViewCameraAlt - mouseY;
+
+    systemViewCameraAzi = mouseX;
+    systemViewCameraAlt = mouseY;
+
+    // Moving from the very bottom of the screen to the very top constitutes orbiting the camera
+    // from one "pole" of the orbit sphere to the other.
+    dAzi /= window.innerWidth;
+    dAlt /= window.innerHeight;
+    dAzi *= 360;
+    dAlt *= 180;
+
+    // Orbit the camera. TODO
 }
 
 /**
@@ -448,12 +526,30 @@ $(document).ready(function () {
     // Update aspect ratio.
     $(window).resize(function () {
         aspectRatio = (window.innerWidth / window.innerHeight);
+
+        // Set the width and height of the canvases.
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        dragCanvas.width = window.innerWidth;
+        dragCanvas.height = window.innerHeight;
+        tooltipCanvas.width = window.innerWidth;
+        tooltipCanvas.height = window.innerHeight;
     });
 
     // Get the canvas that we will draw the GUI on.
     var canvas = document.getElementById('iagui');
     var dragCanvas = document.getElementById('drag');
     var tooltipCanvas = document.getElementById('tooltip');
+
+    // Set the width and height.
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    dragCanvas.width = window.innerWidth;
+    dragCanvas.height = window.innerHeight;
+    tooltipCanvas.width = window.innerWidth;
+    tooltipCanvas.height = window.innerHeight;
+
+    // Create the GUI.
     iagui = new IAGUI(canvas, dragCanvas, tooltipCanvas, 0); // TODO faction is always ISCA
 
     $.ajax({

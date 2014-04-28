@@ -14,6 +14,7 @@ function Planet (planetInfo) {
     this.spaceColonies = [];
     this.groundColonies = [];
     this.owner = planetInfo.owner;
+    this.texture = planetInfo.texture;
 
     // Assign astronomy data.
     this.size = planetInfo.size;
