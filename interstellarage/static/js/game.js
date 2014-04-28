@@ -29,6 +29,10 @@ var mouse = {
 var currentView = null;
 var iagui = null;
 
+/**
+ * A "View" refers to a set of objects that would be displayed. Example views include the
+ * Galaxy Map and the various solar systems.
+ */
 function View () {
     this.scene = new THREE.Scene();
     this.camera = new THREE.PerspectiveCamera(50, aspectRatio, 0.1, 1000);
@@ -37,13 +41,16 @@ function View () {
     this.visible = false;
 }
 
+/**
+ * Displays the view in the HTML page.
+ */
 View.prototype.show = function () {
     currentView = this;
     this.visible = true;
 
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     var d = document.getElementById("3d");
-    d.body.appendChild(this.renderer.domElement);
+    d.appendChild(this.renderer.domElement);
 
     var that = this;
     this.renderer.domElement.onclick = function (event) {
@@ -51,6 +58,9 @@ View.prototype.show = function () {
     };
 };
 
+/**
+ * Hides the view from the HTML page.
+ */
 View.prototype.hide = function () {
     if (this.visible) {
         this.visible = false;
@@ -59,6 +69,9 @@ View.prototype.hide = function () {
     }
 };
 
+/**
+ * Sets the position of this view's camera.
+ */
 View.prototype.setCameraPosition = function (x, y, z) {
     this.camera.position.x = x;
     this.camera.position.y = y;
@@ -92,11 +105,20 @@ View.prototype.setCameraRotation = function (x, y, z) {
     this.camera.rotation.z = z;
 };
 
+/**
+ * Redraws the view.
+ */
 View.prototype.render = function () {
     this.renderer.render(this.scene, this.camera);
     iagui.draw();
 };
 
+/**
+ * Called when the view is clicked. If the mouse click position was within the GUI, we let
+ * the IAGUI handle the click. If not, we project a ray from the mouse position to the game
+ * world and look for an intersected object. If there is a match, then we call the View's
+ * "onMeshClick" method with the mesh's object's userData.
+ */
 View.prototype.onclick = function (event) {
     // Update the mouse position.
     mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
@@ -202,17 +224,50 @@ function updateGalaxyMap (newSystems) {
 
 }
 
+/**
+ * Called when the User presses and holds a key while in the Galaxy Map view. Moves the camera
+ * according to the keys pressed.
+ */
 function galaxyMapKeyboard (keyCode) {
     var goForward = (keyCode === document.keyCodes.upArrow || keyCode === document.keyCodes.w);
     var goLeft = (keyCode === document.keyCodes.leftArrow || keyCode === document.keyCodes.a);
     var goBackward = (keyCode === document.keyCodes.downArrow || keyCode === document.keyCodes.s);
     var goRight = (keyCode === document.keyCodes.rightArrow || keyCode === document.keyCodes.d);
+
+    galaxyMapMove(goForward, goLeft, goBackward, goRight);
 }
 
-function galaxyMapMouseHover () {
+/**
+ * Called when the user has the mouse in the top/bottom/right/left 10% of the screen. Moves the
+ * galaxy map camera in that direction.
+ */
+function galaxyMapMouseHover (x, y) {
+    var sWidth = window.innerWidth;
+    var sHeight = window.innerHeight;
 
+    var topPart = ((y / sHeight) >= 0.1);
+    var leftPart = ((x / sWidth) <= 0.1);
+    var bottomPart = ((y / sHeight) >= 0.9);
+    var rightPart ((x / sWidth) <= 0.1);
+
+    galaxyMapMove(topPart, leftPart, bottomPart, rightPart);
 }
 
+/**
+ * Moves the camera according to the given boolean directions.
+ *
+ * Parameters:
+ *      goForward (boolean):
+ *
+ *      goLeft (boolean):
+ *
+ *      goBackward (boolean):
+ *
+ *      goRight (boolean):
+ *
+ * Returns:
+ *      Nothing.
+ */
 function galaxyMapMove (goForward, goLeft, goBackward, goRight) {
     if (goForward) {
         // TODO
