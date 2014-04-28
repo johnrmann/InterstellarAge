@@ -116,8 +116,19 @@ View.prototype.onclick = function (event) {
     this.onMeshClick(clicked.userData);
 };
 
-var galaxyMap = new View();
-var systemView = new View();
+View.prototype.onmousedown = function(event) {
+    // See if we clicked on the gui.
+    if (iagui.onmousedown(event)) {
+        return;
+    }
+};
+
+View.prototype.onmouseup = function(event) {
+
+};
+
+var galaxyMap = null;
+var systemView = null;
 
 var systems;
 
@@ -162,6 +173,10 @@ function createGalaxyMap (startSystems) {
     }
 }
 
+/**
+ * Takes in a Galaxy Map position (a 3D vector measured in lightyears) and outputs a Vector3 of
+ * that position in the 3D game board space.
+ */
 function galaxyMapWorldToGrid (pos) {
     var x = pos.x;
     var y = pos.y;
@@ -220,6 +235,7 @@ function galaxyMapMove (goForward, goLeft, goBackward, goRight) {
                                        SYSTEM VIEW FUNCTIONS
 **************************************************************************************************/
 
+// Global variables
 var systemViewTheta = 0.0;
 var systemViewPlanets = [];
 
@@ -228,12 +244,15 @@ function systemViewSetup () {
     systemView.setCameraRotation(-90, 0, 0);
 
     objects = [];
+    systemViewPlanets = [];
 }
 
+/**
+ * Given a dictionary that represents a solar system, this function creates a scene based on said
+ * dictionary.
+ */
 function createSystemView (system) {
-    console.log("creating system");
-    systemViewPlanets = [];
-    
+    // Declare iteration/loop variables.
     var a = 0;
     var len = system.planets.length;
 
@@ -286,10 +305,14 @@ function createSystemView (system) {
     animateSystemView();
 }
 
+/**
+ * Called every frame of the system view. Adjusts planet orbit, star luminoscity, and other
+ * details that make the game come alive.
+ */
 var systemViewRender = function () {
     var a = 0;
 
-    systemViewTheta += 0.0001;
+    systemViewTheta += 0.007;
 
     for (a = 0; a < systemViewPlanets.length; a++) {
         var planetMesh = systemViewPlanets[a];
@@ -326,6 +349,10 @@ function showManagePlanet (planet) {
 $(document).ready(function () {
     // Setup the projector.
     projector = new THREE.Projector();
+
+    // Create the views.
+    galaxyMap = new View();
+    systemView = new View();
 
     // Update aspect ratio.
     $(window).resize(function () {
