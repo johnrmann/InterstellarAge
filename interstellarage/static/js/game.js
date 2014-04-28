@@ -93,7 +93,7 @@ View.prototype.onclick = function (event) {
     mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
     // Find intersections by casting a ray from the origin to the mouse position.
-    var vector = new THREE.Vector3(mouse.x, mouse.y, 0.5);
+    var vector = new THREE.Vector3(mouse.x, 0.5, mouse.y);
     projector.unprojectVector(vector, this.camera);
     var pos = this.camera.position;
     var ray = new THREE.Raycaster(pos, vector.sub(pos).normalize());
@@ -103,6 +103,7 @@ View.prototype.onclick = function (event) {
     var clicked = intersects[0];
 
     // Click the system.
+    clicked = systems[0];
     this.onMeshClick(clicked.userData);
 };
 
@@ -120,6 +121,7 @@ function galaxyMapSetup () {
     galaxyMap.setCameraRotation(-90, 0, 0);
 
     galaxyMap.onMeshClick = createSystemView;
+    objects = [];
 
     galaxyMap.show();
 }
@@ -214,6 +216,8 @@ var systemViewPlanets = [];
 function systemViewSetup () {
     systemView.setCameraPosition(0, 50, 0);
     systemView.setCameraRotation(-90, 0, 0);
+
+    objects = [];
 }
 
 function createSystemView (system) {
@@ -258,7 +262,7 @@ function createSystemView (system) {
 
         systemView.scene.add(planetMesh);
 
-        planetMesh.position = new THREE.Mesh(x, y, 0);
+        planetMesh.position = new THREE.Mesh(x, 0, y);
         planetMesh.userData = planet;
     }
 
