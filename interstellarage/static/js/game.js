@@ -30,7 +30,7 @@ var currentView = null;
 
 function View () {
     this.scene = new THREE.Scene();
-    this.camera = new THREE.PerspectiveCamera(75, aspectRatio, 0.1, 1000);
+    this.camera = new THREE.PerspectiveCamera(50, aspectRatio, 0.1, 1000);
     this.renderer = new THREE.CanvasRenderer();
 }
 
@@ -47,7 +47,7 @@ View.prototype.show = function () {
 };
 
 View.prototype.hide = function () {
-
+    document.body.removeChild(this.renderer.domElement);
 };
 
 View.prototype.setCameraPosition = function (x, y, z) {
@@ -93,17 +93,15 @@ View.prototype.onclick = function (event) {
     mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
     // Find intersections by casting a ray from the origin to the mouse position.
-    var vector = new THREE.Vector3(mouse.x, 0.5, mouse.y);
+    var vector = new THREE.Vector3(mouse.x, mouse.y, 0.5);
     projector.unprojectVector(vector, this.camera);
     var pos = this.camera.position;
     var ray = new THREE.Raycaster(pos, vector.sub(pos).normalize());
 
     // This is an array of all objects in the scene that the ray intersected.
-    var intersects = ray.intersectObjects(objects);
-    var clicked = intersects[0];
+    var intersects = ray.intersectObjects(this.scene.children);
 
     // Click the system.
-    clicked = objects[0];
     this.onMeshClick(clicked.userData);
 };
 
@@ -124,6 +122,7 @@ function galaxyMapSetup () {
     objects = [];
 
     galaxyMap.show();
+    systemView.hide();
 }
 
 function createGalaxyMap (startSystems) {
