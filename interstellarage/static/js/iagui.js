@@ -78,7 +78,7 @@ function IAGUI(canvas, dragCanvas, tooltipCanvas, faction) {
     this.tooltipCanvas = tooltipCanvas;
     this.context = this.canvas.getContext('2d');
     this.dragContext = this.dragCanvas.getContext('2d');
-    this.tooltipContext = this.tooltipContext.getContext('2d');
+    this.tooltipContext = this.tooltipCanvas.getContext('2d');
 
     // Display tracking variables.
     this.showingTopbar = false;
