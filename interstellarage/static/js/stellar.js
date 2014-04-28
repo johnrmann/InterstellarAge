@@ -7,7 +7,7 @@ function Planet (planetInfo) {
     this.name = planetInfo.name;
     this.type = planetInfo.type;
     this.moons = [];
-    for (var a = 0; a < planetInfo.moons.length) {
+    for (var a = 0; a < planetInfo.moons.length; a++) {
         var moon = new Planet(planetInfo.moons[a]);
         this.moons.push(moon);
     }
