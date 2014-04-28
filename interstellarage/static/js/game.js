@@ -395,7 +395,7 @@ function createSystemView (system) {
     starMesh.position = new THREE.Vector3(0, 0, 0);
 
     // Add sunlight to the solar system.
-    var sunlight = new PointLight(
+    var sunlight = new THREE.PointLight(
         spectralClassColor(system.star_spectral_class),
         1,
         100
