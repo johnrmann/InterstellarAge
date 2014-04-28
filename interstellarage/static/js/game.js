@@ -53,10 +53,10 @@ View.prototype.show = function () {
     d.appendChild(this.renderer.domElement);
 
     var that = this;
-    this.renderer.domElement.onclick = function (event) {
+    document.onclick = function (event) {
         that.onclick(event);  
     };
-    this.renderer.domElement.mousemove = function(event) {
+    document.mousemove = function(event) {
         that.mousehover(event);
     };
 };
@@ -192,6 +192,7 @@ function galaxyMapSetup () {
     galaxyMap.setCameraRotation(-90, 0, 0);
 
     galaxyMap.onMeshClick = createSystemView;
+    galaxyMap.onMeshHover = galaxyMapHover;
     objects = [];
 
     galaxyMap.show();
@@ -402,7 +403,7 @@ function createSystemView (system) {
 var systemViewRender = function () {
     var a = 0;
 
-    systemViewTheta += 0.007;
+    systemViewTheta += 0.002;
 
     for (a = 0; a < systemViewPlanets.length; a++) {
         var planetMesh = systemViewPlanets[a];
