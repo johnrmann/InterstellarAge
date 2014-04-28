@@ -412,6 +412,13 @@ def system_from_dict(data, game):
     system.position = (x, y, z)
     system.galaxy = game.galaxy
 
+    # Get the users who discovered the system.
+    discov = data['discovered_by']
+    pdiscov = data['planets_discovered_by']
+    p4f = game.player_for_faction
+    system.discovered_by = map(p4f, discov)
+    system.planets_discovered_by = map(p4f, pdiscov)
+
     # We're done here.
     return system
 
