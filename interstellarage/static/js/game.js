@@ -56,7 +56,7 @@ View.prototype.show = function () {
     document.onclick = function (event) {
         that.onclick(event);  
     };
-    document.mousemove = function(event) {
+    document.onmousemove = function(event) {
         that.mousehover(event);
     };
 };
