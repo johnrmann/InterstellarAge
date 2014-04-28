@@ -107,7 +107,7 @@ orders.create.buildOrder = function (atPlanet, fleetNumber, ships) {
     orders.build.push({
         unique : orders.idCount,
         at_planet : atPlanet,
-        fleet_number : fleetNumberm
+        fleet_number : fleetNumber,
         ships : ships
     });
 
