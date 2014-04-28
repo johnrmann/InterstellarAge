@@ -70,13 +70,15 @@ IAGUILabel.prototype.draw = function(context) {
 /**
  * TODO
  */
-function IAGUI(canvas, dragCanvas, faction) {
+function IAGUI(canvas, dragCanvas, tooltipCanvas, faction) {
     this.faction = faction;
 
     this.canvas = canvas;
     this.dragCanvas = dragCanvas;
+    this.tooltipCanvas = tooltipCanvas;
     this.context = this.canvas.getContext('2d');
     this.dragContext = this.dragCanvas.getContext('2d');
+    this.tooltipContext = this.tooltipContext.getContext('2d');
 
     // Display tracking variables.
     this.showingTopbar = false;
@@ -255,7 +257,7 @@ IAGUI.prototype.draw = function () {
     var sWidth = window.innerWidth;
     var sHeight = window.innerHeight;
 
-    this.context.fillRect = this.uiColor;
+    this.context.fillStyle = this.uiColor;
 
     if (this.showingTopbar) {
         // Draw background.
@@ -415,4 +417,12 @@ IAGUI.prototype.onmouseup = function (event) {
  */
 IAGUI.prototype.onmousemove = function (event) {
 
+};
+
+
+IAGUI.prototype.drawTooltip = function (x, y, tooltip) {
+    // TODO
+    tooltipContext.clearRect(0, 0, window.innerWidth, window.innerHeight);
+    tooltipContext.fillStyle = this.textColor;
+    tooltipContext.fillText(tooltip, x, y);
 };

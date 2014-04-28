@@ -56,6 +56,9 @@ View.prototype.show = function () {
     this.renderer.domElement.onclick = function (event) {
         that.onclick(event);  
     };
+    this.renderer.domElement.mousemove = function(event) {
+        that.mousehover(event);
+    };
 };
 
 /**
@@ -113,13 +116,7 @@ View.prototype.render = function () {
     iagui.draw();
 };
 
-/**
- * Called when the view is clicked. If the mouse click position was within the GUI, we let
- * the IAGUI handle the click. If not, we project a ray from the mouse position to the game
- * world and look for an intersected object. If there is a match, then we call the View's
- * "onMeshClick" method with the mesh's object's userData.
- */
-View.prototype.onclick = function (event) {
+View.prototype.mouseMesh = function(event) {
     // Update the mouse position.
     mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
     mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
@@ -134,7 +131,27 @@ View.prototype.onclick = function (event) {
     var intersects = ray.intersectObjects(this.scene.children);
 
     // Click the system.
-    clicked = intersects[0].object;
+    if (intersects.length !== 0) {
+        return intersects[0].object;
+    }
+
+    else {
+        return null;
+    }
+};
+
+/**
+ * Called when the view is clicked. If the mouse click position was within the GUI, we let
+ * the IAGUI handle the click. If not, we project a ray from the mouse position to the game
+ * world and look for an intersected object. If there is a match, then we call the View's
+ * "onMeshClick" method with the mesh's object's userData.
+ */
+View.prototype.onclick = function (event) {
+    // Click the system.
+    clicked = this.mouseMesh(event);
+    if (clicked === null) {
+        return;
+    }
     this.onMeshClick(clicked.userData);
 };
 
@@ -147,6 +164,18 @@ View.prototype.onmousedown = function(event) {
 
 View.prototype.onmouseup = function(event) {
 
+};
+
+View.prototype.mousehover = function (event) {
+    above = this.mouseMesh(event);
+
+    if (above === null) {
+        return;
+    }
+
+    else {
+        this.onMeshHover(event.clientX, event.clientY, above.userData);
+    }
 };
 
 var galaxyMap = null;
@@ -286,6 +315,12 @@ function galaxyMapMove (goForward, goLeft, goBackward, goRight) {
     }
 }
 
+function galaxyMapHover (x, y, above) {
+    // Draw the tooltip on the star.
+    var starName = above.name;
+    iagui.drawTooltip(x, y, starName);
+}
+
 /**************************************************************************************************
                                        SYSTEM VIEW FUNCTIONS
 **************************************************************************************************/
@@ -417,7 +452,8 @@ $(document).ready(function () {
     // Get the canvas that we will draw the GUI on.
     var canvas = document.getElementById('iagui');
     var dragCanvas = document.getElementById('drag');
-    iagui = new IAGUI(canvas, dragCanvas, 0); // TODO faction is always ISCA
+    var tooltipCanvas = document.getElementById('tooltip');
+    iagui = new IAGUI(canvas, dragCanvas, tooltipCanvas, 0); // TODO faction is always ISCA
 
     $.ajax({
         type : 'POST',
