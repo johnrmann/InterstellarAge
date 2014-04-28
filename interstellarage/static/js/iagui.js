@@ -87,15 +87,15 @@ IAGUI.prototype.setTopbar = function (money, turnNumber, backLabel, backFunction
 };
 
 IAGUI.prototype.closeTopbar = function () {
-
+	this.showingTopbar = false;
 };
 
 IAGUI.prototype.setPlanetInfo = function (planet) {
-
+	this.showingPlanetInfo = true;
 };
 
 IAGUI.prototype.closePlanetInfo = function () {
-
+	this.showingPlanetInfo = false;
 };
 
 IAGUI.prototype.draw = function () {

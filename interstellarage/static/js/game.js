@@ -134,7 +134,7 @@ function createGalaxyMap (startSystems) {
 
         var sphere = new THREE.SphereGeometry(size, 20, 20);
         var mat = new THREE.MeshBasicMaterial( {
-            color: spectralClassColor (system.spectral_class)
+            color: spectralClassColor (system.star_spectral_class)
         });
         var mesh = new THREE.Mesh(sphere, mat);
 
@@ -254,6 +254,7 @@ $(document).ready(function () {
         },
         success: function(fromServer) {
             var j = JSON.parse(fromServer);
+            systems = j.galaxy;
             createGalaxyMap(j.galaxy);
             galaxyMapRender();
         }
