@@ -224,7 +224,7 @@ class Galaxy(object):
         # If we were supplied a User instead of a Player, get the player for
         # that user.
         if for_user is not None:
-            for_player = game.player_for_user(for_user)
+            for_player = self.game.player_for_user(for_user)
 
         # This helper function returns "True" if the player in question can
         # plot hyperspace routes to the system. If no player is provided, then

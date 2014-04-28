@@ -26,7 +26,7 @@ USERNAME_MAX_LENGTH = 32
 
 class User(db.Model):
     """
-    TODO
+    Each `User` object represents a registered user in the database.
 
     Public Attributes:
         unique (int):
