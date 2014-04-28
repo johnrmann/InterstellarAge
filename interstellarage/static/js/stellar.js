@@ -42,7 +42,7 @@ Planet.prototype.position = function (turnNumber, theta) {
     orbits += this.orbitOffset;
 
     var x = Math.sin(orbits + theta);
-    var y = Math.sin(orbits + theta);
+    var y = Math.cos(orbits + theta);
 
     var r = (this.orbitDistance * WORLD_SPACES_PER_AU) + this.parentSize;
 

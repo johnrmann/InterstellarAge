@@ -31,7 +31,7 @@ var currentView = null;
 function View () {
     this.scene = new THREE.Scene();
     this.camera = new THREE.PerspectiveCamera(75, aspectRatio, 0.1, 1000);
-    this.renderer = new THREE.WebGLRenderer();
+    this.renderer = new THREE.CanvasRenderer();
 }
 
 View.prototype.show = function () {
@@ -103,7 +103,7 @@ View.prototype.onclick = function (event) {
     var clicked = intersects[0];
 
     // Click the system.
-    clicked = systems[0];
+    clicked = objects[0];
     this.onMeshClick(clicked.userData);
 };
 
@@ -222,6 +222,8 @@ function systemViewSetup () {
 
 function createSystemView (system) {
     console.log("creating system");
+    systemViewPlanets = [];
+    
     var a = 0;
     var len = system.planets.length;
 
@@ -236,6 +238,7 @@ function createSystemView (system) {
     systemViewSetup();
 
     // Add the mesh to the scene.
+    systemView.scene = new THREE.Scene();
     systemView.scene.add(starMesh);
     starMesh.position = new THREE.Vector3(0, 0, 0);
 
@@ -251,7 +254,8 @@ function createSystemView (system) {
         var x = pos[0];
         var y = pos[1];
 
-        var planetSphere = new THREE.SphereGeometry(planet.size, 20, 20);
+        var size = Math.log(Math.E * planet.size) + 0.5 * (1 - planet.size);
+        var planetSphere = new THREE.SphereGeometry(size, 20, 20);
         var planetMat = new THREE.MeshBasicMaterial( {
             color: 0x0000ff
         });
@@ -262,7 +266,7 @@ function createSystemView (system) {
 
         systemView.scene.add(planetMesh);
 
-        planetMesh.position = new THREE.Mesh(x, 0, y);
+        planetMesh.position = new THREE.Vector3(x, 0, y);
         planetMesh.userData = planet;
     }
 
@@ -275,13 +279,13 @@ function createSystemView (system) {
 var systemViewRender = function () {
     var a = 0;
 
-    systemViewTheta += 0.01;
+    systemViewTheta += 0.0001;
 
     for (a = 0; a < systemViewPlanets.length; a++) {
         var planetMesh = systemViewPlanets[a];
         var planetObj = systemViewPlanets[a].userData;
 
-        var pos = planet.position(0, systemViewTheta);
+        var pos = planetObj.position(0, systemViewTheta);
         var x = pos[0];
         var y = pos[1];
 
@@ -289,12 +293,12 @@ var systemViewRender = function () {
         planetMesh.position.y = y;
     }
 
-    systemView.renderer(systemView.scene, systemView.camera);
+    systemView.render();
 };
 
 function animateSystemView () {
     requestAnimationFrame(animateSystemView);
-    systemView.render();
+    systemViewRender();
 }
 
 /**************************************************************************************************
