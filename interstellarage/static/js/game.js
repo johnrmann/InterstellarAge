@@ -248,7 +248,7 @@ function galaxyMapMouseHover (x, y) {
     var topPart = ((y / sHeight) >= 0.1);
     var leftPart = ((x / sWidth) <= 0.1);
     var bottomPart = ((y / sHeight) >= 0.9);
-    var rightPart ((x / sWidth) <= 0.1);
+    var rightPart = ((x / sWidth) <= 0.1);
 
     galaxyMapMove(topPart, leftPart, bottomPart, rightPart);
 }
