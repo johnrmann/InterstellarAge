@@ -138,10 +138,10 @@ View.prototype.render = function () {
     iagui.draw();
 };
 
-View.prototype.mouseMesh = function(event) {
+View.prototype.mouseMesh = function(x, y) {
     // Update the mouse position.
-    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+    x = (x / window.innerWidth) * 2 - 1;
+    y = -(y / window.innerHeight) * 2 + 1;
 
     // Find intersections by casting a ray from the origin to the mouse position.
     var vector = new THREE.Vector3(mouse.x, mouse.y, 0.5);
@@ -170,7 +170,7 @@ View.prototype.mouseMesh = function(event) {
  */
 View.prototype.onclick = function (event) {
     // Click the system.
-    clicked = this.mouseMesh(event);
+    clicked = this.mouseMesh(event.clientX, event.clientY);
     if (clicked === null) {
         return;
     }
@@ -328,19 +328,19 @@ function galaxyMapMouseHover (x, y) {
  */
 function galaxyMapMove (goForward, goLeft, goBackward, goRight) {
     if (goForward) {
-        // TODO
+        galaxyMap.camera.position.z += 0.1;
     }
 
     else if (goLeft) {
-        // TODO
+        galaxyMap.camera.position.x -= 0.1;
     }
 
     else if (goBackward) {
-        // TODO
+        galaxyMap.camera.position.z -= 0.1;
     }
 
     else if (goRight) {
-        // TODO
+        galaxyMap.camera.position.x += 0.1;
     }
 }
 
@@ -394,6 +394,15 @@ function createSystemView (system) {
     systemView.scene.add(starMesh);
     starMesh.position = new THREE.Vector3(0, 0, 0);
 
+    // Add sunlight to the solar system.
+    var sunlight = new PointLight(
+        spectralClassColor(system.star_spectral_class),
+        1,
+        100
+    );
+    sunlight.position = new THREE.Vector3(0, 0, 0);
+    systemView.scene.add(sunlight);
+
     // Setup star render pass.
     // TODO
 
@@ -414,7 +423,8 @@ function createSystemView (system) {
         var planetImgUrl = "/static/img/textures/"+planet.texture;
         var planetImg = new THREE.ImageUtils.loadTexture(planetImgUrl);
         var planetMat = new THREE.MeshLambertMaterial({
-            map : planetImg
+            map : planetImg,
+            color : 0xffffff
         });
 
         // Create the mesh.
@@ -429,6 +439,10 @@ function createSystemView (system) {
         planetMesh.position = new THREE.Vector3(x, 0, y);
         planetMesh.userData = planet;
     }
+
+    // Setup the GUI.
+    iagui.setTopbar(1000, 1, "<- Galaxy", function () {});
+    iagui.draw();
 
     // Swap out the views.
     galaxyMap.hide();
@@ -470,6 +484,37 @@ function systemViewMouseMove(mouseX, mouseY, mouseButton) {
     // Orbit the camera. TODO
 }
 
+function systemViewMouseUp(mouseX, mouseY, mouseButton) {
+    // Declare variables.
+    var droppedOn;
+    var planet;
+    var draggingFleet = false;
+
+    // CASE: Releasing the left mouse button indicates that we could be dropping a fleet on another
+    // planet.
+    if (mouseButton === 1 && draggingFleet) {
+        droppedOn = systemView.mouseMesh(mouseX, mouseY);
+
+        // Nothing was dropped on...
+        if (droppedOn === null) {
+            return;
+        }
+
+        // Get the data about the planet we're dropping on.
+        planet = droppedOn.userData;
+        if (planet === null) {
+            return;
+        }
+
+        // Create the move order.
+    }
+
+    // CASE: Releasing the right mouse button indicates that we've stopped orbiting.
+    else if (mouseButton === 2) {
+        // ???
+    }
+}
+
 /**
  * Called every frame of the system view. Adjusts planet orbit, star luminoscity, and other
  * details that make the game come alive.
@@ -497,6 +542,86 @@ var systemViewRender = function () {
 function animateSystemView () {
     requestAnimationFrame(animateSystemView);
     systemViewRender();
+}
+
+/**************************************************************************************************
+                               HYPERSPACE JUMP PLOT FUNCTIONS
+**************************************************************************************************/
+
+var hyperspaceJump = {
+    fromPlanet : -1,
+    fleetNumber : -1,
+    oldSystemView : null
+};
+
+function setupHyperspaceJump(fromPlanet, fleetNumber) {
+    // Assign globals.
+    hyperspaceJump.fromPlanet = fromPlanet;
+    hyperspaceJump.fleetNumber = fleetNumber;
+    oldSystemView = systemView;
+
+    // We now display the galaxy map with a catch: clicking on a system will call
+    // "hyperspaceJumpSystemSelect".
+    galaxyMap.onMeshClick = hyperspaceJumpSystemSelect;
+    systemView.hide();
+    galaxyMap.show();
+
+    // Set the camera position to be above our solar system in case it was moved.
+}
+
+function hyperspaceJumpSystemSelect(system) {
+    var discovered = (system.planets.length !== 0);
+
+    // CASE: If the planets in this system are not discovered, then set the jump to the system.
+    if (!discovered) {
+        // Add the new order.
+        orders.create.hyperspaceOrder(
+            hyperspaceJump.fromPlanet.unique,
+            -1,
+            system.unique,
+            hyperspaceJump.fleetNumber
+        );
+
+        hyperspaceJumpRestoreOldSystemView();
+    }
+
+    // CASE: If there are planets in the system, then show the system view with the planet click
+    // behavior set to "hyperspaceJumpPlanetSelect"
+    else {
+        createSystemView(system);
+        systemView.onMeshClick = hyperspaceJumpPlanetSelect;
+    }
+}
+
+/**
+ * Called when the User selects a planet to plot a hyperspace jump to.
+ */
+function hyperspaceJumpPlanetSelect(planet) {
+    if (planet === null) {
+        return;
+    }
+
+    // Create the new order.
+    orders.create.hyperspaceOrder(
+        hyperspaceOrder.fromPlanet.unique,
+        planet.unique,
+        -1,
+        hyperspaceJump.fleetNumber
+    );
+
+    hyperspaceJumpRestoreOldSystemView();
+}
+
+/**
+ * Called after we have created the hyperspace order. This function restores the old solar system
+ * view.
+ */
+function hyperspaceJumpRestoreOldSystemView () {
+    // Restore the old system view.
+    systemView.hide();
+    galaxyMap.hide();
+    systemView = oldSystemView;
+    systemView.show();
 }
 
 /**************************************************************************************************
