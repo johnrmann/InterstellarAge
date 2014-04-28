@@ -27,11 +27,12 @@ var mouse = {
 };
 
 var currentView = null;
+var iagui = null;
 
 function View () {
     this.scene = new THREE.Scene();
     this.camera = new THREE.PerspectiveCamera(50, aspectRatio, 0.1, 1000);
-    this.renderer = new THREE.CanvasRenderer();
+    this.renderer = new THREE.WebGLRenderer();
 
     this.visible = false;
 }
@@ -41,7 +42,8 @@ View.prototype.show = function () {
     this.visible = true;
 
     this.renderer.setSize(window.innerWidth, window.innerHeight);
-    document.body.appendChild(this.renderer.domElement);
+    var d = document.getElementById("3d");
+    d.body.appendChild(this.renderer.domElement);
 
     var that = this;
     this.renderer.domElement.onclick = function (event) {
@@ -52,7 +54,8 @@ View.prototype.show = function () {
 View.prototype.hide = function () {
     if (this.visible) {
         this.visible = false;
-        document.body.removeChild(this.renderer.domElement);
+        var d = document.getElementById("3d");
+        d.removeChild(this.renderer.domElement);
     }
 };
 
@@ -91,6 +94,7 @@ View.prototype.setCameraRotation = function (x, y, z) {
 
 View.prototype.render = function () {
     this.renderer.render(this.scene, this.camera);
+    iagui.draw();
 };
 
 View.prototype.onclick = function (event) {
@@ -108,6 +112,7 @@ View.prototype.onclick = function (event) {
     var intersects = ray.intersectObjects(this.scene.children);
 
     // Click the system.
+    clicked = intersects[0].object;
     this.onMeshClick(clicked.userData);
 };
 
@@ -295,7 +300,7 @@ var systemViewRender = function () {
         var y = pos[1];
 
         planetMesh.position.x = x;
-        planetMesh.position.y = y;
+        planetMesh.position.z = y;
     }
 
     systemView.render();
@@ -326,6 +331,11 @@ $(document).ready(function () {
     $(window).resize(function () {
         aspectRatio = (window.innerWidth / window.innerHeight);
     });
+
+    // Get the canvas that we will draw the GUI on.
+    var canvas = document.getElementById('iagui');
+    var dragCanvas = document.getElementById('drag');
+    iagui = new IAGUI(canvas, dragCanvas, 0); // TODO faction is always ISCA
 
     $.ajax({
         type : 'POST',

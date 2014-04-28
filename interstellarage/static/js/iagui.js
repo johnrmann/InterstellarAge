@@ -70,11 +70,11 @@ IAGUILabel.prototype.draw = function(context) {
 /**
  * TODO
  */
-function IAGUI(faction) {
+function IAGUI(canvas, dragCanvas, faction) {
     this.faction = faction;
 
-    this.canvas = document.getElementById('canvas');
-    this.dragCanvas = document.getElementById('dragCanvas');
+    this.canvas = canvas;
+    this.dragCanvas = dragCanvas;
     this.context = this.canvas.getContext('2d');
     this.dragContext = this.dragCanvas.getContext('2d');
 
@@ -254,6 +254,8 @@ IAGUI.prototype.showOrders = function () {
 IAGUI.prototype.draw = function () {
     var sWidth = window.innerWidth;
     var sHeight = window.innerHeight;
+
+    this.context.fillRect = this.uiColor;
 
     if (this.showingTopbar) {
         // Draw background.
