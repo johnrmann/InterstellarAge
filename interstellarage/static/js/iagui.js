@@ -422,7 +422,7 @@ IAGUI.prototype.onmousemove = function (event) {
 
 IAGUI.prototype.drawTooltip = function (x, y, tooltip) {
     // TODO
-    tooltipContext.clearRect(0, 0, window.innerWidth, window.innerHeight);
-    tooltipContext.fillStyle = this.textColor;
-    tooltipContext.fillText(tooltip, x, y);
+    this.tooltipContext.clearRect(0, 0, window.innerWidth, window.innerHeight);
+    this.tooltipContext.fillStyle = this.textColor;
+    this.tooltipContext.fillText(tooltip, x, y);
 };
