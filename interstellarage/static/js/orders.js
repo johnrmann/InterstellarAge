@@ -56,7 +56,7 @@ var orders = {
  * at planet with unique ID "fromPlanet" to a planet with unique ID "toPlanet"
  * in the same system as "fromPlanet".
  */
-orders.create.moveOrder = function (fromPlanet, toPlanet, fleetNumber) {
+orders.create.moveOrder = function(fromPlanet, toPlanet, fleetNumber) {
     // Create the label for this order.
     var label = "Move fleet number N from PLANET to PLANET.";
 

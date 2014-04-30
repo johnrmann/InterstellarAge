@@ -71,7 +71,7 @@ IAGUIButton.prototype.pointInside = function(clickX, clickY) {
                                        IAGUIDraggable
 **************************************************************************************************/
 
-function IAGUIDraggable(x, y, width, height, color, content, textColor, textSize, whenReleased) {
+function IAGUIDraggable(x, y, width, height, color, content, textColor, textSize, whenReleased, info) {
     this.x = x;
     this.y = y;
     this.width = width;
@@ -86,6 +86,8 @@ function IAGUIDraggable(x, y, width, height, color, content, textColor, textSize
     this.textSize = textSize;
 
     this.whenReleased = whenReleased;
+
+    this.info = info;
 }
 
 IAGUIDraggable.prototype.pointInside = function(clickX, clickY) {
@@ -320,6 +322,24 @@ IAGUI.prototype.setTopbar = function (money, turnNumber, backLabel, backFunction
         content : factionLabelText
     });
 
+    // Draw the back button.
+    if (backLabel !== null && backLabel !== "") {
+        var backButton = this._createButton({
+            right : 0,
+            top : 0,
+            width : TOPBAR_BACK_BUTTON_WIDTH,
+            height : TOPBAR_HEIGHT,
+            content : backLabel,
+            toRun : backFunction,
+            textColor : this.textColor,
+            color : this.uiColor
+        });
+        this._topbarElems.push(backButton);
+    }
+
+    // Draw the orders button.
+
+
     this._topbarElems.push(turnLabel);
     this._topbarElems.push(moneyLabel);
     this._topbarElems.push(factionLabel);
@@ -360,13 +380,14 @@ IAGUI.prototype.setPlanetInfo = function (planet, releasedCallback) {
         draggable = this._createDraggable({
             right : PLANET_INFO_WIDTH - 5 - (FLEET_ICON_HEIGHT + 5) * a,
             top : curY,
-            content : "Fleet "+a+": "+planet.fleets[a]+" Ships",
+            content : "Fleet "+(a+1)+": "+planet.fleets[a]+" Ships",
             textColor : "white",
             color : "gray",
             textSize : FONT_SIZE,
             width : FLEET_ICON_HEIGHT,
             height : FLEET_ICON_HEIGHT,
-            whenReleased : releasedCallback
+            whenReleased : releasedCallback,
+            info : {fleetNumber : a+1}
         });
         this._planetViewElems.push(draggable);
     }
@@ -382,7 +403,7 @@ IAGUI.prototype.setPlanetInfo = function (planet, releasedCallback) {
     };
 
     // Draw ground colonies header.
-    labelAttrs.content = "Cities";
+    labelAttrs.content = "Cities:";
     label = this._createLabel(labelAttrs);
     this._planetViewElems.push(label);
 
@@ -447,7 +468,7 @@ IAGUI.prototype.showOrders = function () {
         // Add the button to the orders sidebar.
         buttonAttrs.x = ORDERS_WIDTH - ORDER_LABEL_HEIGHT;
         buttonAttrs.y = TOPBAR_HEIGHT + (b * ORDER_LABEL_HEIGHT);
-        this._addButton(buttonAttrs);
+        this._createButton(buttonAttrs);
 
         // Create the label for this move order and draw it.
         var label = "Move Fleet 1 from PLANET to PLANET.";
@@ -461,7 +482,7 @@ IAGUI.prototype.showOrders = function () {
         // Add the button to the orders sidebar.
         buttonAttrs.x = ORDERS_WIDTH - ORDER_LABEL_HEIGHT;
         buttonAttrs.y = TOPBAR_HEIGHT + (b * ORDER_LABEL_HEIGHT);
-        this._addButton(buttonAttrs);
+        this._createButton(buttonAttrs);
 
         // Create the label for this hyperspace order and draw it.
         var label = "Compute FTL jump from PLANET to DEST.";
@@ -475,7 +496,7 @@ IAGUI.prototype.showOrders = function () {
         // Add the button to the orders sidebar.
         buttonAttrs.x = ORDERS_WIDTH - ORDER_LABEL_HEIGHT;
         buttonAttrs.y = TOPBAR_HEIGHT + (b * ORDER_LABEL_HEIGHT);
-        this._addButton(buttonAttrs);
+        this._createButton(buttonAttrs);
 
         // Create the label for this build order and draw it.
         var label = "Build N fleets at PLANET.";
@@ -489,7 +510,7 @@ IAGUI.prototype.showOrders = function () {
         // Add the button to the orders sidebar.
         buttonAttrs.x = ORDERS_WIDTH - ORDER_LABEL_HEIGHT;
         buttonAttrs.y = TOPBAR_HEIGHT + (b * ORDER_LABEL_HEIGHT);
-        this._addButton(buttonAttrs);
+        this._createButton(buttonAttrs); // TODO add
 
         // Create the label for this colonize order and draw it.
         var label = "Found COLONY on/in orbit of PLANET.";
@@ -544,7 +565,7 @@ IAGUI.prototype.draw = function () {
     }
 };
 
-IAGUI.prototype._addButton = function(attrs) {
+IAGUI.prototype._createButton = function(attrs) {
     var x;
     var y;
     var width = attrs.width;
@@ -572,7 +593,7 @@ IAGUI.prototype._addButton = function(attrs) {
     // Create the button
     var button = new IAGUIButton(x, y, width, height, attrs.color, attrs.content,
                                  attrs.textColor);
-    this._buttons.push(button);
+    return button;
 };
 
 IAGUI.prototype._createLabel = function(attrs) {
@@ -630,7 +651,8 @@ IAGUI.prototype._createDraggable = function(attrs) {
     var draggable = new IAGUIDraggable(
         x, y, attrs.width, attrs.height,
         attrs.color, attrs.content, attrs.textColor, attrs.textSize,
-        attrs.whenReleased
+        attrs.whenReleased,
+        attrs.info
     );
     return draggable;
 };
@@ -685,7 +707,7 @@ IAGUI.prototype.onmouseup = function (event) {
 
     // Are we dragging something?
     if (this._dragging !== null) {
-        this._dragging.whenReleased(x, y);
+        this._dragging.whenReleased(x, y, this._dragging.info);
         this._dragging.letGo();
         this._dragging = null;
     }

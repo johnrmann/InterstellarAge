@@ -606,7 +606,7 @@ function systemViewMouseUp(mouseX, mouseY, mouseButton) {
         }
 
         // Display information about the planet.
-        var fleetIconReleasedCallback = function (releasedX, releasedY) {
+        var fleetIconReleasedCallback = function (releasedX, releasedY, info) {
             var dropMesh = systemView.mouseMesh(releasedX, releasedY);
             if (dropMesh === null) {
                 return;
@@ -618,11 +618,11 @@ function systemViewMouseUp(mouseX, mouseY, mouseButton) {
             }
 
             // Create the move order.
-            orders.create.moveOrder({
-                fromPlanet : systemView.clickedOn.unique,
-                toPlanet : planet.unique,
-                fleetNumber : 1 // TODO
-            });
+            orders.create.moveOrder(
+                systemView.clickedOn.unique,
+                planet.unique,
+                info.fleetNumber
+            );
         };
         iagui.setPlanetInfo(planet, fleetIconReleasedCallback);
         iagui.draw();
