@@ -2,8 +2,15 @@
 	width: 800px;
 }
 
+.container.create {
+	width: 800px;
+	margin-bottom: 20px;
+}
+
 .game {
 	text-align: left;
+	color:white;
+	background-color:gray;
 }
 
 .faction {

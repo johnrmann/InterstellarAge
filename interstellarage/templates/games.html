@@ -26,9 +26,18 @@
 
 		<div class="container game">
 			{% for game in user.get_games() %}
-				<div class="game">
+				<div class="game" unique="{{ game.unique }}">
 					<h1>{{ game.name }}</h1>
 					Game created on {{ game.started_when|string }}.
+					Playing With:
+					<ul>
+					{% for player in game.players %}
+						<li>{{ player.user.username }}</li>
+					{% endfor %}
+					</ul>
+					<a href="{{ /game/{{ game.unique }}">
+						<div class="button">Enter</div>
+					</a>
 				</div>
 			{%- endfor %}
 		</div>

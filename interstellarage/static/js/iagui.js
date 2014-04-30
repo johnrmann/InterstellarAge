@@ -6,7 +6,8 @@ var ORDERS_WIDTH = 300;
 var ORDER_LABEL_HEIGHT = 40;
 var FLEET_ICON_HEIGHT = 50;
 var COLONY_LABEL_HEIGHT = 20;
-var FONT_SIZE = 20;
+var FONT_SIZE = 12;
+var FONT_LARGE_SIZE = 24;
 
 /**************************************************************************************************
                                          IAGUIButton
@@ -33,8 +34,8 @@ IAGUIButton.prototype.draw = function(context) {
     context.fillRect(this.x, this.y, this.width + this.x, this.height + this.y);
 
     // Prepare to the text.
-    var textWidth = context.measureText(this.content).width;
-    var textHeight = context.measureText(this.content).height;
+    var textWidth = context.measureText(this.content);
+    var textHeight = FONT_SIZE;
     var midpointX = this.x + (this.width / 2);
     var midpointY = this.y + (this.height / 2);
     var drawX = midpointX - (textWidth / 2);
@@ -88,15 +89,24 @@ function IAGUIDraggable(x, y, width, height, color, content, textColor, whenRele
                                        IAGUILabel
 **************************************************************************************************/
 
-function IAGUILabel(x, y, content, textColor) {
+function IAGUILabel(x, y, content, textColor, textSize) {
     this.x = x;
     this.y = y;
     this.content = content;
     this.textColor = textColor;
+    this.textSize = textSize;
 }
 
 IAGUILabel.prototype.draw = function(context) {
+    var oldFill = context.fillStyle;
 
+    // Draw the text.
+    context.font = this.textSize+"px Arial";
+    context.fillStyle = this.textColor;
+    context.fillText(this.content, this.x, this.y + this.textSize);
+
+    // Reset context values.
+    context.fillStyle = oldFill;
 };
 
 /**************************************************************************************************
@@ -234,7 +244,8 @@ IAGUI.prototype.setPlanetInfo = function (planet) {
         right : PLANET_INFO_WIDTH - 5,
         top : TOPBAR_HEIGHT + 5,
         content : planet.name,
-        textColor : this.textColor
+        textColor : this.textColor,
+        textSize : FONT_LARGE_SIZE
     });
     this._planetViewElems.push(label);
 
@@ -245,7 +256,8 @@ IAGUI.prototype.setPlanetInfo = function (planet) {
         right : PLANET_INFO_WIDTH - 5,
         top : curY,
         content : "Cities:",
-        textColor : this.textColor
+        textColor : this.textColor,
+        textSize : FONT_SIZE
     });
     this._planetViewElems.push(label);
 
@@ -256,7 +268,8 @@ IAGUI.prototype.setPlanetInfo = function (planet) {
             right : PLANET_INFO_WIDTH - 15,
             top : curY,
             content : planet.groundColonies[a],
-            textColor : this.textColor            
+            textColor : this.textColor,
+            textSize : FONT_SIZE     
         });
 
         curY += (COLONY_LABEL_HEIGHT + 5);
@@ -267,7 +280,8 @@ IAGUI.prototype.setPlanetInfo = function (planet) {
         right : PLANET_INFO_WIDTH - 5,
         top : curY,
         content : "Space Stations:",
-        textColor : this.textColor
+        textColor : this.textColor,
+        textSize : FONT_SIZE
     });
     this._planetViewElems.push(label);
 
@@ -278,7 +292,8 @@ IAGUI.prototype.setPlanetInfo = function (planet) {
             right : PLANET_INFO_WIDTH - 15,
             top : curY,
             content : planet.spaceColonies[a],
-            textColor : this.textColor            
+            textColor : this.textColor,
+            textSize : FONT_SIZE     
         });
 
         curY += (COLONY_LABEL_HEIGHT + 5);
@@ -458,7 +473,7 @@ IAGUI.prototype._addLabel = function(attrs) {
     }
 
     // Create the new label.
-    var label = new IAGUILabel(x, y, attrs.content, attrs.textColor);
+    var label = new IAGUILabel(x, y, attrs.content, attrs.textColor, attrs.textSize);
     this._labels.push(label);
 
     // Return the label.

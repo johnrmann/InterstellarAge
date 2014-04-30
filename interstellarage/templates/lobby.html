@@ -29,7 +29,11 @@
 		$(document).ready(function () {
 			$("#join").click(function () {
 				$.ajax({
-					type : 'POST'
+					type : 'POST',
+					url : '/game/join/{{ game.unique }}',
+					success : function(fromServer) {
+						alert(fromServer);
+					}
 				});
 			});
 		});
@@ -42,8 +46,7 @@
 					type : 'POST',
 					url : '/game/start/{{ game.unique }}',
 					success : function(fromServer) {
-						// TODO: redirect to game
-						console.log(fromServer);
+						window.location = window.location;
 					}
 				});
 			});
