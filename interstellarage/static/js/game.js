@@ -497,6 +497,7 @@ function createSystemView (system) {
     systemView.onMouseUp = systemViewMouseUp;
     systemView.onMouseDown = systemViewMouseDown;
     systemView.onMouseMove = systemViewMouseMove;
+    systemView.onScroll = systemViewOnScroll;
 
     // Setup star render pass.
     // TODO
@@ -661,7 +662,7 @@ function systemViewMouseUp(mouseX, mouseY, mouseButton) {
     }
 }
 
-systemView.onScroll = function(amount) {
+function systemViewOnScroll(amount) {
     // One world unit per one hundred scroll units.
     var dZ = amount / 100.0;
     this.camera.position.z += dZ;
