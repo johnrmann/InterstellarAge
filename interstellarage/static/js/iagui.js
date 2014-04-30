@@ -23,7 +23,26 @@ function IAGUIButton(x, y, width, height, color, content, textColor, toRun) {
 }
 
 IAGUIButton.prototype.draw = function(context) {
+    var oldFill = context.fillStyle;
 
+    // Draw the background.
+    context.fillStyle = this.color;
+    context.fillRect(this.x, this.y, this.width + this.x, this.height + this.y);
+
+    // Prepare to the text.
+    var textWidth = context.measureText(this.content).width;
+    var textHeight = context.measureText(this.content).height;
+    var midpointX = this.x + (this.width / 2);
+    var midpointY = this.y + (this.height / 2);
+    var drawX = midpointX - (textWidth / 2);
+    var drawY = midpointY - (textHeight / 2);
+
+    // Draw the text.
+    context.fillStyle = this.textColor;
+    context.fillText(this.content, drawX, drawY);
+
+    // Reset context values.
+    context.fillStyle = oldFill;
 };
 
 IAGUIButton.prototype.pointInside = function(clickX, clickY) {
@@ -38,15 +57,29 @@ IAGUIButton.prototype.pointInside = function(clickX, clickY) {
     var cond4 = clickY <= y2;
 
     return cond1 && cond2 && cond3 && cond4;
-}
+};
 
 /**************************************************************************************************
                                        IAGUIDraggable
 **************************************************************************************************/
 
 function IAGUIDraggable(x, y, width, height, color, content, textColor, whenReleased) {
+    this.x = x;
+    this.y = y;
+    this.width = width;
+    this.height = height;
 
+    this._dragX = x;
+    this._dragY = y;
+
+    this.color = color;
+    this.content = content;
+    this.textColor = textColor;
+
+    this.whenReleased = whenReleased;
 }
+
+
 
 /**************************************************************************************************
                                        IAGUILabel
@@ -168,7 +201,17 @@ IAGUI.prototype.closeTopbar = function () {
 IAGUI.prototype.setPlanetInfo = function (planet) {
     this.showingPlanetInfo = true;
 
-    // Draw the fleet icons.
+    // Add the planet name label.
+    this._addLabel({
+        right : PLANET_INFO_WIDTH - 5,
+        top : TOPBAR_HEIGHT + 5,
+        content : planet.name,
+        textColor : this.textColor
+    });
+
+    // Add the fleet icons.
+
+    // Add the FTL dropzone.
 };
 
 IAGUI.prototype.closePlanetInfo = function () {

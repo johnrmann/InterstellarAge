@@ -487,6 +487,7 @@ function systemViewMouseMove(mouseX, mouseY, mouseButton) {
 function systemViewMouseUp(mouseX, mouseY, mouseButton) {
     // Declare variables.
     var droppedOn;
+    var clickedOn;
     var planet;
     var draggingFleet = false;
 
@@ -509,10 +510,34 @@ function systemViewMouseUp(mouseX, mouseY, mouseButton) {
         // Create the move order.
     }
 
+    // CASE: Clicking on planet.
+    else if (mouseButton === 1 && !draggingFleet) {
+        clickedOn = systemView.mouseMesh(mouseX, mouseY);
+
+        // If nothing was clicked on...
+        if (clickedOn === null) {
+            return;
+        }
+
+        // Get the data about the planet we're clicking.
+        planet = clickedOn.userData;
+        if (planet === null) {
+            return;
+        }
+
+        // Display information about the planet.
+        iagui.setPlanetInfo(planet);
+        iagui.draw();
+    }
+
     // CASE: Releasing the right mouse button indicates that we've stopped orbiting.
     else if (mouseButton === 2) {
         // ???
     }
+}
+
+function systemViewBackToGalaxyMap () {
+    
 }
 
 /**
