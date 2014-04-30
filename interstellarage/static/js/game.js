@@ -238,9 +238,21 @@ View.prototype.onmouseup = function(event) {
 };
 
 View.prototype.mousehover = function (event) {
+    // The view can't be clicked if it is not active.
+    if (!this.visible) {
+        return;
+    }
+
     above = this.mouseMesh(event.clientX, event.clientY);
 
+    // Are we doing anything with the GUI?
+    if (iagui.onmousemove(event)) {
+        return;
+    }
+
     if (above === null) {
+        // TODO: Make this a method call.
+        iagui.dragContext.clearRect(0, 0, window.innerWidth, window.innerHeight);
         return;
     }
 
@@ -458,6 +470,7 @@ function createSystemView (system) {
     // Hook in the system view functions.
     systemView.onMouseUp = systemViewMouseUp;
     systemView.onMouseDown = systemViewMouseDown;
+    systemView.onMouseMove = systemViewMouseMove;
 
     // Setup star render pass.
     // TODO

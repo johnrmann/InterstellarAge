@@ -454,6 +454,10 @@ IAGUI.prototype.draw = function () {
 
     this.context.fillStyle = this.uiColor;
 
+    // Clear everything.
+    this.context.clearRect(0, 0, sWidth, sHeight);
+
+    // Draw the topbar if such a thing is to be drawn.
     if (this.showingTopbar) {
         // Draw background.
         this.context.fillRect(0, 0, sWidth, TOPBAR_HEIGHT);
