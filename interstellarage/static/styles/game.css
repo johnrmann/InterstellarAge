@@ -1,9 +1,10 @@
 .container.game {
-	width: 800px;
+	width: 730px;
 }
 
 .container.create {
-	width: 800px;
+    color: white;
+	width: 730px;
 	margin-bottom: 20px;
 }
 
@@ -13,11 +14,19 @@
 	background-color:gray;
 }
 
+.faction-container {
+    color: black;
+    height: 170px;
+}
+
 .faction {
-	float:left;
+	float: left;
+    border-radius: 2px;
+    margin: 5px;
+    padding: 10px;
 	text-align: center;
-	width: 200px;
-	height: 200px;
+	width: 150px;
+	height: 150px;
 }
 
 .isca {
@@ -34,4 +43,12 @@
 
 .privateer {
 	background-color: red;
+}
+
+.selected {
+    color: yellow;
+    font-weight: bold;
+    -moz-box-shadow: 0 0 10px #fff;
+    -webkit-box-shadow: 0 0 10px #fff;
+    box-shadow: 0px 0px 10px #fff;
 }

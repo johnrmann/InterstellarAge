@@ -15,11 +15,15 @@
 			<input type="text" id="name" placeholder="Game Name..."></input>
 			<br/>
 			<input type="text" id="joincode" placeholder="Join password..."></input>
-			<br/>
-			<div class="faction isca" code="0">ISCA</div>
-			<div class="faction galaxycorp" code="1">GalaxyCorp</div>
-			<div class="faction fsr" code="2">FSR</div>
-			<div class="faction privateer" code="3">Mercs</div>
+			<br/><br/>
+            Choose faction:
+            <br/><br/>
+            <div class="faction-container">
+                <div class="faction isca" code="0">ISCA</div>
+                <div class="faction galaxycorp" code="1">GalaxyCorp</div>
+                <div class="faction fsr" code="2">FSR</div>
+                <div class="faction privateer" code="3">Mercs</div>
+            </div>
 			<br/>
 			<div class="button" id="create">Create</div>
 		</div>
@@ -40,6 +44,9 @@
 					</a>
 				</div>
 			{%- endfor %}
+            {% if not user.get_games() %}
+                No games created yet.
+            {% endif %}
 		</div>
 	</body>
 
@@ -61,7 +68,7 @@
 				},
 				success : function(fromServer) {
 					// TODO redirect to game lobby
-					alert(fromServer);
+					alert("Your game is available at: " + fromServer);
 				}
 			});
 		});
