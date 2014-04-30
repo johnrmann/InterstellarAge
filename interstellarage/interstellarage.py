@@ -182,7 +182,11 @@ def show_game(gameid):
     if started and not joined:
         return "You can't play this game. Sorry. :(", 400
     elif started and joined:
-        return render_template('game.html', game=game)
+        return render_template(
+            'game.html',
+            game=game,
+            player=game.player_for_user(user)
+        )
     else:
         return render_template(
             'lobby.html',
