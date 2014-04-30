@@ -88,6 +88,20 @@ function IAGUIDraggable(x, y, width, height, color, content, textColor, textSize
     this.whenReleased = whenReleased;
 }
 
+IAGUIDraggable.prototype.pointInside = function(x, y) {
+    var x1 = this._dragX;
+    var y1 = this._dragY;
+    var x2 = x1 + this.width;
+    var y2 = y1 + this.height;
+
+    var cond1 = x1 <= clickX;
+    var cond2 = clickX <= x2;
+    var cond3 = y1 <= clickY;
+    var cond4 = clickY <= y2;
+
+    return cond1 && cond2 && cond3 && cond4;
+};
+
 IAGUIDraggable.prototype.draw = function(context) {
     var oldFill = "white";
     if (context.fillStyle) {
@@ -119,6 +133,11 @@ IAGUIDraggable.prototype.draw = function(context) {
 
     // Reset context values.
     context.fillStyle = oldFill;
+};
+
+IAGUIDraggable.prototype.letGo = function() {
+    this._dragX = this.x;
+    this._dragY = this.y;
 };
 
 /**************************************************************************************************
@@ -259,17 +278,28 @@ IAGUI.prototype.setTopbar = function (money, turnNumber, backLabel, backFunction
 
     this._topbarElems = [];
 
-    // Draw the labels.
-    var turnLabel = this.labelForTurn(this.turnNumber);
-    var label = this._createLabel({
+    // Draw the current turn label.
+    var turnLabelText = this.labelForTurn(this.turnNumber);
+    var turnLabel = this._createLabel({
         right : 200,
         top : 10,
         textColor : this.textColor,
         textSize : FONT_LARGE_SIZE,
-        content : turnLabel
+        content : turnLabelText
     });
 
-    this._topbarElems.push(label);
+    // Draw the money label.
+    var moneyLabelText = "$"+this.money;
+    var moneyLabel = this._createLabel({
+        right: 400,
+        top : 10,
+        textColor : this.textColor,
+        textSize : FONT_LARGE_SIZE,
+        content : moneyLabelText
+    });
+
+    this._topbarElems.push(turnLabel);
+    this._topbarElems.push(moneyLabel);
 };
 
 IAGUI.prototype.closeTopbar = function () {
@@ -666,7 +696,7 @@ IAGUI.prototype.onmousemove = function (event) {
     var sWidth = window.innerWidth;
     var sHeight = window.innerHeight;
 
-    if (this.dragging !== null) {
+    if (this.dragging !== null && this.dragging instanceof IAGUIDraggable) {
         this.dragging.x = x;
         this.dragging.y = y;
         this.dragContext.clearRect(0, 0, sWidth, sHeight);
