@@ -86,6 +86,9 @@ View.prototype.show = function () {
         that.mousehover(event);
     };
     document.onmousewheel = function(event) {
+        if (event.preventDefault) {
+            event.preventDefault();
+        }
         if (!that.scroll) {
             return;
         }
@@ -288,8 +291,7 @@ View.prototype.scroll = function(event) {
     }
 
     // Do the scroll
-    console.log(wheeldelta);
-    this.onScroll(event.wheeldelta);
+    this.onScroll(event.wheelDelta);
 };
 
 var galaxyMap = null;
@@ -495,7 +497,6 @@ function createSystemView (system) {
     systemView.onMouseUp = systemViewMouseUp;
     systemView.onMouseDown = systemViewMouseDown;
     systemView.onMouseMove = systemViewMouseMove;
-    systemView.onScroll = systemViewScroll;
 
     // Setup star render pass.
     // TODO
@@ -660,14 +661,16 @@ function systemViewMouseUp(mouseX, mouseY, mouseButton) {
     }
 }
 
-function systemViewScroll (amount) {
-
-}
+systemView.onScroll = function(amount) {
+    // One world unit per one hundred scroll units.
+    var dZ = amount / 100.0;
+    this.camera.position.z += dZ;
+};
 
 function systemViewBackToGalaxyMap () {
     systemView.hide();
     galaxyMap.show();
-}
+};
 
 /**
  * Called every frame of the system view. Adjusts planet orbit, star luminoscity, and other
