@@ -596,7 +596,25 @@ function systemViewMouseUp(mouseX, mouseY, mouseButton) {
         }
 
         // Display information about the planet.
-        iagui.setPlanetInfo(planet);
+        var releasedCallback = function (releasedX, releasedY) {
+            var dropMesh = this.mouseMesh(releasedX, releasedY);
+            if (dropMesh === null) {
+                return;
+            }
+
+            var planet = dropMesh.userData;
+            if (planet === null || !(planet instanceof Planet)) {
+                return;
+            }
+
+            // Create the move order.
+            orders.create.moveOrder({
+                fromPlanet : 0, // TODO
+                toPlanet : planet.unique,
+                fleetNumber : 1 // TODO
+            });
+        };
+        iagui.setPlanetInfo(planet, releasedCallback);
         iagui.draw();
     }
 

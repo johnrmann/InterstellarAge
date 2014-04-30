@@ -88,7 +88,7 @@ function IAGUIDraggable(x, y, width, height, color, content, textColor, textSize
     this.whenReleased = whenReleased;
 }
 
-IAGUIDraggable.prototype.pointInside = function(x, y) {
+IAGUIDraggable.prototype.pointInside = function(clickX, clickY) {
     var x1 = this._dragX;
     var y1 = this._dragY;
     var x2 = x1 + this.width;
@@ -329,7 +329,7 @@ IAGUI.prototype.closeTopbar = function () {
     this.showingTopbar = false;
 };
 
-IAGUI.prototype.setPlanetInfo = function (planet) {
+IAGUI.prototype.setPlanetInfo = function (planet, releasedCallback) {
     // Declare variables
     var a = 0;
     var curY = TOPBAR_HEIGHT;
@@ -366,7 +366,7 @@ IAGUI.prototype.setPlanetInfo = function (planet) {
             textSize : FONT_SIZE,
             width : FLEET_ICON_HEIGHT,
             height : FLEET_ICON_HEIGHT,
-            whenReleased : null
+            whenReleased : releasedCallback
         });
         this._planetViewElems.push(draggable);
     }
@@ -683,6 +683,12 @@ IAGUI.prototype.onmouseup = function (event) {
     var x = event.clientX;
     var y = event.clientY;
 
+    // Are we dragging something?
+    if (this._dragging !== null) {
+        this._dragging.whenReleased(x, y);
+        this._dragging = null;
+    }
+
     // Loop through buttons.
     for (a = 0; a < this._buttons.length; a++) {
         var button = this._buttons[a];
@@ -719,11 +725,11 @@ IAGUI.prototype.onmousemove = function (event) {
     var sWidth = window.innerWidth;
     var sHeight = window.innerHeight;
 
-    if (this.dragging !== null && this.dragging instanceof IAGUIDraggable) {
-        this.dragging.x = x;
-        this.dragging.y = y;
+    if (this._dragging !== null && this._dragging instanceof IAGUIDraggable) {
+        this._dragging.x = x;
+        this._dragging.y = y;
         this.dragContext.clearRect(0, 0, sWidth, sHeight);
-        this.dragging.draw(this.dragContext);
+        this._dragging.draw(this.dragContext);
         return true;
     }
 };
