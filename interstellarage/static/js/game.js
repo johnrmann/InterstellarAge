@@ -61,6 +61,18 @@ View.prototype.show = function () {
         }
         that.onclick(event);  
     };
+    document.onmousedown = function (event) {
+        if (!that.onmousedown) {
+            return;
+        }
+        that.onmousedown(event);
+    };
+    document.onmouseup = function (event) {
+        if (!that.onmouseup) {
+            return;
+        }
+        that.onmouseup(event);
+    };
     document.onmousemove = function(event) {
         if (!that.mousehover) {
             return;
@@ -183,11 +195,18 @@ View.prototype.onmousedown = function(event) {
         return;
     }
 
-
+    // Perform the click.
+    this.onMouseDown(event.clientX, event.clientY, event.which);
 };
 
 View.prototype.onmouseup = function(event) {
+    // See if we clicked on the gui.
+    if (iagui.onmouseup(event)) {
+        return;
+    }
 
+    // Perform the click.
+    this.onMouseDown(event.clientX, event.clientY, event.which);
 };
 
 View.prototype.mousehover = function (event) {
@@ -198,6 +217,9 @@ View.prototype.mousehover = function (event) {
     }
 
     else {
+        if (!this.onMeshHover) {
+            return;
+        }
         this.onMeshHover(event.clientX, event.clientY, above.userData);
     }
 };
@@ -222,6 +244,8 @@ function galaxyMapSetup () {
     galaxyMap.onMeshClick = createSystemView;
     galaxyMap.onMeshHover = galaxyMapHover;
     objects = [];
+
+    iagui.clear();
 
     galaxyMap.show();
     systemView.hide();
@@ -403,6 +427,10 @@ function createSystemView (system) {
     sunlight.position = new THREE.Vector3(0, 0, 0);
     systemView.scene.add(sunlight);
 
+    // Hook in the system view functions.
+    systemView.onMouseUp = systemViewMouseUp;
+    systemView.onMouseDown = systemViewMouseDown;
+
     // Setup star render pass.
     // TODO
 
@@ -441,6 +469,7 @@ function createSystemView (system) {
     }
 
     // Setup the GUI.
+    iagui.clear();
     iagui.setTopbar(1000, 1, "<- Galaxy", function () {});
     iagui.draw();
 
@@ -537,7 +566,7 @@ function systemViewMouseUp(mouseX, mouseY, mouseButton) {
 }
 
 function systemViewBackToGalaxyMap () {
-    
+
 }
 
 /**
@@ -615,6 +644,8 @@ function hyperspaceJumpSystemSelect(system) {
     else {
         createSystemView(system);
         systemView.onMeshClick = hyperspaceJumpPlanetSelect;
+        systemView.onMouseDown = null;
+        systemView.onMouseUp = null;
     }
 }
 

@@ -4,6 +4,8 @@ var TOPBAR_BACK_BUTTON_WIDTH = 100;
 var PLANET_INFO_WIDTH = 300;
 var ORDERS_WIDTH = 300;
 var ORDER_LABEL_HEIGHT = 40;
+var FLEET_ICON_HEIGHT = 50;
+var COLONY_LABEL_HEIGHT = 20;
 
 /**************************************************************************************************
                                          IAGUIButton
@@ -158,6 +160,14 @@ function IAGUI(canvas, dragCanvas, tooltipCanvas, faction) {
     this._dragging = null;
 }
 
+IAGUI.prototype.clear = function () {
+    this._buttons = [];
+    this._draggables = [];
+    this._labels = [];
+    this._mouseDownIn = null;
+    this._dragging = null;
+};
+
 IAGUI.prototype.labelForTurn = function (turnNumber) {
     var faction = this.faction;
     var year = Math.floor(turnNumber / 4);
@@ -199,6 +209,11 @@ IAGUI.prototype.closeTopbar = function () {
 };
 
 IAGUI.prototype.setPlanetInfo = function (planet) {
+    // Declare variables
+    var a = 0;
+    var curY = TOPBAR_HEIGHT;
+
+    // We're showing the planet info.
     this.showingPlanetInfo = true;
 
     // Add the planet name label.
@@ -210,6 +225,46 @@ IAGUI.prototype.setPlanetInfo = function (planet) {
     });
 
     // Add the fleet icons.
+
+    // Draw ground colonies.
+    this._addLabel({
+        right : PLANET_INFO_WIDTH - 5,
+        top : curY,
+        content : "Cities:",
+        textColor : this.textColor
+    });
+    curY += COLONY_LABEL_HEIGHT;
+    a = 0;
+    for (a = 0; a < planet.groundColonies.length; a++) {
+        this._addLabel({
+            right : PLANET_INFO_WIDTH - 15,
+            top : curY,
+            content : planet.groundColonies[a],
+            textColor : this.textColor            
+        });
+
+        curY += (COLONY_LABEL_HEIGHT * 5);
+    }
+
+    // Draw space colonies.
+    this._addLabel({
+        right : PLANET_INFO_WIDTH - 5,
+        top : curY,
+        content : "Space Stations:",
+        textColor : this.textColor
+    });
+    curY += COLONY_LABEL_HEIGHT;
+    a = 0;
+    for (a = 0; a < planet.spaceColonies.length; a++) {
+        this._addLabel({
+            right : PLANET_INFO_WIDTH - 15,
+            top : curY,
+            content : planet.spaceColonies[a],
+            textColor : this.textColor            
+        });
+
+        curY += (COLONY_LABEL_HEIGHT * 5);
+    }
 
     // Add the FTL dropzone.
 };
@@ -300,6 +355,8 @@ IAGUI.prototype.draw = function () {
     var sWidth = window.innerWidth;
     var sHeight = window.innerHeight;
 
+    var a = 0;
+
     this.context.fillStyle = this.uiColor;
 
     if (this.showingTopbar) {
@@ -319,6 +376,13 @@ IAGUI.prototype.draw = function () {
         // Draw background.
         this.context.fillRect(0, TOPBAR_HEIGHT, ORDERS_WIDTH, sHeight);
     }
+
+    // Draw all labels.
+    for (a = 0; a < this._labels.length; a++) {
+        this._labels[a].draw(this.context);
+    }
+
+    // 
 };
 
 IAGUI.prototype._addButton = function(attrs) {
@@ -352,7 +416,7 @@ IAGUI.prototype._addButton = function(attrs) {
     this._buttons.push(button);
 };
 
-IAGUI._addLabel = function(attrs) {
+IAGUI.prototype._addLabel = function(attrs) {
     var x;
     var y;
 
@@ -379,10 +443,6 @@ IAGUI._addLabel = function(attrs) {
     var label = new IAGUILabel(x, y, content, textColor);
     this._labels.push(label);
 }
-
-IAGUI.prototype._clearButtons = function() {
-    this._buttons = [];
-};
 
 /**
  * Args:

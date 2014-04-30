@@ -12,7 +12,13 @@ function Planet (planetInfo) {
         this.moons.push(moon);
     }
     this.spaceColonies = [];
+    for (var a = 0; a < planetInfo.space_colonies.length; a++) {
+        this.spaceColonies.push(planetInfo.space_colonies[a].name);
+    }
     this.groundColonies = [];
+    for (var a = 0; a < planetInfo.ground_colonies.length; a++) {
+        this.groundColonies.push(planetInfo.ground_colonies[a].name);
+    }
     this.owner = planetInfo.owner;
     this.texture = planetInfo.texture;
 
