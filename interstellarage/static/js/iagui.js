@@ -27,7 +27,10 @@ function IAGUIButton(x, y, width, height, color, content, textColor, toRun) {
 }
 
 IAGUIButton.prototype.draw = function(context) {
-    var oldFill = context.fillStyle;
+    var oldFill = "white";
+    if (context.fillStyle) {
+        oldFill = context.fillStyle;
+    }
 
     // Draw the background.
     context.fillStyle = this.color;
@@ -85,7 +88,10 @@ function IAGUIDraggable(x, y, width, height, color, content, textColor, textSize
 }
 
 IAGUIDraggable.prototype.draw = function(context) {
-    var oldFill = context.fillStyle;
+    var oldFill = "white";
+    if (context.fillStyle) {
+        oldFill = context.fillStyle;
+    }
 
     var x = this._dragX;
     var y = this._dragY;
@@ -126,7 +132,10 @@ function IAGUILabel(x, y, content, textColor, textSize) {
 }
 
 IAGUILabel.prototype.draw = function(context) {
-    var oldFill = context.fillStyle;
+    var oldFill = "white";
+    if (context.fillStyle) {
+        oldFill = context.fillStyle;
+    }
 
     // Draw the text.
     context.font = this.textSize+"px Arial";
@@ -202,6 +211,8 @@ function IAGUI(canvas, dragCanvas, tooltipCanvas, faction) {
     this._labels = [];
     this._mouseDownIn = null;
     this._dragging = null;
+
+    this._topbarElems = [];
     this._planetViewElems = [];
 }
 
@@ -215,7 +226,7 @@ IAGUI.prototype.clear = function () {
 
 IAGUI.prototype.labelForTurn = function (turnNumber) {
     var faction = this.faction;
-    var year = Math.floor(turnNumber / 4);
+    var year = Math.floor(turnNumber / 4) + 2100;
     var months;
     var month;
 
@@ -282,7 +293,7 @@ IAGUI.prototype.setPlanetInfo = function (planet) {
     // Add the fleet icons.
     for (a = 0; a < planet.fleets.length; a++) {
         draggable = this._addDraggable({
-            right : PLANET_INFO_WIDTH - 5 + (90 * a),
+            right : PLANET_INFO_WIDTH - 5 - (FLEET_ICON_HEIGHT * a),
             top : curY,
             content : "Fleet 1: "+planet.fleets[a]+" Ships",
             textColor : "white",
@@ -296,51 +307,43 @@ IAGUI.prototype.setPlanetInfo = function (planet) {
     }
     curY += FLEET_ICON_HEIGHT + 5;
 
-    // Draw ground colonies header.
-    label = this._addLabel({
-        right : PLANET_INFO_WIDTH - 5,
+    // Prepare colony drawing
+    var labelAttrs = {
+        right : PLANET_INFO_WIDTH - 15,
         top : curY,
-        content : "Cities:",
+        content : null,
         textColor : this.textColor,
-        textSize : FONT_SIZE
-    });
+        textSize : FONT_SIZE     
+    };
+
+    // Draw ground colonies header.
+    labelAttrs.content = "Cities";
+    label = this._addLabel(labelAttrs);
     this._planetViewElems.push(label);
 
     // Draw the ground colony labels.
     curY += COLONY_LABEL_HEIGHT;
     for (a = 0; a < planet.groundColonies.length; a++) {
-        label = this._addLabel({
-            right : PLANET_INFO_WIDTH - 15,
-            top : curY,
-            content : planet.groundColonies[a],
-            textColor : this.textColor,
-            textSize : FONT_SIZE     
-        });
+        labelAttrs.content = planet.groundColonies[a];
+        labelAttrs.top = curY;
+        label = this._addLabel(labelAttrs);
         this._planetViewElems.push(label);
 
         curY += (COLONY_LABEL_HEIGHT + 5);
     }
 
     // Draw space colonies.
-    label = this._addLabel({
-        right : PLANET_INFO_WIDTH - 5,
-        top : curY,
-        content : "Space Stations:",
-        textColor : this.textColor,
-        textSize : FONT_SIZE
-    });
+    labelAttrs.content = "Space Stations:";
+    labelAttrs.top = curY;
+    label = this._addLabel(labelAttrs);
     this._planetViewElems.push(label);
 
     // Draw the space colony labels.
     curY += COLONY_LABEL_HEIGHT;
     for (a = 0; a < planet.spaceColonies.length; a++) {
-        label = this._addLabel({
-            right : PLANET_INFO_WIDTH - 15,
-            top : curY,
-            content : planet.spaceColonies[a],
-            textColor : this.textColor,
-            textSize : FONT_SIZE     
-        });
+        labelAttrs.content = planet.spaceColonies[a];
+        labelAttrs.top = curY;
+        label = this._addLabel(labelAttrs);
         this._planetViewElems.push(label);
 
         curY += (COLONY_LABEL_HEIGHT + 5);
@@ -449,7 +452,7 @@ IAGUI.prototype.draw = function () {
             textColor : this.textColor,
             textSize : FONT_LARGE_SIZE,
             content : turnLabel
-        }).draw();
+        }).draw(this.context);
     }
 
     if (this.showingPlanetInfo) {
