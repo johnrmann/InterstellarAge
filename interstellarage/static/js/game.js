@@ -5,6 +5,10 @@
  *      - orders.js
  */
 
+// Constants.
+var LEFT_MOUSE_BUTTON = 0;
+var RIGHT_MOUSE_BUTTON = 2;
+
 var lerp = function (v1, v2, t) {
     return (1 - t)*v1 + (t * v2);       
 };
@@ -181,32 +185,60 @@ View.prototype.mouseMesh = function(x, y) {
  * "onMeshClick" method with the mesh's object's userData.
  */
 View.prototype.onclick = function (event) {
+    // The view can't be clicked if it is not active.
+    if (!this.visible) {
+        return;
+    }
+
     // Click the system.
     clicked = this.mouseMesh(event.clientX, event.clientY);
     if (clicked === null) {
+        return;
+    }
+    if (!this.onMeshClick) {
         return;
     }
     this.onMeshClick(clicked.userData);
 };
 
 View.prototype.onmousedown = function(event) {
+    // The view can't be clicked if it is not active.
+    if (!this.visible) {
+        return;
+    }
+
     // See if we clicked on the gui.
     if (iagui.onmousedown(event)) {
         return;
     }
 
+    // Do we have a function to handle this click?
+    if (!this.onMouseDown) {
+        return;
+    }
+
     // Perform the click.
-    this.onMouseDown(event.clientX, event.clientY, event.which);
+    this.onMouseDown(event.clientX, event.clientY, event.button);
 };
 
 View.prototype.onmouseup = function(event) {
+    // The view can't be clicked if it is not active.
+    if (!this.visible) {
+        return;
+    }
+
     // See if we clicked on the gui.
     if (iagui.onmouseup(event)) {
         return;
     }
 
+    // Do we have a function to handle this click?
+    if (!this.onMouseUp) {
+        return;
+    }
+
     // Perform the click.
-    this.onMouseDown(event.clientX, event.clientY, event.which);
+    this.onMouseDown(event.clientX, event.clientY, event.button);
 };
 
 View.prototype.mousehover = function (event) {
@@ -465,12 +497,12 @@ function createSystemView (system) {
         systemView.scene.add(planetMesh);
 
         planetMesh.position = new THREE.Vector3(x, 0, y);
-        planetMesh.userData = planet;
+        planetMesh.userData = planet.info();
     }
 
     // Setup the GUI.
     iagui.clear();
-    iagui.setTopbar(1000, 1, "<- Galaxy", function () {});
+    iagui.setTopbar(1000, 1, "<- Galaxy", systemViewBackToGalaxyMap);
     iagui.draw();
 
     // Swap out the views.
@@ -483,7 +515,7 @@ function createSystemView (system) {
  * TODO
  */
 function systemViewMouseDown(mouseX, mouseY, mouseButton) {
-    if (mouseButton !== 2) {
+    if (mouseButton !== RIGHT_MOUSE_BUTTON) {
         return;
     }
 
@@ -493,7 +525,7 @@ function systemViewMouseDown(mouseX, mouseY, mouseButton) {
 }
 
 function systemViewMouseMove(mouseX, mouseY, mouseButton) {
-    if (mouseButton !== 2 || !systemViewCameraOrbit) {
+    if (mouseButton !== RIGHT_MOUSE_BUTTON || !systemViewCameraOrbit) {
         return;
     }
 
@@ -522,7 +554,7 @@ function systemViewMouseUp(mouseX, mouseY, mouseButton) {
 
     // CASE: Releasing the left mouse button indicates that we could be dropping a fleet on another
     // planet.
-    if (mouseButton === 1 && draggingFleet) {
+    if (mouseButton === LEFT_MOUSE_BUTTON && draggingFleet) {
         droppedOn = systemView.mouseMesh(mouseX, mouseY);
 
         // Nothing was dropped on...
@@ -540,7 +572,7 @@ function systemViewMouseUp(mouseX, mouseY, mouseButton) {
     }
 
     // CASE: Clicking on planet.
-    else if (mouseButton === 1 && !draggingFleet) {
+    else if (mouseButton === LEFT_MOUSE_BUTTON && !draggingFleet) {
         clickedOn = systemView.mouseMesh(mouseX, mouseY);
 
         // If nothing was clicked on...
@@ -560,7 +592,7 @@ function systemViewMouseUp(mouseX, mouseY, mouseButton) {
     }
 
     // CASE: Releasing the right mouse button indicates that we've stopped orbiting.
-    else if (mouseButton === 2) {
+    else if (mouseButton === RIGHT_MOUSE_BUTTON) {
         // ???
     }
 }

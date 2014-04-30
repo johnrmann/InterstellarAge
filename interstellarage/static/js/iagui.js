@@ -440,7 +440,7 @@ IAGUI.prototype._addLabel = function(attrs) {
     }
 
     // Create the new label.
-    var label = new IAGUILabel(x, y, content, textColor);
+    var label = new IAGUILabel(x, y, attrs.content, attrs.textColor);
     this._labels.push(label);
 }
 
@@ -508,7 +508,7 @@ IAGUI.prototype.onmouseup = function (event) {
     }
 
     // Uh...
-    return true;
+    return false;
 };
 
 /**

@@ -56,6 +56,26 @@ Planet.prototype.position = function (turnNumber, theta) {
     return [x * r, y * r];
 };
 
+Planet.prototype.info = function() {
+    var infoMoons = [];
+    for (var a = 0; a < this.moons.length; a++) {
+        var moon = infoMoons[a];
+        infoMoons.push(moon.info());
+    }
+
+    return {
+        name : this.name,
+        parentSize : this.parentSize,
+        unique : this.unique,
+        moons : infoMoons,
+        spaceColonies : this.spaceColonies,
+        groundColonies : this.groundColonies,
+        owner : this.owner,
+        size : this.size,
+        texture : this.texture
+    };
+};
+
 function spectralClassColor (spectralClass) {
     if (spectralClass === "O") {
         return 0x9bb0ff;
