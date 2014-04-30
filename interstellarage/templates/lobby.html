@@ -10,8 +10,20 @@
 	<body>
 		<div class="container">
 		<h1>{{ game.name }}</h1>
+		Playing this game:
+		<ul>
+		{% for player in game.players %}
+			<li>{{ player.user.username }} as {{ player.faction_shortname() }}.</li>
+		{%- endfor %}
+		</ul>
 		{% if not joined %}
 			<input type="text" id="password" placeholder="Join Password..."></input>
+			<select id="faction">
+				<option value="0">ISCA</option>
+				<option value="1">GalaxyCorp</option>
+				<option value="2">FSR</option>
+				<option value="3">Mercs</option>
+			</select>
 			<div class="button" id="join">Join</div>
 		{% elif is_creator %}
 			You are going to play as {{ game.faction_shortname_for_user(user) }}.
@@ -24,15 +36,20 @@
 
 	{% if not joined %}
 		<script type="text/javascript">
-		var faction = 0; // TODO isca
+		var faction = $("#faction").val();
 
 		$(document).ready(function () {
 			$("#join").click(function () {
 				$.ajax({
 					type : 'POST',
 					url : '/game/join/{{ game.unique }}',
+					data : {
+						faction : faction,
+						join_code : $("#password").val()
+					},
 					success : function(fromServer) {
-						alert(fromServer);
+						// Refresh the page
+						window.location = window.location;
 					}
 				});
 			});
