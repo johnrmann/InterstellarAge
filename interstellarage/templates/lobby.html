@@ -8,7 +8,7 @@
 	</head>
 
 	<body>
-		<div class="container">
+		<div class="container lobby">
 		<h1>{{ game.name }}</h1>
 		Playing this game:
 		<ul>
@@ -27,6 +27,7 @@
 			<div class="button" id="join">Join</div>
 		{% elif is_creator %}
 			You are going to play as {{ game.faction_shortname_for_user(user) }}.
+            <br/><br/>
 			<div class="button" id="start">Start Game</div>
 		{% elif joined %}
 			You have joined this game as {{ game.faction_shortname_for_user(user) }}. Waiting for game creator to start.

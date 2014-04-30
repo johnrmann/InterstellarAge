@@ -11,13 +11,13 @@
 	<body>
 		<h1>My Games</h1>
 		<div class="container create">
-			<h1>Create Game</h1>
+			<h2>Create Game</h2>
 			<input type="text" id="name" placeholder="Game Name..."></input>
 			<br/>
 			<input type="text" id="joincode" placeholder="Join password..."></input>
 			<br/><br/>
             Choose faction:
-            <br/><br/>
+            <br/>
             <div class="faction-container">
                 <div class="faction isca" code="0">ISCA</div>
                 <div class="faction galaxycorp" code="1">GalaxyCorp</div>
@@ -28,10 +28,10 @@
 			<div class="button" id="create">Create</div>
 		</div>
 
-		<div class="container game">
+		<div class="container games">
 			{% for game in user.get_games() %}
 				<div class="game" unique="{{ game.unique }}">
-					<h1>{{ game.name }}</h1>
+					<h2>{{ game.name }}</h2>
 					Game created on {{ game.started_when|string }}.
 					Playing With:
 					<ul>

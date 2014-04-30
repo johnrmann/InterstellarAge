@@ -1,22 +1,28 @@
-.container.game {
-	width: 730px;
+.container.games {
+    background: none;
+	padding: 0;
+    width: 540px;
 }
 
 .container.create {
     color: white;
-	width: 730px;
+    padding: 5px 10px 10px 10px;
+	width: 520px;
 	margin-bottom: 20px;
 }
 
 .game {
+    margin: 10px 0;
+    border-radius: 3px;
+    padding: 10px;
 	text-align: left;
-	color:white;
-	background-color:gray;
+	color: white;
+	background-color: #333;
 }
 
 .faction-container {
     color: black;
-    height: 170px;
+    height: 40px;
 }
 
 .faction {
@@ -25,8 +31,8 @@
     margin: 5px;
     padding: 10px;
 	text-align: center;
-	width: 150px;
-	height: 150px;
+	width: 100px;
+	height: 20px;
 }
 
 .isca {
@@ -46,7 +52,6 @@
 }
 
 .selected {
-    color: yellow;
     font-weight: bold;
     -moz-box-shadow: 0 0 10px #fff;
     -webkit-box-shadow: 0 0 10px #fff;
