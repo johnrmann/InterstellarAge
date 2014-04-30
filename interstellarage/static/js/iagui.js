@@ -297,9 +297,32 @@ IAGUI.prototype.setTopbar = function (money, turnNumber, backLabel, backFunction
         textSize : FONT_LARGE_SIZE,
         content : moneyLabelText
     });
+    
+    var factionLabelText;
+    
+    if (this.faction === 0) {
+        factionLabelText = "ISCA";                                     
+    }
+    else if (this.faction === 1) {
+        factionLabelText = "GalaxyCorp";                                      
+    }
+    else if (this.faction === 2) {
+        factionLabelText = "FSR";                                      
+    }
+    else if (this.faction === 3) {
+        factionLabelText = "Merc";                                      
+    }
+    var factionLabel = this._createLabel({
+        right: 600,
+        top : 10,
+        textColor : this.textColor,
+        textSize : FONT_LARGE_SIZE,
+        content : factionLabelText
+    });
 
     this._topbarElems.push(turnLabel);
     this._topbarElems.push(moneyLabel);
+    this._topbarElems.push(factionLabel);
 };
 
 IAGUI.prototype.closeTopbar = function () {
