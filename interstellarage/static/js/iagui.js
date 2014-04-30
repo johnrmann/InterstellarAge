@@ -158,6 +158,7 @@ function IAGUI(canvas, dragCanvas, tooltipCanvas, faction) {
     this._labels = [];
     this._mouseDownIn = null;
     this._dragging = null;
+    this._planetViewElems = [];
 }
 
 IAGUI.prototype.clear = function () {
@@ -212,29 +213,38 @@ IAGUI.prototype.setPlanetInfo = function (planet) {
     // Declare variables
     var a = 0;
     var curY = TOPBAR_HEIGHT;
+    var label;
+
+    // Delete existing labels.
+    for (a = 0; a < this._planetViewElems.length; a++) {
+        // TODO REMOVE
+    }
 
     // We're showing the planet info.
     this.showingPlanetInfo = true;
 
     // Add the planet name label.
-    this._addLabel({
+    label = this._addLabel({
         right : PLANET_INFO_WIDTH - 5,
         top : TOPBAR_HEIGHT + 5,
         content : planet.name,
         textColor : this.textColor
     });
+    this._planetViewElems.push(label);
 
     // Add the fleet icons.
 
-    // Draw ground colonies.
-    this._addLabel({
+    // Draw ground colonies header.
+    label = this._addLabel({
         right : PLANET_INFO_WIDTH - 5,
         top : curY,
         content : "Cities:",
         textColor : this.textColor
     });
+    this._planetViewElems.push(label);
+
+    // Draw the ground colony labels.
     curY += COLONY_LABEL_HEIGHT;
-    a = 0;
     for (a = 0; a < planet.groundColonies.length; a++) {
         this._addLabel({
             right : PLANET_INFO_WIDTH - 15,
@@ -243,18 +253,20 @@ IAGUI.prototype.setPlanetInfo = function (planet) {
             textColor : this.textColor            
         });
 
-        curY += (COLONY_LABEL_HEIGHT * 5);
+        curY += (COLONY_LABEL_HEIGHT + 5);
     }
 
     // Draw space colonies.
-    this._addLabel({
+    label = this._addLabel({
         right : PLANET_INFO_WIDTH - 5,
         top : curY,
         content : "Space Stations:",
         textColor : this.textColor
     });
+    this._planetViewElems.push(label);
+
+    // Draw the space colony labels.
     curY += COLONY_LABEL_HEIGHT;
-    a = 0;
     for (a = 0; a < planet.spaceColonies.length; a++) {
         this._addLabel({
             right : PLANET_INFO_WIDTH - 15,
@@ -263,7 +275,7 @@ IAGUI.prototype.setPlanetInfo = function (planet) {
             textColor : this.textColor            
         });
 
-        curY += (COLONY_LABEL_HEIGHT * 5);
+        curY += (COLONY_LABEL_HEIGHT + 5);
     }
 
     // Add the FTL dropzone.
@@ -442,6 +454,9 @@ IAGUI.prototype._addLabel = function(attrs) {
     // Create the new label.
     var label = new IAGUILabel(x, y, attrs.content, attrs.textColor);
     this._labels.push(label);
+
+    // Return the label.
+    return label;
 }
 
 /**

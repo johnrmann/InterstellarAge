@@ -59,7 +59,7 @@ Planet.prototype.position = function (turnNumber, theta) {
 Planet.prototype.info = function() {
     var infoMoons = [];
     for (var a = 0; a < this.moons.length; a++) {
-        var moon = infoMoons[a];
+        var moon = this.moons[a];
         infoMoons.push(moon.info());
     }
 
