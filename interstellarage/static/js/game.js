@@ -755,7 +755,7 @@ $(document).ready(function () {
     tooltipCanvas.height = window.innerHeight;
 
     // Create the GUI.
-    iagui = new IAGUI(canvas, dragCanvas, tooltipCanvas, 0); // TODO faction is always ISCA
+    iagui = new IAGUI(canvas, dragCanvas, tooltipCanvas, factionCode);
 
     $.ajax({
         type : 'POST',

@@ -248,6 +248,7 @@ IAGUI.prototype.setPlanetInfo = function (planet) {
         textSize : FONT_LARGE_SIZE
     });
     this._planetViewElems.push(label);
+    curY += FONT_LARGE_SIZE + 5;
 
     // Add the fleet icons.
 
