@@ -34,7 +34,7 @@ IAGUIButton.prototype.draw = function(context) {
 
     // Draw the background.
     context.fillStyle = this.color;
-    context.fillRect(this.x, this.y, this.width + this.x, this.height + this.y);
+    context.fillRect(this.x, this.y, this.width, this.height);
 
     // Prepare to draw the text.
     var textWidth = context.measureText(this.content);
@@ -98,7 +98,7 @@ IAGUIDraggable.prototype.draw = function(context) {
 
     // Draw the background.
     context.fillStyle = this.color;
-    context.fillRect(x, y, this.width + x, this.height + y);
+    context.fillRect(x, y, this.width, this.height);
 
     // Prepare to draw the text.
     var textWidth = context.measureText(this.content);
@@ -258,6 +258,20 @@ IAGUI.prototype.setTopbar = function (money, turnNumber, backLabel, backFunction
     this.turnNumber = turnNumber;
 
     this.showingTopbar = true;
+
+    this._topbarElems = [];
+
+    // Draw the labels.
+    var turnLabel = this.labelForTurn(this.turnNumber);
+    var label = this._createLabel({
+        right : 200,
+        top : 10,
+        textColor : this.textColor,
+        textSize : FONT_LARGE_SIZE,
+        content : turnLabel
+    });
+
+    this._topbarElems.push(label);
 };
 
 IAGUI.prototype.closeTopbar = function () {
@@ -280,7 +294,7 @@ IAGUI.prototype.setPlanetInfo = function (planet) {
     this.showingPlanetInfo = true;
 
     // Add the planet name label.
-    label = this._addLabel({
+    label = this._createLabel({
         right : PLANET_INFO_WIDTH - 5,
         top : TOPBAR_HEIGHT + 5,
         content : planet.name,
@@ -318,7 +332,7 @@ IAGUI.prototype.setPlanetInfo = function (planet) {
 
     // Draw ground colonies header.
     labelAttrs.content = "Cities";
-    label = this._addLabel(labelAttrs);
+    label = this._createLabel(labelAttrs);
     this._planetViewElems.push(label);
 
     // Draw the ground colony labels.
@@ -326,7 +340,7 @@ IAGUI.prototype.setPlanetInfo = function (planet) {
     for (a = 0; a < planet.groundColonies.length; a++) {
         labelAttrs.content = planet.groundColonies[a];
         labelAttrs.top = curY;
-        label = this._addLabel(labelAttrs);
+        label = this._createLabel(labelAttrs);
         this._planetViewElems.push(label);
 
         curY += (COLONY_LABEL_HEIGHT + 5);
@@ -335,7 +349,7 @@ IAGUI.prototype.setPlanetInfo = function (planet) {
     // Draw space colonies.
     labelAttrs.content = "Space Stations:";
     labelAttrs.top = curY;
-    label = this._addLabel(labelAttrs);
+    label = this._createLabel(labelAttrs);
     this._planetViewElems.push(label);
 
     // Draw the space colony labels.
@@ -343,7 +357,7 @@ IAGUI.prototype.setPlanetInfo = function (planet) {
     for (a = 0; a < planet.spaceColonies.length; a++) {
         labelAttrs.content = planet.spaceColonies[a];
         labelAttrs.top = curY;
-        label = this._addLabel(labelAttrs);
+        label = this._createLabel(labelAttrs);
         this._planetViewElems.push(label);
 
         curY += (COLONY_LABEL_HEIGHT + 5);
@@ -445,14 +459,11 @@ IAGUI.prototype.draw = function () {
     if (this.showingTopbar) {
         // Draw background.
         this.context.fillRect(0, 0, sWidth, TOPBAR_HEIGHT);
-        var turnLabel = this.labelForTurn(this.turnNumber);
-        this._addLabel({
-            right : 200,
-            top : 10,
-            textColor : this.textColor,
-            textSize : FONT_LARGE_SIZE,
-            content : turnLabel
-        }).draw(this.context);
+        
+        // Draw the topbar elements
+        for (a = 0; a < this._topbarElems.length; a++) {
+            this._topbarElems[a].draw(this.context);
+        }
     }
 
     if (this.showingPlanetInfo) {
@@ -509,7 +520,7 @@ IAGUI.prototype._addButton = function(attrs) {
     this._buttons.push(button);
 };
 
-IAGUI.prototype._addLabel = function(attrs) {
+IAGUI.prototype._createLabel = function(attrs) {
     var x;
     var y;
 
@@ -534,9 +545,6 @@ IAGUI.prototype._addLabel = function(attrs) {
 
     // Create the new label.
     var label = new IAGUILabel(x, y, attrs.content, attrs.textColor, attrs.textSize);
-    this._labels.push(label);
-
-    // Return the label.
     return label;
 };
 
