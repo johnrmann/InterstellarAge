@@ -660,8 +660,8 @@ function systemViewMouseUp(mouseX, mouseY, mouseButton) {
     }
 }
 
-function systemMapScroll (amount) {
-    
+function systemViewScroll (amount) {
+
 }
 
 function systemViewBackToGalaxyMap () {
