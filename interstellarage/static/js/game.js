@@ -41,6 +41,9 @@ function View () {
     this.renderer = new THREE.WebGLRenderer();
 
     this.visible = false;
+
+    // An object (like a Planet) that the user clicked on.
+    this.clickedOn = null;
 }
 
 /**
@@ -524,6 +527,13 @@ function createSystemView (system) {
  * TODO
  */
 function systemViewMouseDown(mouseX, mouseY, mouseButton) {
+    // Get the planet we clicked on, if any.
+    var clickedOn = systemView.mouseMesh(mouseX, mouseY);
+    if (clickedOn !== null && clickedOn.userData instanceof Planet) {
+        var planet = clickedOn.userData;
+        systemView.clickedOn = planet;
+    }
+
     if (mouseButton !== RIGHT_MOUSE_BUTTON) {
         return;
     }
@@ -591,13 +601,13 @@ function systemViewMouseUp(mouseX, mouseY, mouseButton) {
 
         // Get the data about the planet we're clicking.
         planet = clickedOn.userData;
-        if (planet === null) {
+        if (planet === null || planet !== systemView.clickedOn) {
             return;
         }
 
         // Display information about the planet.
-        var releasedCallback = function (releasedX, releasedY) {
-            var dropMesh = this.mouseMesh(releasedX, releasedY);
+        var fleetIconReleasedCallback = function (releasedX, releasedY) {
+            var dropMesh = systemView.mouseMesh(releasedX, releasedY);
             if (dropMesh === null) {
                 return;
             }
@@ -609,13 +619,14 @@ function systemViewMouseUp(mouseX, mouseY, mouseButton) {
 
             // Create the move order.
             orders.create.moveOrder({
-                fromPlanet : 0, // TODO
+                fromPlanet : systemView.clickedOn.unique,
                 toPlanet : planet.unique,
                 fleetNumber : 1 // TODO
             });
         };
-        iagui.setPlanetInfo(planet, releasedCallback);
+        iagui.setPlanetInfo(planet, fleetIconReleasedCallback);
         iagui.draw();
+        systemView.clickedOn = planet;
     }
 
     // CASE: Releasing the right mouse button indicates that we've stopped orbiting.
@@ -743,10 +754,6 @@ function hyperspaceJumpRestoreOldSystemView () {
                                   MANAGE PLANET FUNCTIONS
 **************************************************************************************************/
 
-function showManagePlanet (planet) {
-
-}
-
 /**************************************************************************************************
                                        SCENE SETUP
 **************************************************************************************************/
@@ -759,31 +766,28 @@ $(document).ready(function () {
     galaxyMap = new View();
     systemView = new View();
 
-    // Update aspect ratio.
-    $(window).resize(function () {
-        aspectRatio = (window.innerWidth / window.innerHeight);
-
-        // Set the width and height of the canvases.
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-        dragCanvas.width = window.innerWidth;
-        dragCanvas.height = window.innerHeight;
-        tooltipCanvas.width = window.innerWidth;
-        tooltipCanvas.height = window.innerHeight;
-    });
-
     // Get the canvas that we will draw the GUI on.
     var canvas = document.getElementById('iagui');
     var dragCanvas = document.getElementById('drag');
     var tooltipCanvas = document.getElementById('tooltip');
 
     // Set the width and height.
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    dragCanvas.width = window.innerWidth;
-    dragCanvas.height = window.innerHeight;
-    tooltipCanvas.width = window.innerWidth;
-    tooltipCanvas.height = window.innerHeight;
+    function adjust () {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        dragCanvas.width = window.innerWidth;
+        dragCanvas.height = window.innerHeight;
+        tooltipCanvas.width = window.innerWidth;
+        tooltipCanvas.height = window.innerHeight;
+    };
+
+    adjust();
+
+    // Update aspect ratio.
+    $(window).resize(function () {
+        aspectRatio = (window.innerWidth / window.innerHeight);
+        adjust();
+    });
 
     // Create the GUI.
     iagui = new IAGUI(canvas, dragCanvas, tooltipCanvas, factionCode);

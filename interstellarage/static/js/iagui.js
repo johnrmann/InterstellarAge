@@ -358,9 +358,9 @@ IAGUI.prototype.setPlanetInfo = function (planet, releasedCallback) {
     // Add the fleet icons.
     for (a = 0; a < planet.fleets.length; a++) {
         draggable = this._createDraggable({
-            right : PLANET_INFO_WIDTH - 5 - (FLEET_ICON_HEIGHT * a + 5),
+            right : PLANET_INFO_WIDTH - 5 - (FLEET_ICON_HEIGHT + 5) * a,
             top : curY,
-            content : "Fleet 1: "+planet.fleets[a]+" Ships",
+            content : "Fleet "+a+": "+planet.fleets[a]+" Ships",
             textColor : "white",
             color : "gray",
             textSize : FONT_SIZE,
@@ -686,6 +686,7 @@ IAGUI.prototype.onmouseup = function (event) {
     // Are we dragging something?
     if (this._dragging !== null) {
         this._dragging.whenReleased(x, y);
+        this._dragging.letGo();
         this._dragging = null;
     }
 
@@ -726,8 +727,8 @@ IAGUI.prototype.onmousemove = function (event) {
     var sHeight = window.innerHeight;
 
     if (this._dragging !== null && this._dragging instanceof IAGUIDraggable) {
-        this._dragging.x = x;
-        this._dragging.y = y;
+        this._dragging._dragX = x;
+        this._dragging._dragY = y;
         this.dragContext.clearRect(0, 0, sWidth, sHeight);
         this._dragging.draw(this.dragContext);
         return true;
