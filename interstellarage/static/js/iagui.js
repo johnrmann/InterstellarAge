@@ -4,7 +4,7 @@ var TOPBAR_BACK_BUTTON_WIDTH = 100;
 var PLANET_INFO_WIDTH = 300;
 var ORDERS_WIDTH = 300;
 var ORDER_LABEL_HEIGHT = 40;
-var FLEET_ICON_HEIGHT = 50;
+var FLEET_ICON_HEIGHT = 90;
 var COLONY_LABEL_HEIGHT = 20;
 var FONT_SIZE = 12;
 var FONT_LARGE_SIZE = 24;
@@ -27,13 +27,16 @@ function IAGUIButton(x, y, width, height, color, content, textColor, toRun) {
 }
 
 IAGUIButton.prototype.draw = function(context) {
-    var oldFill = context.fillStyle;
+    var oldFill = "white";
+    if (context.fillStyle) {
+        oldFill = context.fillStyle;
+    }
 
     // Draw the background.
     context.fillStyle = this.color;
-    context.fillRect(this.x, this.y, this.width + this.x, this.height + this.y);
+    context.fillRect(this.x, this.y, this.width, this.height);
 
-    // Prepare to the text.
+    // Prepare to draw the text.
     var textWidth = context.measureText(this.content);
     var textHeight = FONT_SIZE;
     var midpointX = this.x + (this.width / 2);
@@ -67,7 +70,7 @@ IAGUIButton.prototype.pointInside = function(clickX, clickY) {
                                        IAGUIDraggable
 **************************************************************************************************/
 
-function IAGUIDraggable(x, y, width, height, color, content, textColor, whenReleased) {
+function IAGUIDraggable(x, y, width, height, color, content, textColor, textSize, whenReleased) {
     this.x = x;
     this.y = y;
     this.width = width;
@@ -79,11 +82,42 @@ function IAGUIDraggable(x, y, width, height, color, content, textColor, whenRele
     this.color = color;
     this.content = content;
     this.textColor = textColor;
+    this.textSize = textSize;
 
     this.whenReleased = whenReleased;
 }
 
+IAGUIDraggable.prototype.draw = function(context) {
+    var oldFill = "white";
+    if (context.fillStyle) {
+        oldFill = context.fillStyle;
+    }
 
+    var x = this._dragX;
+    var y = this._dragY;
+
+    // Draw the background.
+    context.fillStyle = this.color;
+    context.fillRect(x, y, this.width, this.height);
+
+    // Prepare to draw the text.
+    var textWidth = context.measureText(this.content);
+    var textHeight = FONT_SIZE;
+    var midpointX = x + (this.width / 2);
+    var midpointY = y + (this.height / 2);
+    var drawX = midpointX - (textWidth / 2);
+    var drawY = midpointY - (textHeight / 2);
+
+    // Set the font.
+    context.font = this.textSize+"px Arial";
+
+    // Draw the text.
+    context.fillStyle = this.textColor;
+    context.fillText(this.content, drawX, drawY);
+
+    // Reset context values.
+    context.fillStyle = oldFill;
+};
 
 /**************************************************************************************************
                                        IAGUILabel
@@ -98,7 +132,10 @@ function IAGUILabel(x, y, content, textColor, textSize) {
 }
 
 IAGUILabel.prototype.draw = function(context) {
-    var oldFill = context.fillStyle;
+    var oldFill = "white";
+    if (context.fillStyle) {
+        oldFill = context.fillStyle;
+    }
 
     // Draw the text.
     context.font = this.textSize+"px Arial";
@@ -174,6 +211,8 @@ function IAGUI(canvas, dragCanvas, tooltipCanvas, faction) {
     this._labels = [];
     this._mouseDownIn = null;
     this._dragging = null;
+
+    this._topbarElems = [];
     this._planetViewElems = [];
 }
 
@@ -187,7 +226,7 @@ IAGUI.prototype.clear = function () {
 
 IAGUI.prototype.labelForTurn = function (turnNumber) {
     var faction = this.faction;
-    var year = Math.floor(turnNumber / 4);
+    var year = Math.floor(turnNumber / 4) + 2100;
     var months;
     var month;
 
@@ -219,6 +258,20 @@ IAGUI.prototype.setTopbar = function (money, turnNumber, backLabel, backFunction
     this.turnNumber = turnNumber;
 
     this.showingTopbar = true;
+
+    this._topbarElems = [];
+
+    // Draw the labels.
+    var turnLabel = this.labelForTurn(this.turnNumber);
+    var label = this._createLabel({
+        right : 200,
+        top : 10,
+        textColor : this.textColor,
+        textSize : FONT_LARGE_SIZE,
+        content : turnLabel
+    });
+
+    this._topbarElems.push(label);
 };
 
 IAGUI.prototype.closeTopbar = function () {
@@ -230,17 +283,18 @@ IAGUI.prototype.setPlanetInfo = function (planet) {
     var a = 0;
     var curY = TOPBAR_HEIGHT;
     var label;
+    var button;
+    var draggable;
+    var turnNumber = 1;
 
     // Delete existing labels.
-    for (a = 0; a < this._planetViewElems.length; a++) {
-        // TODO REMOVE
-    }
+    this._planetViewElems = [];
 
     // We're showing the planet info.
     this.showingPlanetInfo = true;
 
     // Add the planet name label.
-    label = this._addLabel({
+    label = this._createLabel({
         right : PLANET_INFO_WIDTH - 5,
         top : TOPBAR_HEIGHT + 5,
         content : planet.name,
@@ -251,51 +305,60 @@ IAGUI.prototype.setPlanetInfo = function (planet) {
     curY += FONT_LARGE_SIZE + 5;
 
     // Add the fleet icons.
+    for (a = 0; a < planet.fleets.length; a++) {
+        draggable = this._addDraggable({
+            right : PLANET_INFO_WIDTH - 5 - (FLEET_ICON_HEIGHT * a),
+            top : curY,
+            content : "Fleet 1: "+planet.fleets[a]+" Ships",
+            textColor : "white",
+            color : "gray",
+            textSize : FONT_SIZE,
+            width : FLEET_ICON_HEIGHT,
+            height : FLEET_ICON_HEIGHT,
+            whenReleased : null
+        });
+        this._planetViewElems.push(draggable);
+    }
+    curY += FLEET_ICON_HEIGHT + 5;
+
+    // Prepare colony drawing
+    var labelAttrs = {
+        right : PLANET_INFO_WIDTH - 15,
+        top : curY,
+        content : null,
+        textColor : this.textColor,
+        textSize : FONT_SIZE     
+    };
 
     // Draw ground colonies header.
-    label = this._addLabel({
-        right : PLANET_INFO_WIDTH - 5,
-        top : curY,
-        content : "Cities:",
-        textColor : this.textColor,
-        textSize : FONT_SIZE
-    });
+    labelAttrs.content = "Cities";
+    label = this._createLabel(labelAttrs);
     this._planetViewElems.push(label);
 
     // Draw the ground colony labels.
     curY += COLONY_LABEL_HEIGHT;
     for (a = 0; a < planet.groundColonies.length; a++) {
-        this._addLabel({
-            right : PLANET_INFO_WIDTH - 15,
-            top : curY,
-            content : planet.groundColonies[a],
-            textColor : this.textColor,
-            textSize : FONT_SIZE     
-        });
+        labelAttrs.content = planet.groundColonies[a];
+        labelAttrs.top = curY;
+        label = this._createLabel(labelAttrs);
+        this._planetViewElems.push(label);
 
         curY += (COLONY_LABEL_HEIGHT + 5);
     }
 
     // Draw space colonies.
-    label = this._addLabel({
-        right : PLANET_INFO_WIDTH - 5,
-        top : curY,
-        content : "Space Stations:",
-        textColor : this.textColor,
-        textSize : FONT_SIZE
-    });
+    labelAttrs.content = "Space Stations:";
+    labelAttrs.top = curY;
+    label = this._createLabel(labelAttrs);
     this._planetViewElems.push(label);
 
     // Draw the space colony labels.
     curY += COLONY_LABEL_HEIGHT;
     for (a = 0; a < planet.spaceColonies.length; a++) {
-        this._addLabel({
-            right : PLANET_INFO_WIDTH - 15,
-            top : curY,
-            content : planet.spaceColonies[a],
-            textColor : this.textColor,
-            textSize : FONT_SIZE     
-        });
+        labelAttrs.content = planet.spaceColonies[a];
+        labelAttrs.top = curY;
+        label = this._createLabel(labelAttrs);
+        this._planetViewElems.push(label);
 
         curY += (COLONY_LABEL_HEIGHT + 5);
     }
@@ -396,27 +459,34 @@ IAGUI.prototype.draw = function () {
     if (this.showingTopbar) {
         // Draw background.
         this.context.fillRect(0, 0, sWidth, TOPBAR_HEIGHT);
+        
+        // Draw the topbar elements
+        for (a = 0; a < this._topbarElems.length; a++) {
+            this._topbarElems[a].draw(this.context);
+        }
     }
 
     if (this.showingPlanetInfo) {
         // Draw background.
         this.context.fillRect(sWidth - PLANET_INFO_WIDTH, TOPBAR_HEIGHT, sWidth, sHeight);
 
-        // Draw the fleet icons on the drag canvas. The reason why we have a separate canvas for
-        // this is so we don't have to redraw the entire canvas for when a user drags a fleet.
+        // Draw the planet infos!
+        for (a = 0; a < this._planetViewElems.length; a++) {
+            var elem = this._planetViewElems[a];
+
+            if (elem instanceof IAGUIDraggable) {
+                elem.draw(this.dragContext);
+            }
+            else {
+                elem.draw(this.context);
+            }
+        }
     }
 
     if (this.showingOrders) {
         // Draw background.
         this.context.fillRect(0, TOPBAR_HEIGHT, ORDERS_WIDTH, sHeight);
     }
-
-    // Draw all labels.
-    for (a = 0; a < this._labels.length; a++) {
-        this._labels[a].draw(this.context);
-    }
-
-    // 
 };
 
 IAGUI.prototype._addButton = function(attrs) {
@@ -450,7 +520,7 @@ IAGUI.prototype._addButton = function(attrs) {
     this._buttons.push(button);
 };
 
-IAGUI.prototype._addLabel = function(attrs) {
+IAGUI.prototype._createLabel = function(attrs) {
     var x;
     var y;
 
@@ -475,11 +545,42 @@ IAGUI.prototype._addLabel = function(attrs) {
 
     // Create the new label.
     var label = new IAGUILabel(x, y, attrs.content, attrs.textColor, attrs.textSize);
-    this._labels.push(label);
-
-    // Return the label.
     return label;
-}
+};
+
+IAGUI.prototype._addDraggable = function(attrs) {
+    var x;
+    var y;
+
+    var sWidth = window.innerWidth;
+    var sHeight = window.innerHeight;
+
+    // Assign x-coordinate.
+    if (attrs.left) {
+        x = attrs.left;
+    }
+    else {
+        x = sWidth - attrs.right;
+    }
+
+    // Assign y-coordinate.
+    if (attrs.top) {
+        y = attrs.top;
+    }
+    else {
+        y = sHeight - attrs.bottom;
+    }
+
+    // Create the new draggable.
+    var draggable = new IAGUIDraggable(
+        x, y, attrs.width, attrs.height,
+        attrs.color, attrs.content, attrs.textColor, attrs.textSize,
+        attrs.whenReleased
+    );
+    this._draggables.push(draggable);
+
+    return draggable;
+};
 
 /**
  * Args:
