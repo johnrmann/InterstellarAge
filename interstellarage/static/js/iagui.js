@@ -566,8 +566,8 @@ IAGUI.prototype.draw = function () {
 };
 
 IAGUI.prototype._createButton = function(attrs) {
-    var x;
-    var y;
+    var x = 0;
+    var y = 0;
     var width = attrs.width;
     var height = attrs.height;
 
@@ -682,6 +682,17 @@ IAGUI.prototype.onmousedown = function (event) {
             var elem = this._planetViewElems[a];
             if (elem instanceof IAGUIDraggable && elem.pointInside(x, y)) {
                 this._dragging = elem;
+                return true;
+            }
+        }
+    }
+
+    // If we're showing the topbar, look for a click inside the buttons.
+    if (this.showingTopbar) {
+        for (a = 0; a < this._topbarElems.length; a++) {
+            var elem = this._topbarElems[a];
+            if (elem instanceof IAGUIButton && elem.pointInside(x, y)) {
+                elem.toRun();
                 return true;
             }
         }

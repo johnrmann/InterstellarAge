@@ -44,6 +44,9 @@ function View () {
 
     // An object (like a Planet) that the user clicked on.
     this.clickedOn = null;
+
+    // For misc info
+    this.info = {};
 }
 
 /**
@@ -82,6 +85,12 @@ View.prototype.show = function () {
         }
         that.mousehover(event);
     };
+    document.onmousewheel = function(event) {
+        if (!that.scroll) {
+            return;
+        }
+        that.scroll(event);
+    }
 };
 
 /**
@@ -267,8 +276,20 @@ View.prototype.mousehover = function (event) {
     }
 };
 
-View.prototype.mousescroll = function(event) {
+View.prototype.scroll = function(event) {
+    // The view can't be scrolled if it is not active.
+    if (!this.visible) {
+        return;
+    }
 
+    // Is the onScroll method defined?
+    if (!this.onScroll) {
+        return;
+    }
+
+    // Do the scroll
+    console.log(wheeldelta);
+    this.onScroll(event.wheeldelta);
 };
 
 var galaxyMap = null;
@@ -474,6 +495,7 @@ function createSystemView (system) {
     systemView.onMouseUp = systemViewMouseUp;
     systemView.onMouseDown = systemViewMouseDown;
     systemView.onMouseMove = systemViewMouseMove;
+    systemView.onScroll = systemViewScroll;
 
     // Setup star render pass.
     // TODO
@@ -636,6 +658,10 @@ function systemViewMouseUp(mouseX, mouseY, mouseButton) {
     else if (mouseButton === RIGHT_MOUSE_BUTTON) {
         // ???
     }
+}
+
+function systemMapScroll (amount) {
+    
 }
 
 function systemViewBackToGalaxyMap () {
