@@ -37,7 +37,7 @@ IAGUIButton.prototype.draw = function(context) {
     context.fillRect(this.x, this.y, this.width, this.height);
 
     // Prepare to draw the text.
-    var textWidth = context.measureText(this.content);
+    var textWidth = context.measureText(this.content).width;
     var textHeight = FONT_SIZE;
     var midpointX = this.x + (this.width / 2);
     var midpointY = this.y + (this.height / 2);
@@ -45,8 +45,9 @@ IAGUIButton.prototype.draw = function(context) {
     var drawY = midpointY - (textHeight / 2);
 
     // Draw the text.
+    context.rect(drawX, drawY, textWidth, textHeight);
     context.fillStyle = this.textColor;
-    context.fillText(this.content, drawX, drawY);
+    context.fillText(this.content, drawX, drawY + textHeight);
 
     // Reset context values.
     context.fillStyle = oldFill;
@@ -101,7 +102,7 @@ IAGUIDraggable.prototype.draw = function(context) {
     context.fillRect(x, y, this.width, this.height);
 
     // Prepare to draw the text.
-    var textWidth = context.measureText(this.content);
+    var textWidth = context.measureText(this.content).width;
     var textHeight = FONT_SIZE;
     var midpointX = x + (this.width / 2);
     var midpointY = y + (this.height / 2);
@@ -112,8 +113,9 @@ IAGUIDraggable.prototype.draw = function(context) {
     context.font = this.textSize+"px Arial";
 
     // Draw the text.
+    context.rect(drawX, drawY, textWidth, textHeight);
     context.fillStyle = this.textColor;
-    context.fillText(this.content, drawX, drawY);
+    context.fillText(this.content, drawX, drawY + textHeight);
 
     // Reset context values.
     context.fillStyle = oldFill;
@@ -207,8 +209,6 @@ function IAGUI(canvas, dragCanvas, tooltipCanvas, faction) {
 
     // Private variables.
     this._buttons = [];
-    this._draggables = [];
-    this._labels = [];
     this._mouseDownIn = null;
     this._dragging = null;
 
@@ -218,8 +218,6 @@ function IAGUI(canvas, dragCanvas, tooltipCanvas, faction) {
 
 IAGUI.prototype.clear = function () {
     this._buttons = [];
-    this._draggables = [];
-    this._labels = [];
     this._mouseDownIn = null;
     this._dragging = null;
 };
@@ -306,8 +304,8 @@ IAGUI.prototype.setPlanetInfo = function (planet) {
 
     // Add the fleet icons.
     for (a = 0; a < planet.fleets.length; a++) {
-        draggable = this._addDraggable({
-            right : PLANET_INFO_WIDTH - 5 - (FLEET_ICON_HEIGHT * a),
+        draggable = this._createDraggable({
+            right : PLANET_INFO_WIDTH - 5 - (FLEET_ICON_HEIGHT * a + 5),
             top : curY,
             content : "Fleet 1: "+planet.fleets[a]+" Ships",
             textColor : "white",
@@ -548,7 +546,7 @@ IAGUI.prototype._createLabel = function(attrs) {
     return label;
 };
 
-IAGUI.prototype._addDraggable = function(attrs) {
+IAGUI.prototype._createDraggable = function(attrs) {
     var x;
     var y;
 
@@ -577,8 +575,6 @@ IAGUI.prototype._addDraggable = function(attrs) {
         attrs.color, attrs.content, attrs.textColor, attrs.textSize,
         attrs.whenReleased
     );
-    this._draggables.push(draggable);
-
     return draggable;
 };
 
@@ -593,20 +589,22 @@ IAGUI.prototype._addDraggable = function(attrs) {
 IAGUI.prototype.onmousedown = function (event) {
     var a = 0; // iteration
 
-    var x;
-    var y; // TODO
+    var x = event.clientX;
+    var y = event.clientY;
 
     // CASE: y value within range of topbar
     if (y <= TOPBAR_HEIGHT) {
         return true;
     }
 
-    for (a = 0; a < this._buttons.length; a++) {
-        var button = this._buttons[a];
-
-        if (button.pointInside(x, y)) {
-            this._mouseDownIn = button;
-            return true;
+    // If we're showing the planet info, look for a click inside one of the draggables.
+    if (this.showingPlanetInfo) {
+        for (a = 0; a < this._planetViewElems.length; a++) {
+            var elem = this._planetViewElems[a];
+            if (elem instanceof IAGUIDraggable && elem.pointInside(x, y)) {
+                this._dragging = elem;
+                return true;
+            }
         }
     }
 
@@ -658,7 +656,19 @@ IAGUI.prototype.onmouseup = function (event) {
  *      that it can look for mesh clicks.
  */
 IAGUI.prototype.onmousemove = function (event) {
+    var x = event.clientX;
+    var y = event.clientY;
 
+    var sWidth = window.innerWidth;
+    var sHeight = window.innerHeight;
+
+    if (this.dragging !== null) {
+        this.dragging.x = x;
+        this.dragging.y = y;
+        this.dragContext.clearRect(0, 0, sWidth, sHeight);
+        this.dragging.draw(this.dragContext);
+        return true;
+    }
 };
 
 
