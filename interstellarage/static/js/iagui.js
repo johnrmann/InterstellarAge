@@ -325,7 +325,7 @@ IAGUI.prototype.setTopbar = function (money, turnNumber, backLabel, backFunction
     // Draw the back button.
     if (backLabel !== null && backLabel !== "") {
         var backButton = this._createButton({
-            right : 0,
+            left : 0,
             top : 0,
             width : TOPBAR_BACK_BUTTON_WIDTH,
             height : TOPBAR_HEIGHT,
@@ -387,7 +387,7 @@ IAGUI.prototype.setPlanetInfo = function (planet, releasedCallback) {
             width : FLEET_ICON_HEIGHT,
             height : FLEET_ICON_HEIGHT,
             whenReleased : releasedCallback,
-            info : {fleetNumber : a+1}
+            info : {fleetNumber : a}
         });
         this._planetViewElems.push(draggable);
     }

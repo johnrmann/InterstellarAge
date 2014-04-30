@@ -617,11 +617,14 @@ function systemViewMouseUp(mouseX, mouseY, mouseButton) {
                 return;
             }
 
+            var fleetNum = info.fleetNumber;
+            planet.fleets[fleetNum] = 0;
+
             // Create the move order.
             orders.create.moveOrder(
                 systemView.clickedOn.unique,
                 planet.unique,
-                info.fleetNumber
+                fleetNum
             );
         };
         iagui.setPlanetInfo(planet, fleetIconReleasedCallback);
@@ -636,7 +639,8 @@ function systemViewMouseUp(mouseX, mouseY, mouseButton) {
 }
 
 function systemViewBackToGalaxyMap () {
-
+    systemView.hide();
+    galaxyMap.show();
 }
 
 /**
