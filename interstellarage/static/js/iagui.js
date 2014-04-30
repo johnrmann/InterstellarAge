@@ -6,6 +6,7 @@ var ORDERS_WIDTH = 300;
 var ORDER_LABEL_HEIGHT = 40;
 var FLEET_ICON_HEIGHT = 50;
 var COLONY_LABEL_HEIGHT = 20;
+var FONT_SIZE = 20;
 
 /**************************************************************************************************
                                          IAGUIButton
@@ -114,6 +115,11 @@ function IAGUI(canvas, dragCanvas, tooltipCanvas, faction) {
     this.context = this.canvas.getContext('2d');
     this.dragContext = this.dragCanvas.getContext('2d');
     this.tooltipContext = this.tooltipCanvas.getContext('2d');
+
+    // Set font size
+    this.context.font = FONT_SIZE+"px Arial";
+    this.dragContext.font = FONT_SIZE+"px Arial";
+    this.tooltipContext.font = FONT_SIZE+"px Arial";
 
     // Display tracking variables.
     this.showingTopbar = false;

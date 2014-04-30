@@ -25,10 +25,6 @@ var aspectRatio = (window.innerWidth / window.innerHeight);
 
 var projector;
 var objects = [];
-var mouse = {
-    x : 0,
-    y : 0
-};
 
 var currentView = null;
 var iagui = null;
@@ -160,7 +156,7 @@ View.prototype.mouseMesh = function(x, y) {
     y = -(y / window.innerHeight) * 2 + 1;
 
     // Find intersections by casting a ray from the origin to the mouse position.
-    var vector = new THREE.Vector3(mouse.x, mouse.y, 0.5);
+    var vector = new THREE.Vector3(x, y, 0.5);
     projector.unprojectVector(vector, this.camera);
     var pos = this.camera.position;
     var ray = new THREE.Raycaster(pos, vector.sub(pos).normalize());
@@ -238,11 +234,11 @@ View.prototype.onmouseup = function(event) {
     }
 
     // Perform the click.
-    this.onMouseDown(event.clientX, event.clientY, event.button);
+    this.onMouseUp(event.clientX, event.clientY, event.button);
 };
 
 View.prototype.mousehover = function (event) {
-    above = this.mouseMesh(event);
+    above = this.mouseMesh(event.clientX, event.clientY);
 
     if (above === null) {
         return;
@@ -497,7 +493,7 @@ function createSystemView (system) {
         systemView.scene.add(planetMesh);
 
         planetMesh.position = new THREE.Vector3(x, 0, y);
-        planetMesh.userData = planet.info();
+        planetMesh.userData = planet;
     }
 
     // Setup the GUI.
