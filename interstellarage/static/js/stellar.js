@@ -21,6 +21,7 @@ function Planet (planetInfo) {
     }
     this.owner = planetInfo.owner;
     this.texture = planetInfo.texture;
+    this.fleets = planetInfo.fleets;
 
     // Assign astronomy data.
     this.size = planetInfo.size;

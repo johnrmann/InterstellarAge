@@ -4,7 +4,7 @@ var TOPBAR_BACK_BUTTON_WIDTH = 100;
 var PLANET_INFO_WIDTH = 300;
 var ORDERS_WIDTH = 300;
 var ORDER_LABEL_HEIGHT = 40;
-var FLEET_ICON_HEIGHT = 50;
+var FLEET_ICON_HEIGHT = 90;
 var COLONY_LABEL_HEIGHT = 20;
 var FONT_SIZE = 12;
 var FONT_LARGE_SIZE = 24;
@@ -33,7 +33,7 @@ IAGUIButton.prototype.draw = function(context) {
     context.fillStyle = this.color;
     context.fillRect(this.x, this.y, this.width + this.x, this.height + this.y);
 
-    // Prepare to the text.
+    // Prepare to draw the text.
     var textWidth = context.measureText(this.content);
     var textHeight = FONT_SIZE;
     var midpointX = this.x + (this.width / 2);
@@ -67,7 +67,7 @@ IAGUIButton.prototype.pointInside = function(clickX, clickY) {
                                        IAGUIDraggable
 **************************************************************************************************/
 
-function IAGUIDraggable(x, y, width, height, color, content, textColor, whenReleased) {
+function IAGUIDraggable(x, y, width, height, color, content, textColor, textSize, whenReleased) {
     this.x = x;
     this.y = y;
     this.width = width;
@@ -79,11 +79,39 @@ function IAGUIDraggable(x, y, width, height, color, content, textColor, whenRele
     this.color = color;
     this.content = content;
     this.textColor = textColor;
+    this.textSize = textSize;
 
     this.whenReleased = whenReleased;
 }
 
+IAGUIDraggable.prototype.draw = function(context) {
+    var oldFill = context.fillStyle;
 
+    var x = this._dragX;
+    var y = this._dragY;
+
+    // Draw the background.
+    context.fillStyle = this.color;
+    context.fillRect(x, y, this.width + x, this.height + y);
+
+    // Prepare to draw the text.
+    var textWidth = context.measureText(this.content);
+    var textHeight = FONT_SIZE;
+    var midpointX = x + (this.width / 2);
+    var midpointY = y + (this.height / 2);
+    var drawX = midpointX - (textWidth / 2);
+    var drawY = midpointY - (textHeight / 2);
+
+    // Set the font.
+    context.font = this.textSize+"px Arial";
+
+    // Draw the text.
+    context.fillStyle = this.textColor;
+    context.fillText(this.content, drawX, drawY);
+
+    // Reset context values.
+    context.fillStyle = oldFill;
+};
 
 /**************************************************************************************************
                                        IAGUILabel
@@ -230,11 +258,12 @@ IAGUI.prototype.setPlanetInfo = function (planet) {
     var a = 0;
     var curY = TOPBAR_HEIGHT;
     var label;
+    var button;
+    var draggable;
+    var turnNumber = 1;
 
     // Delete existing labels.
-    for (a = 0; a < this._planetViewElems.length; a++) {
-        // TODO REMOVE
-    }
+    this._planetViewElems = [];
 
     // We're showing the planet info.
     this.showingPlanetInfo = true;
@@ -251,6 +280,21 @@ IAGUI.prototype.setPlanetInfo = function (planet) {
     curY += FONT_LARGE_SIZE + 5;
 
     // Add the fleet icons.
+    for (a = 0; a < planet.fleets.length; a++) {
+        draggable = this._addDraggable({
+            right : PLANET_INFO_WIDTH - 5 + (90 * a),
+            top : curY,
+            content : "Fleet 1: "+planet.fleets[a]+" Ships",
+            textColor : "white",
+            color : "gray",
+            textSize : FONT_SIZE,
+            width : FLEET_ICON_HEIGHT,
+            height : FLEET_ICON_HEIGHT,
+            whenReleased : null
+        });
+        this._planetViewElems.push(draggable);
+    }
+    curY += FLEET_ICON_HEIGHT + 5;
 
     // Draw ground colonies header.
     label = this._addLabel({
@@ -265,13 +309,14 @@ IAGUI.prototype.setPlanetInfo = function (planet) {
     // Draw the ground colony labels.
     curY += COLONY_LABEL_HEIGHT;
     for (a = 0; a < planet.groundColonies.length; a++) {
-        this._addLabel({
+        label = this._addLabel({
             right : PLANET_INFO_WIDTH - 15,
             top : curY,
             content : planet.groundColonies[a],
             textColor : this.textColor,
             textSize : FONT_SIZE     
         });
+        this._planetViewElems.push(label);
 
         curY += (COLONY_LABEL_HEIGHT + 5);
     }
@@ -289,13 +334,14 @@ IAGUI.prototype.setPlanetInfo = function (planet) {
     // Draw the space colony labels.
     curY += COLONY_LABEL_HEIGHT;
     for (a = 0; a < planet.spaceColonies.length; a++) {
-        this._addLabel({
+        label = this._addLabel({
             right : PLANET_INFO_WIDTH - 15,
             top : curY,
             content : planet.spaceColonies[a],
             textColor : this.textColor,
             textSize : FONT_SIZE     
         });
+        this._planetViewElems.push(label);
 
         curY += (COLONY_LABEL_HEIGHT + 5);
     }
@@ -396,27 +442,37 @@ IAGUI.prototype.draw = function () {
     if (this.showingTopbar) {
         // Draw background.
         this.context.fillRect(0, 0, sWidth, TOPBAR_HEIGHT);
+        var turnLabel = this.labelForTurn(this.turnNumber);
+        this._addLabel({
+            right : 200,
+            top : 10,
+            textColor : this.textColor,
+            textSize : FONT_LARGE_SIZE,
+            content : turnLabel
+        }).draw();
     }
 
     if (this.showingPlanetInfo) {
         // Draw background.
         this.context.fillRect(sWidth - PLANET_INFO_WIDTH, TOPBAR_HEIGHT, sWidth, sHeight);
 
-        // Draw the fleet icons on the drag canvas. The reason why we have a separate canvas for
-        // this is so we don't have to redraw the entire canvas for when a user drags a fleet.
+        // Draw the planet infos!
+        for (a = 0; a < this._planetViewElems.length; a++) {
+            var elem = this._planetViewElems[a];
+
+            if (elem instanceof IAGUIDraggable) {
+                elem.draw(this.dragContext);
+            }
+            else {
+                elem.draw(this.context);
+            }
+        }
     }
 
     if (this.showingOrders) {
         // Draw background.
         this.context.fillRect(0, TOPBAR_HEIGHT, ORDERS_WIDTH, sHeight);
     }
-
-    // Draw all labels.
-    for (a = 0; a < this._labels.length; a++) {
-        this._labels[a].draw(this.context);
-    }
-
-    // 
 };
 
 IAGUI.prototype._addButton = function(attrs) {
@@ -479,7 +535,41 @@ IAGUI.prototype._addLabel = function(attrs) {
 
     // Return the label.
     return label;
-}
+};
+
+IAGUI.prototype._addDraggable = function(attrs) {
+    var x;
+    var y;
+
+    var sWidth = window.innerWidth;
+    var sHeight = window.innerHeight;
+
+    // Assign x-coordinate.
+    if (attrs.left) {
+        x = attrs.left;
+    }
+    else {
+        x = sWidth - attrs.right;
+    }
+
+    // Assign y-coordinate.
+    if (attrs.top) {
+        y = attrs.top;
+    }
+    else {
+        y = sHeight - attrs.bottom;
+    }
+
+    // Create the new draggable.
+    var draggable = new IAGUIDraggable(
+        x, y, attrs.width, attrs.height,
+        attrs.color, attrs.content, attrs.textColor, attrs.textSize,
+        attrs.whenReleased
+    );
+    this._draggables.push(draggable);
+
+    return draggable;
+};
 
 /**
  * Args:
