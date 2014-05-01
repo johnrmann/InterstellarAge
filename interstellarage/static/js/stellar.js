@@ -33,6 +33,13 @@ function Planet (planetInfo) {
 
     // Uh...
     this.parentSize = 0.0;
+
+    // Set max colonies
+    this.maxSpaceColonies = 4;
+    this.maxGroundColonies = 4;
+    if (this.type === "HabitablePlanet") {
+        this.maxGroundColonies = 8;
+    }
 }
 
 /**

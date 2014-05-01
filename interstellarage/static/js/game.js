@@ -312,7 +312,7 @@ View.prototype.makeSkybox = function() {
     var shader = THREE.ShaderLib["cube"];
     var uniforms = THREE.UniformsUtils.clone(shader.uniforms);
     uniforms['tCube'].texture = textureCube;
-    var material = new THREE.MeshShaderMaterial({
+    var material = new THREE.ShaderMaterial({
         fragmentShader : shader.fragmentShader,
         vertexShader : shader.vertexShader,
         uniforms : uniforms
