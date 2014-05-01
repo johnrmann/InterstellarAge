@@ -499,10 +499,14 @@ function galaxyMapHover (x, y, above) {
 // Global variables
 var systemViewTheta = 0.0;
 var systemViewPlanets = [];
+
 var systemViewCameraOrbit = false;
 var systemViewCameraAzi = 0.0;
 var systemViewCameraAlt = 0.0;
 var systemViewZoomDistance = 50.0;
+
+var systemViewOldMouseX = 0;
+var systemViewOldMouseY = 0;
 
 function systemViewSetup () {
     systemView.setCameraPosition(0, 50, 0);
@@ -615,8 +619,9 @@ function systemViewMouseDown(mouseX, mouseY, mouseButton) {
     }
 
     systemViewCameraOrbit = true;
-    systemViewCameraAlt = mouseY;
-    systemViewCameraAzi = mouseX;
+
+    systemViewOldMouseX = mouseX;
+    systemViewOldMouseY = mouseY;
 }
 
 function systemViewMouseMove(mouseX, mouseY, mouseButton) {
@@ -624,20 +629,16 @@ function systemViewMouseMove(mouseX, mouseY, mouseButton) {
         return;
     }
 
-    var dAzi = systemViewCameraAzi - mouseX;
-    var dAlt = systemViewCameraAlt - mouseY;
+    var dX = systemViewOldMouseX - mouseX;
+    var dY = systemViewOldMouseY - mouseY;
 
-    systemViewCameraAzi = mouseX;
-    systemViewCameraAlt = mouseY;
+    var dAzi = (dX / window.innerWidth) * 360;
+    var dAlt = (dY / window.innerHeight) * 180;
 
-    // Moving from the very bottom of the screen to the very top constitutes orbiting the camera
-    // from one "pole" of the orbit sphere to the other.
-    dAzi /= window.innerWidth;
-    dAlt /= window.innerHeight;
-    dAzi *= 360;
-    dAlt *= 180;
+    systemViewCameraAzi += dAzi;
+    systemViewCameraAlt += dAlt;
 
-    // Orbit the camera. TODO
+    systemView.cameraOrbit(systemViewZoomDistance, systemViewCameraAzi, systemViewCameraAlt);
 }
 
 function systemViewMouseUp(mouseX, mouseY, mouseButton) {
