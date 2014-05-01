@@ -289,6 +289,8 @@ View.prototype.mousehover = function (event) {
         return;
     }
 
+    this.onMouseMove(event.clientX, event.clientY, event.button);
+
     if (above === null) {
         // TODO: Make this a method call.
         iagui.dragContext.clearRect(0, 0, window.innerWidth, window.innerHeight);
@@ -632,8 +634,11 @@ function systemViewMouseMove(mouseX, mouseY, mouseButton) {
     var dX = systemViewOldMouseX - mouseX;
     var dY = systemViewOldMouseY - mouseY;
 
-    var dAzi = (dX / window.innerWidth) * 360;
-    var dAlt = (dY / window.innerHeight) * 180;
+    var dAzi = (dX / window.innerWidth) * 360.0;
+    var dAlt = (dY / window.innerHeight) * 180.0;
+
+    dAzi /= 1024;
+    dAlt /= 1024;
 
     systemViewCameraAzi += dAzi;
     systemViewCameraAlt += dAlt;
@@ -728,7 +733,7 @@ function systemViewOnScroll(amount) {
         systemViewZoomDistance = 10;
     }
 
-    systemView.cameraOrbit(systemViewZoomDistance, 0.0, 0.0);
+    systemView.cameraOrbit(systemViewZoomDistance, systemViewCameraAzi, systemViewCameraAlt);
 };
 
 function systemViewBackToGalaxyMap () {
