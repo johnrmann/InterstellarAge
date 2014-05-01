@@ -302,8 +302,8 @@ View.prototype.makeSkybox = function() {
     var urls = [
         urlPrefix+"Left.png",
         urlPrefix+"Right.png",
-        urlPrefix+"Top.png",
-        urlPrefix+"Bottom.png",
+        urlPrefix+"Up.png",
+        urlPrefix+"Down.png",
         urlPrefix+"Front.png",
         urlPrefix+"Back.png"
     ];
