@@ -37,10 +37,10 @@
 
 	{% if not joined %}
 		<script type="text/javascript">
-		var faction = $("#faction").val();
-
 		$(document).ready(function () {
 			$("#join").click(function () {
+				var faction = $("#faction").val();
+				
 				$.ajax({
 					type : 'POST',
 					url : '/game/join/{{ game.unique }}',

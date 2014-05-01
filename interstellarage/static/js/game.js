@@ -700,7 +700,7 @@ function systemViewMouseUp(mouseX, mouseY, mouseButton) {
             }
 
             var fleetNum = info.fleetNumber;
-            planet.fleets[fleetNum] = 0;
+            systemView.clickedOn.fleets[fleetNum] = 0;
 
             // Create the move order.
             orders.create.moveOrder(
