@@ -322,7 +322,7 @@ View.prototype.makeSkybox = function() {
         new THREE.CubeGeometry(100000, 100000, 100000, 1, 1, 1, null, true),
         material
     );
-    this.scene.addObject(skyboxMesh);
+    this.scene.add(skyboxMesh);
 };
 
 var galaxyMap = null;
@@ -753,6 +753,8 @@ function setupHyperspaceJump(fromPlanet, fleetNumber) {
     // We now display the galaxy map with a catch: clicking on a system will call
     // "hyperspaceJumpSystemSelect".
     galaxyMap.onMeshClick = hyperspaceJumpSystemSelect;
+    galaxyMap.onMouseDown = null;
+    galaxyMap.onMouseUp = null;
     systemView.hide();
     galaxyMap.show();
 
@@ -782,6 +784,7 @@ function hyperspaceJumpSystemSelect(system) {
         systemView.onMeshClick = hyperspaceJumpPlanetSelect;
         systemView.onMouseDown = null;
         systemView.onMouseUp = null;
+        systemView.onScroll = systemViewOnScroll;
     }
 }
 
