@@ -47,6 +47,9 @@ function View () {
 
     // For misc info
     this.info = {};
+
+    // Make the skybox
+    this.makeSkybox();
 }
 
 /**
@@ -292,6 +295,34 @@ View.prototype.scroll = function(event) {
 
     // Do the scroll
     this.onScroll(event.wheelDelta);
+};
+
+View.prototype.makeSkybox = function() {
+    var urlPrefix = "/static/img/textures/Stars";
+    var urls = [
+        urlPrefix+"Left.png",
+        urlPrefix+"Right.png",
+        urlPrefix+"Top.png",
+        urlPrefix+"Bottom.png",
+        urlPrefix+"Front.png",
+        urlPrefix+"Back.png"
+    ];
+    var textureCube = THREE.ImageUtils.loadTextureCube(urls);
+
+    var shader = THREE.ShaderUtils.lib["cube"];
+    var uniforms = THREE.UniformsUtils.clone(shader.uniforms);
+    uniforms['tCube'].texture = textureCube;
+    var material = new THREE.MeshShaderMaterial({
+        fragmentShader : shader.fragmentShader,
+        vertexShader : shader.vertexShader,
+        uniforms : uniforms
+    });
+
+    var skyboxMesh = new THREE.Mesh(
+        new THREE.CubeGeometry(100000, 100000, 100000, 1, 1, 1, null, true),
+        material
+    );
+    this.scene.addObject(skyboxMesh);
 };
 
 var galaxyMap = null;
@@ -664,8 +695,9 @@ function systemViewMouseUp(mouseX, mouseY, mouseButton) {
 
 function systemViewOnScroll(amount) {
     // One world unit per one hundred scroll units.
-    var dZ = amount / 100.0;
-    this.camera.position.z += dZ;
+    var dY = amount / 100.0;
+    systemViewZoomDistance += dY;
+    systemView.cameraOrbit(systemViewZoomDistance, 0.0, 0.0);
 };
 
 function systemViewBackToGalaxyMap () {
