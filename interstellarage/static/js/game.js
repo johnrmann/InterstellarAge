@@ -50,6 +50,9 @@ function View () {
 
     // Make the skybox
     this.makeSkybox();
+
+    // SUPER hacky solution to skybox warnings
+    this.renderer.context.getProgramInfoLog = function () { return '' };
 }
 
 /**
@@ -65,18 +68,36 @@ View.prototype.show = function () {
 
     var that = this;
     document.onclick = function (event) {
+        if (event.preventDefault) {
+            event.preventDefault();
+        }
+        if (event.stopPropagation) {
+            event.stopPropagation();
+        }
         if (!that.onclick) {
             return;
         }
         that.onclick(event);  
     };
     document.onmousedown = function (event) {
+        if (event.preventDefault) {
+            event.preventDefault();
+        }
+        if (event.stopPropagation) {
+            event.stopPropagation();
+        }
         if (!that.onmousedown) {
             return;
         }
         that.onmousedown(event);
     };
     document.onmouseup = function (event) {
+        if (event.preventDefault) {
+            event.preventDefault();
+        }
+        if (event.stopPropagation) {
+            event.stopPropagation();
+        }
         if (!that.onmouseup) {
             return;
         }
@@ -697,6 +718,15 @@ function systemViewOnScroll(amount) {
     // One world unit per one hundred scroll units.
     var dY = amount / 100.0;
     systemViewZoomDistance += dY;
+
+    if (systemViewZoomDistance > 1000) {
+        systemViewZoomDistance = 1000;
+    }
+
+    else if (systemViewZoomDistance < 10) {
+        systemViewZoomDistance = 10;
+    }
+
     systemView.cameraOrbit(systemViewZoomDistance, 0.0, 0.0);
 };
 
